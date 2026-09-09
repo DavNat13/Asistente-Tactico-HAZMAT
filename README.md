@@ -4,7 +4,7 @@ Este repositorio contiene la implementación de un Asistente Virtual basado en I
 
 ## Tecnologías Utilizadas
 * **Frontend:** Streamlit
-* **LLM & Embeddings:** Google Gemini (`gemini-1.5-flash`, `embedding-001`)
+* **LLM & Embeddings:** Google Gemini (`gemini-1.5-flash`, `gemini-embedding-001`)
 * **Vector Store:** MongoDB Atlas (Vector Search)
 * **Observabilidad:** LangSmith
 * **Despliegue:** Docker y Docker Compose
