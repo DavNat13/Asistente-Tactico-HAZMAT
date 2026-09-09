@@ -21,7 +21,7 @@ class Settings:
         self.LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
         self.LANGCHAIN_TRACING_V2: str = os.getenv("LANGCHAIN_TRACING_V2", "true")
         self.LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", "Bomberos-HAZMAT-RAG")
-        self.EMBEDDING_MODEL: str = "models/text-embedding-004"
+        self.EMBEDDING_MODEL: str = "models/embedding-001"
         self.EMBEDDING_DIMENSIONS: int = 768
         self.LLM_MODEL: str = "gemini-1.5-flash"
         self.LLM_TEMPERATURE: float = 0.1
