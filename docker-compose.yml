@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  hazmat-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hazmat-assistant
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - hazmat-network
+
+networks:
+  hazmat-network:
+    driver: bridge
