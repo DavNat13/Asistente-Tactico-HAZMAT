@@ -1,0 +1,7 @@
+div[data-testid="stChatInput"] {
+    background-color: #020617;
+}
+
+div[data-testid="stChatMessage"] {
+    background-color: #1e293b;
+}

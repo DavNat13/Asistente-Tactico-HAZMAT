@@ -1,0 +1,7 @@
+.stMarkdown {
+    color: #f8fafc;
+}
+
+h1, h2, h3, h4, h5, h6, p, li, span {
+    color: #f8fafc !important;
+}
