@@ -23,7 +23,7 @@ class Settings:
         self.LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", "Bomberos-HAZMAT-RAG")
         self.EMBEDDING_MODEL: str = "models/gemini-embedding-001"
         self.EMBEDDING_DIMENSIONS: int = 768
-        self.LLM_MODEL: str = "gemini-1.5-flash"
+        self.LLM_MODEL: str = "gemini-3.5-flash-lite"
         self.LLM_TEMPERATURE: float = 0.1
         self.CHUNK_SIZE: int = 1000
         self.CHUNK_OVERLAP: int = 150
