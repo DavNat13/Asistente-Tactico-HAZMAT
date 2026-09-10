@@ -8,3 +8,5 @@ pypdf>=3.17.0
 python-dotenv>=1.0.0
 langsmith>=0.0.83
 google-generativeai>=0.3.0
+sentence-transformers>=2.2.0
+torch>=2.0.0

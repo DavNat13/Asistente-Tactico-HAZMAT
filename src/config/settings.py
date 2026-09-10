@@ -21,8 +21,8 @@ class Settings:
         self.LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
         self.LANGCHAIN_TRACING_V2: str = os.getenv("LANGCHAIN_TRACING_V2", "true")
         self.LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", "Bomberos-HAZMAT-RAG")
-        self.EMBEDDING_MODEL: str = "models/gemini-embedding-001"
-        self.EMBEDDING_DIMENSIONS: int = 768
+        self.EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+        self.EMBEDDING_DIMENSIONS: int = 384
         self.LLM_MODEL: str = "gemini-3.5-flash-lite"
         self.LLM_TEMPERATURE: float = 0.1
         self.CHUNK_SIZE: int = 1000
