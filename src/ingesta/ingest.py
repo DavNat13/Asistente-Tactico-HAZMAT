@@ -2,8 +2,11 @@ from pymongo import MongoClient
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config.settings import settings
+APP_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if APP_DIR not in sys.path:
+    sys.path.insert(0, APP_DIR)
+
+from src.config.settings import settings
 from src.ingesta.loaders import load_single_pdf, load_directory, load_from_github
 from src.ingesta.processor import get_text_splitter, get_embeddings, split_documents, prepare_documents
 
