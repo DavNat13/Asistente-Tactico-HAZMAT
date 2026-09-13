@@ -49,7 +49,10 @@ class Generator:
 
         try:
             response = self.llm.invoke(messages)
-            answer = response.content
+            if isinstance(response.content, list) and len(response.content) > 0:
+                answer = response.content[0].get("text", str(response.content))
+            else:
+                answer = response.content
         except Exception as e:
             answer = f"ADVERTENCIA: Error al generar respuesta. Intente nuevamente. Error: {str(e)[:100]}"
 
