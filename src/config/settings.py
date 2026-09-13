@@ -30,5 +30,18 @@ class Settings:
         self.RETRIEVAL_TOP_K: int = 8
         self.RETRIEVAL_MIN_SCORE: float = 0.50
 
+        self._validate_required()
+
+    def _validate_required(self):
+        required = {
+            "GOOGLE_API_KEY": self.GOOGLE_API_KEY,
+            "MONGODB_URI": self.MONGODB_URI,
+        }
+        missing = [k for k, v in required.items() if not v]
+        if missing:
+            raise ValueError(
+                f"Variables de entorno requeridas faltantes: {', '.join(missing)}"
+            )
+
 
 settings = Settings()
