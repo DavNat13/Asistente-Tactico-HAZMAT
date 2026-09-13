@@ -391,7 +391,7 @@ class SessionManager:
             return
 
         # Only update if this is the first user message
-        if thread.user_message_count <= 1:
+        if thread.user_message_count == 1:
             # Use first 60 chars as title
             title = first_message[:60].strip()
             if len(first_message) > 60:

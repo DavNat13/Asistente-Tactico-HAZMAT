@@ -1,3 +1,4 @@
+import html
 import re
 
 
@@ -18,11 +19,11 @@ def _render_tables(text):
         header_row = m.group(1)
         rows = m.group(3).strip().split("\n")
         headers = [c.strip() for c in header_row.split("|")[1:-1]]
-        th = "".join(f"<th>{h}</th>" for h in headers)
+        th = "".join(f"<th>{html.escape(h)}</th>" for h in headers)
         body = ""
         for row in rows:
             cells = [c.strip() for c in row.split("|")[1:-1]]
-            body += "<tr>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>"
+            body += "<tr>" + "".join(f"<td>{html.escape(c)}</td>" for c in cells) + "</tr>"
         return (
             '<table class="hazmat-table">'
             f"<thead><tr>{th}</tr></thead>"
@@ -33,13 +34,13 @@ def _render_tables(text):
 
 def _render_warnings(text):
     if text.startswith("ADVERTENCIA"):
-        text = text.replace("ADVERTENCIA:", "").strip()
+        text = text.replace("ADVERTENCIA:", "", 1).strip()
         return (
             '<div class="hazmat-toast error" '
             'style="position:relative;margin-bottom:1rem;">'
             '<span class="text-emergency font-semibold">'
             ":material/warning: ADVERTENCIA</span>"
-            f"<p>{text}</p></div>"
+            f"<p>{html.escape(text)}</p></div>"
         )
     return text
 
@@ -54,7 +55,7 @@ def _render_lists(text):
             if not in_list:
                 result.append("<ul>")
                 in_list = True
-            result.append(f"<li>{stripped[2:]}</li>")
+            result.append(f"<li>{html.escape(stripped[2:])}</li>")
         else:
             if in_list:
                 result.append("</ul>")

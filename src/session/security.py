@@ -32,7 +32,7 @@ class InputSanitizer:
     XSS_PATTERNS = [
         re.compile(r"<script", re.IGNORECASE),
         re.compile(r"javascript:", re.IGNORECASE),
-        re.compile(r"on\w+\s*=", re.IGNORECASE),
+        re.compile(r"on(?:click|load|error|mouse\w+)\s*=", re.IGNORECASE),
         re.compile(r"<iframe", re.IGNORECASE),
         re.compile(r"<object", re.IGNORECASE),
         re.compile(r"<embed", re.IGNORECASE),
