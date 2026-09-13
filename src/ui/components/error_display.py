@@ -15,17 +15,6 @@ def render_error(message, details=None):
             st.code(details)
 
 
-def render_warning(message):
-    html = (
-        '<div class="hazmat-toast warning" style="position:relative;">'
-        '<span class="text-accent font-semibold">'
-        "Advertencia</span>"
-        f"<p>{message}</p>"
-        "</div>"
-    )
-    st.markdown(html, unsafe_allow_html=True)
-
-
 def render_empty_context():
     st.warning(
         "No se encontraron documentos relevantes. "

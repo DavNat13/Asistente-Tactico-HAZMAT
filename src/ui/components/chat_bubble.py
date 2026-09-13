@@ -2,11 +2,6 @@ import streamlit as st
 from src.ui.renderers.response_formatter import format_response
 
 
-def render_user_bubble(content):
-    with st.chat_message("user"):
-        st.markdown(content)
-
-
 def render_assistant_bubble(content, sources=None):
     formatted = format_response(content)
     with st.chat_message("assistant"):
