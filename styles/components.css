@@ -1,7 +1,51 @@
-.source-card {
-    background-color: #1e293b;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin: 4px 0;
-    border-left: 3px solid #EA580C;
+/* Expander, Divider, Toast */
+.streamlit-expanderHeader {
+  font-family: var(--font-family-primary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  color: var(--text-primary) !important; background: var(--surface-primary) !important;
+  border: 1px solid var(--border-secondary) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: var(--space-3) var(--space-4) !important;
+  transition: all var(--transition-fast) !important;
 }
+.streamlit-expanderHeader:hover {
+  background: var(--surface-secondary) !important;
+  border-color: var(--color-accent-500) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.streamlit-expanderHeader:focus-visible {
+  outline: 2px solid var(--color-accent-500) !important;
+  outline-offset: -2px !important;
+}
+.streamlit-expanderContent {
+  background: var(--surface-primary) !important;
+  border: 1px solid var(--border-secondary) !important;
+  border-top: none !important;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg) !important;
+  padding: var(--space-4) !important;
+}
+hr, .stDivider > hr {
+  border: none !important; border-top: 1px solid var(--border-secondary) !important;
+  margin: var(--space-4) 0 !important; opacity: 0.6;
+}
+.divider-labeled {
+  display: flex; align-items: center; gap: var(--space-4); color: var(--text-muted);
+  font-size: var(--font-size-xs); text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+}
+.divider-labeled::before, .divider-labeled::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-secondary);
+}
+.hazmat-toast {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  background: var(--surface-elevated); border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg); padding: var(--space-4);
+  box-shadow: var(--shadow-xl); animation: fadeInUp 0.3s var(--ease-out) both;
+  position: fixed; bottom: var(--space-6); right: var(--space-6);
+  z-index: var(--z-toast); max-width: 400px;
+}
+.hazmat-toast.success { border-left: 4px solid var(--color-success); }
+.hazmat-toast.warning { border-left: 4px solid var(--color-warning); }
+.hazmat-toast.error { border-left: 4px solid var(--color-emergency-500); }
+.hazmat-toast.info { border-left: 4px solid var(--color-info); }

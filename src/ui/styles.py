@@ -12,6 +12,15 @@ MATERIAL_SYMBOLS = (
 )
 
 
+CSS_FILES = [
+    "colors.css", "tokens.css", "typography.css", "spacing.css",
+    "component-tokens.css", "animations.css", "base.css", "rules.css",
+    "sidebar.css", "chat.css", "buttons.css", "tabs.css",
+    "sources.css", "status.css", "components.css", "utilities.css",
+    "responsive.css", "accessibility.css",
+]
+
+
 def load_css_files():
     st.markdown(MATERIAL_SYMBOLS, unsafe_allow_html=True)
     styles_dir = os.path.join(
@@ -20,14 +29,14 @@ def load_css_files():
         ),
         "styles",
     )
-    css_path = os.path.join(styles_dir, "global.css")
-    if os.path.exists(css_path):
-        with open(css_path, encoding="utf-8") as f:
-            css_content = f.read()
-        st.markdown(
-            f"<style>{css_content}</style>",
-            unsafe_allow_html=True,
-        )
+    for css_file in CSS_FILES:
+        path = os.path.join(styles_dir, css_file)
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                st.markdown(
+                    f"<style>{f.read()}</style>",
+                    unsafe_allow_html=True,
+                )
 
 
 def _init_session(manager):

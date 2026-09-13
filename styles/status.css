@@ -1,0 +1,45 @@
+/* Status Indicators & Loading Spinner */
+.status-dot {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: var(--radius-full); position: relative;
+}
+.status-dot::after {
+  content: ''; position: absolute; top: -2px; left: -2px;
+  width: 14px; height: 14px; border-radius: var(--radius-full);
+  opacity: 0.3; animation: pulse 2s infinite ease-in-out;
+}
+.status-dot.online { background-color: var(--status-online); }
+.status-dot.online::after { background-color: var(--status-online); }
+.status-dot.processing { background-color: var(--status-processing); }
+.status-dot.processing::after { background-color: var(--status-processing); animation: emergencyPulse 1.5s infinite; }
+.status-dot.error { background-color: var(--status-error); }
+.status-dot.error::after { background-color: var(--status-error); }
+.status-dot.idle { background-color: var(--status-idle); }
+.status-dot.idle::after { animation: none; }
+.status-label {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+.hazmat-spinner {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-3); padding: var(--space-4);
+}
+.hazmat-spinner-ring {
+  width: 32px; height: 32px; border: 3px solid var(--border-secondary);
+  border-top-color: var(--color-accent-500); border-radius: var(--radius-full);
+  animation: spinnerRotate 0.8s linear infinite;
+}
+.hazmat-spinner-ring.emergency { border-top-color: var(--color-emergency-500); }
+.hazmat-spinner-text {
+  font-size: var(--font-size-sm); color: var(--text-muted);
+  animation: spinnerPulse 1.5s ease-in-out infinite;
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-primary) 25%, var(--surface-secondary) 50%, var(--surface-primary) 75%);
+  background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+.skeleton-text { height: 14px; margin-bottom: var(--space-2); width: 100%; }
+.skeleton-text:last-child { width: 60%; }
+.skeleton-circle { border-radius: var(--radius-full); }

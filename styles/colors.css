@@ -1,0 +1,44 @@
+/* Bomberos de Chile Brand Colors */
+:root {
+  --color-primary-50: #e8eaf6;
+  --color-primary-100: #c5cae9;
+  --color-primary-200: #9fa8da;
+  --color-primary-300: #7986cb;
+  --color-primary-400: #5c6bc0;
+  --color-primary-500: #1a237e;
+  --color-primary-600: #283593;
+  --color-primary-700: #303f9f;
+  --color-primary-800: #3949ab;
+  --color-primary-900: #0d1642;
+  --color-accent-50: #fff8e1;
+  --color-accent-100: #ffecb3;
+  --color-accent-200: #ffe082;
+  --color-accent-300: #ffd54f;
+  --color-accent-400: #ffca28;
+  --color-accent-500: #d4a017;
+  --color-accent-600: #c5911a;
+  --color-accent-700: #b5831d;
+  --color-accent-800: #a57520;
+  --color-accent-900: #8d6014;
+  --color-emergency-50: #ffebee;
+  --color-emergency-100: #ffcdd2;
+  --color-emergency-200: #ef9a9a;
+  --color-emergency-300: #e57373;
+  --color-emergency-400: #ef5350;
+  --color-emergency-500: #c62828;
+  --color-emergency-600: #b71c1c;
+  --color-emergency-700: #a31515;
+  --color-emergency-800: #8b0f0f;
+  --color-emergency-900: #5f0a0a;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+}
