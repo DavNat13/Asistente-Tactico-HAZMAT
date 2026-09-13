@@ -11,32 +11,30 @@ MATERIAL_SYMBOLS = (
     ':opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">'
 )
 
-
 CSS_FILES = [
-    "colors.css", "tokens.css", "typography.css", "spacing.css",
-    "component-tokens.css", "animations.css", "base.css", "rules.css",
-    "sidebar.css", "chat.css", "buttons.css", "tabs.css",
-    "sources.css", "status.css", "components.css", "utilities.css",
-    "responsive.css", "accessibility.css",
+    "tokens/colors.css", "tokens/tokens.css", "tokens/typography.css",
+    "tokens/spacing.css", "tokens/component-tokens.css",
+    "base/animations.css", "base/animations-extra.css",
+    "base/reset.css", "base/rules.css", "base/rules-typography.css",
+    "components/sidebar.css", "components/chat.css", "components/buttons.css",
+    "components/tabs.css", "components/sources.css", "components/status.css",
+    "components/components.css",
+    "utilities/utilities.css", "utilities/utilities-layout.css",
+    "utilities/responsive.css", "utilities/accessibility.css",
 ]
 
 
 def load_css_files():
     st.markdown(MATERIAL_SYMBOLS, unsafe_allow_html=True)
     styles_dir = os.path.join(
-        os.path.dirname(
-            os.path.dirname(os.path.dirname(__file__))
-        ),
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
         "styles",
     )
     for css_file in CSS_FILES:
         path = os.path.join(styles_dir, css_file)
         if os.path.exists(path):
             with open(path, encoding="utf-8") as f:
-                st.markdown(
-                    f"<style>{f.read()}</style>",
-                    unsafe_allow_html=True,
-                )
+                st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 def _init_session(manager):
@@ -76,8 +74,7 @@ def _init_history(manager):
         )
         st.session_state.history = [
             {
-                "role": m.role,
-                "content": m.content,
+                "role": m.role, "content": m.content,
                 "sources": [
                     {"page": s.page, "source": s.source, "score": s.score}
                     for s in m.sources
