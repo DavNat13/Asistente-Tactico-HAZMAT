@@ -30,6 +30,17 @@ class Settings:
         self.RETRIEVAL_TOP_K: int = 8
         self.RETRIEVAL_MIN_SCORE: float = 0.50
 
+        # Session Management
+        self.SESSION_COLLECTION_NAME: str = os.getenv(
+            "SESSION_COLLECTION_NAME", "sessions"
+        )
+        self.SESSION_MAX_HISTORY_MESSAGES: int = int(
+            os.getenv("SESSION_MAX_HISTORY_MESSAGES", "100")
+        )
+        self.SESSION_TTL_DAYS: int = int(
+            os.getenv("SESSION_TTL_DAYS", "90")
+        )
+
         self._validate_required()
 
     def _validate_required(self):
