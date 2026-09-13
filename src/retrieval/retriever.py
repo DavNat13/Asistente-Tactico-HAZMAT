@@ -1,4 +1,3 @@
-from langchain_huggingface import HuggingFaceEmbeddings
 from pymongo import MongoClient
 from langsmith import traceable
 import sys
@@ -6,6 +5,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.settings import settings
+from src.ingesta.processor import get_embeddings
 
 
 class Retriever:
@@ -21,11 +21,7 @@ class Retriever:
         if Retriever._initialized:
             return
 
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=settings.EMBEDDING_MODEL,
-            model_kwargs={'device': 'cpu'},
-            encode_kwargs={'normalize_embeddings': True}
-        )
+        self.embeddings = get_embeddings()
         self.client = MongoClient(settings.MONGODB_URI)
         self.db = self.client[settings.MONGODB_DB_NAME]
         self.collection = self.db[settings.MONGODB_COLLECTION_NAME]

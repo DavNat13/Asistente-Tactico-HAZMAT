@@ -116,7 +116,7 @@ class Session(BaseModel):
 
     @property
     def total_messages(self) -> int:
-        return sum(t.message_count for t in self.threads)
+        return sum(t.message_count for t in self.threads if t.is_active)
 
     def soft_delete(self) -> None:
         self.is_active = False

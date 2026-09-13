@@ -48,7 +48,7 @@ class SessionRepository:
 
         self.client: MongoClient = MongoClient(settings.MONGODB_URI)
         self.db: Database = self.client[settings.MONGODB_DB_NAME]
-        self.collection: Collection = self.db["sessions"]
+        self.collection: Collection = self.db[settings.SESSION_COLLECTION_NAME]
 
         self._ensure_indexes()
         SessionRepository._initialized = True
@@ -78,7 +78,7 @@ class SessionRepository:
             # TTL index for automatic cleanup of old sessions (90 days)
             self.collection.create_index(
                 [("updated_at", ASCENDING)],
-                expireAfterSeconds=90 * 24 * 60 * 60,
+                expireAfterSeconds=settings.SESSION_TTL_DAYS * 24 * 60 * 60,
                 name="idx_ttl_cleanup",
             )
 
@@ -266,26 +266,20 @@ class SessionRepository:
             session_id = InputSanitizer.sanitize_uuid(session_id)
             thread_id = InputSanitizer.sanitize_uuid(thread_id)
 
-            doc = self.collection.find_one(
-                {
-                    "session_id": session_id,
-                    "threads.thread_id": thread_id,
-                },
-                {
-                    "threads.$": 1,
-                },
-            )
+            pipeline = [
+                {"$match": {"session_id": session_id, "threads.thread_id": thread_id}},
+                {"$unwind": "$threads"},
+                {"$match": {"threads.thread_id": thread_id}},
+                {"$project": {"messages": {"$slice": ["$threads.messages", skip, limit]}}},
+            ]
 
-            if not doc or "threads" not in doc or not doc["threads"]:
+            results = list(self.collection.aggregate(pipeline))
+
+            if not results or not results[0].get("messages"):
                 return []
 
-            messages = doc["threads"][0].get("messages", [])
-
-            # Apply pagination
-            messages = messages[skip: skip + limit]
-
             return [
-                Message(**m) for m in messages
+                Message(**m) for m in results[0]["messages"]
             ]
 
         except PyMongoError as e:
