@@ -6,32 +6,35 @@
  * Modular CSS: each file < 100 lines
  * Loaded via styles.py in order: tokens, then components
  */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 /* Design Tokens */
-@import 'colors.css';
-@import 'tokens.css';
-@import 'typography.css';
-@import 'spacing.css';
-@import 'component-tokens.css';
+@import "tokens/colors.css";
+@import "tokens/tokens.css";
+@import "tokens/typography.css";
+@import "tokens/spacing.css";
+@import "tokens/component-tokens.css";
 
 /* Animations */
-@import 'animations.css';
+@import "base/animations.css";
+@import "base/animations-extra.css";
 
 /* Base & Typography */
-@import 'base.css';
-@import 'rules.css';
+@import "base/reset.css";
+@import "base/rules.css";
+@import "base/rules-typography.css";
 
 /* Components */
-@import 'sidebar.css';
-@import 'chat.css';
-@import 'buttons.css';
-@import 'tabs.css';
-@import 'sources.css';
-@import 'status.css';
-@import 'components.css';
+@import "components/sidebar.css";
+@import "components/chat.css";
+@import "components/buttons.css";
+@import "components/tabs.css";
+@import "components/sources.css";
+@import "components/status.css";
+@import "components/components.css";
 
 /* Utilities & Responsive */
-@import 'utilities.css';
-@import 'responsive.css';
-@import 'accessibility.css';
+@import "utilities/utilities.css";
+@import "utilities/utilities-layout.css";
+@import "utilities/responsive.css";
+@import "utilities/accessibility.css";

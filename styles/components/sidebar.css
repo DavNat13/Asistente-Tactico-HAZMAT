@@ -1,0 +1,67 @@
+/* Sidebar Styles */
+[data-testid="stSidebar"] {
+  background-color: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--sidebar-divider);
+  animation: sidebarSlideIn 0.4s var(--ease-out) both;
+}
+[data-testid="stSidebar"] > div:first-child {
+  background-color: var(--sidebar-bg) !important;
+}
+[data-testid="stSidebar"] .stMarkdown h1,
+[data-testid="stSidebar"] .stMarkdown h2,
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2 {
+  color: var(--text-primary) !important;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  letter-spacing: var(--letter-spacing-tight);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-accent-500);
+  margin-bottom: var(--space-4);
+}
+[data-testid="stSidebar"] .stMarkdown h3,
+[data-testid="stSidebar"] h3 {
+  color: var(--color-accent-400) !important;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+[data-testid="stSidebar"] [data-testid="stMetric"] {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--sidebar-divider);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  transition: all var(--transition-fast);
+}
+[data-testid="stSidebar"] [data-testid="stMetric"]:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-accent-500);
+  box-shadow: var(--shadow-glow-accent);
+}
+[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
+  color: var(--text-muted) !important;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+}
+[data-testid="stSidebar"] [data-testid="stMetricValue"] {
+  color: var(--color-accent-400) !important;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-mono);
+}
+[data-testid="stSidebar"] hr {
+  border-color: var(--sidebar-divider) !important;
+  margin: var(--space-4) 0;
+}
+[data-testid="stSidebar"] .stCaption,
+[data-testid="stSidebar"] caption {
+  color: var(--text-muted) !important;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  opacity: 0.7;
+}
