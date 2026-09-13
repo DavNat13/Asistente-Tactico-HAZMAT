@@ -30,6 +30,13 @@ class Generator:
 
     @traceable(name="hazmat_generation")
     def generate(self, query: str, context_chunks: list[dict], history: list[dict] = None) -> dict:
+        if not context_chunks:
+            return {
+                "answer": "ADVERTENCIA: No se encontraron documentos relevantes para esta consulta. Consulte el manual GRE físico.",
+                "sources": [],
+                "context_used": 0,
+            }
+
         context_text = format_context(context_chunks)
         formatted_prompt = HAZMAT_SYSTEM_PROMPT.format(context=context_text)
 
@@ -40,7 +47,11 @@ class Generator:
 
         messages.append({"role": "user", "content": query})
 
-        response = self.llm.invoke(messages)
+        try:
+            response = self.llm.invoke(messages)
+            answer = response.content
+        except Exception as e:
+            answer = f"ADVERTENCIA: Error al generar respuesta. Intente nuevamente. Error: {str(e)[:100]}"
 
         sources = []
         for chunk in context_chunks:
@@ -52,7 +63,7 @@ class Generator:
             })
 
         return {
-            "answer": response.content,
+            "answer": answer,
             "sources": sources,
             "context_used": len(context_chunks)
         }
