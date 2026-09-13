@@ -27,8 +27,8 @@ class Settings:
         self.LLM_TEMPERATURE: float = 0.1
         self.CHUNK_SIZE: int = 1000
         self.CHUNK_OVERLAP: int = 150
-        self.RETRIEVAL_TOP_K: int = 4
-        self.RETRIEVAL_MIN_SCORE: float = 0.75
+        self.RETRIEVAL_TOP_K: int = 8
+        self.RETRIEVAL_MIN_SCORE: float = 0.50
 
 
 settings = Settings()
