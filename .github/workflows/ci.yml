@@ -103,10 +103,7 @@ jobs:
             --junitxml=junit-results.xml \
             --timeout=60 \
             -v \
-            src/ \
-            --ignore=src/session/test_security.py \
-            --ignore=src/session/test_models.py \
-            --ignore=src/session/test_export.py
+            src/
         env:
           PYTHONPATH: ${{ github.workspace }}
 
