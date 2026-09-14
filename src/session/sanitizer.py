@@ -1,11 +1,11 @@
 import re
-from typing import Any
+from typing import Any, ClassVar
 
 from .validators import validate_role, validate_score
 
 
 class InputSanitizer:
-    NOSQL_INJECTION_PATTERNS = [
+    NOSQL_INJECTION_PATTERNS: ClassVar[list] = [
         re.compile(r"\$where", re.IGNORECASE),
         re.compile(r"\$regex", re.IGNORECASE),
         re.compile(r"\$ne", re.IGNORECASE),
@@ -20,7 +20,7 @@ class InputSanitizer:
         re.compile(r"ObjectId\s*\(", re.IGNORECASE),
         re.compile(r"ISODate\s*\(", re.IGNORECASE),
     ]
-    XSS_PATTERNS = [
+    XSS_PATTERNS: ClassVar[list] = [
         re.compile(r"<script", re.IGNORECASE),
         re.compile(r"javascript:", re.IGNORECASE),
         re.compile(r"on(?:click|load|error|mouse\w+)\s*=", re.IGNORECASE),
@@ -35,7 +35,7 @@ class InputSanitizer:
     @classmethod
     def sanitize_string(cls, value: str, max_length: int = 10000) -> str:
         if not isinstance(value, str):
-            raise ValueError(f"Expected string, got {type(value).__name__}")
+            raise TypeError(f"Expected string, got {type(value).__name__}")
         value = value.strip()[:max_length]
         for pattern in cls.NOSQL_INJECTION_PATTERNS:
             if pattern.search(value):
@@ -48,11 +48,12 @@ class InputSanitizer:
     @classmethod
     def sanitize_uuid(cls, value: str) -> str:
         if not isinstance(value, str):
-            raise ValueError(f"Expected string, got {type(value).__name__}")
+            raise TypeError(f"Expected string, got {type(value).__name__}")
         value = value.strip()
         uuid_re = re.compile(
             r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
-            r"[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE,
+            r"[0-9a-f]{4}-[0-9a-f]{12}$",
+            re.IGNORECASE,
         )
         if not uuid_re.match(value):
             raise ValueError(f"Invalid UUID: {value[:20]}...")
@@ -82,9 +83,12 @@ class InputSanitizer:
                 sanitized[key] = cls.sanitize_dict(value)
             elif isinstance(value, list):
                 sanitized[key] = [
-                    cls.sanitize_dict(v) if isinstance(v, dict)
-                    else cls.sanitize_string(v) if isinstance(v, str)
-                    else v for v in value
+                    cls.sanitize_dict(v)
+                    if isinstance(v, dict)
+                    else cls.sanitize_string(v)
+                    if isinstance(v, str)
+                    else v
+                    for v in value
                 ]
             else:
                 sanitized[key] = value

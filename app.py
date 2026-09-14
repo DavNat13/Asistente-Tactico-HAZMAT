@@ -1,15 +1,16 @@
 # app.py — Punto de entrada del Dashboard RAG HAZMAT
-import streamlit as st
-import sys
 import os
+import sys
+
+import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from src.ui.styles import load_css_files, init_session_state
-from src.ui.sidebar import render_sidebar
-from src.ui.chat import render_history, handle_query
-from src.ui.layout.header import render_header
+from src.ui.chat import handle_query, render_history
 from src.ui.components.empty_state import render_empty_state
-from src.utils.constants import APP_NAME, APP_ICON
+from src.ui.layout.header import render_header
+from src.ui.sidebar import render_sidebar
+from src.ui.styles import init_session_state, load_css_files
+from src.utils.constants import APP_ICON, APP_NAME
 
 st.set_page_config(
     page_title=APP_NAME,
@@ -24,7 +25,7 @@ load_css_files()
 # El sidebar debe renderizarse SIEMPRE, aunque la sesión falle.
 try:
     init_session_state()
-except Exception:
+except Exception:  # noqa: BLE001
     st.session_state.setdefault("history", [])
 
 render_sidebar()

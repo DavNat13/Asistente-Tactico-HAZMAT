@@ -1,4 +1,5 @@
 import streamlit as st
+
 from src.ui.renderers.response_formatter import format_response
 
 
@@ -19,8 +20,8 @@ def _render_sources(sources):
             html = (
                 f'<div class="source-card">'
                 f'<span class="source-page" style="color:{color}">'
-                f'Pagina {page}</span>'
+                f"Pagina {page}</span>"
                 f' <span class="source-score">'
-                f'Score: {score:.2f}</span></div>'
+                f"Score: {score:.2f}</span></div>"
             )
             st.markdown(html, unsafe_allow_html=True)

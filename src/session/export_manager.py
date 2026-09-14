@@ -1,7 +1,6 @@
 import json
 from datetime import datetime, timezone
 from io import BytesIO
-from typing import Optional
 
 from .repository import SessionRepository
 
@@ -21,7 +20,7 @@ class ExportManager:
         self.repo = SessionRepository()
         ExportManager._initialized = True
 
-    def export_json(self, session_id: str, thread_id: str) -> Optional[str]:
+    def export_json(self, session_id: str, thread_id: str) -> str | None:
         thread = self.repo.get_thread(session_id, thread_id)
         if not thread:
             return None
@@ -40,7 +39,8 @@ class ExportManager:
             },
             "messages": [
                 {
-                    "role": m.role, "content": m.content,
+                    "role": m.role,
+                    "content": m.content,
                     "timestamp": m.timestamp.isoformat(),
                     "sources": [
                         {"page": s.page, "source": s.source, "score": s.score}
@@ -53,16 +53,20 @@ class ExportManager:
         }
         return json.dumps(data, ensure_ascii=False, indent=2)
 
-    def export_markdown(self, session_id: str, thread_id: str) -> Optional[str]:
+    def export_markdown(self, session_id: str, thread_id: str) -> str | None:
         thread = self.repo.get_thread(session_id, thread_id)
         if not thread:
             return None
         lines = [
-            "# HAZMAT Chat Export", "",
+            "# HAZMAT Chat Export",
+            "",
             f"**Session:** `{session_id[:8]}...`",
             f"**Thread:** {thread.title}",
             f"**Date:** {thread.created_at.strftime('%Y-%m-%d %H:%M')}",
-            f"**Messages:** {thread.message_count}", "", "---", "",
+            f"**Messages:** {thread.message_count}",
+            "",
+            "---",
+            "",
         ]
         for msg in thread.messages:
             if msg.role == "user":
@@ -72,12 +76,16 @@ class ExportManager:
                 if msg.sources:
                     lines.append("**Fuentes:**")
                     for src in msg.sources:
-                        lines.append(f"- Pagina {src.page} ({src.source}) Score: {src.score:.2f}")
+                        lines.append(
+                            f"- Pagina {src.page} ({src.source}) Score: {src.score:.2f}"
+                        )
                     lines.append("")
             lines.extend(["---", ""])
         return "\n".join(lines)
 
-    def export_bytes(self, session_id: str, thread_id: str, export_format: str = "json") -> Optional[BytesIO]:
+    def export_bytes(
+        self, session_id: str, thread_id: str, export_format: str = "json"
+    ) -> BytesIO | None:
         if export_format == "json":
             content = self.export_json(session_id, thread_id)
             ext = "json"

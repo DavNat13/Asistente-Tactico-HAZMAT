@@ -1,19 +1,21 @@
 import json
 
 from src.session.manager import SessionManager
-from src.session.models import Session, Thread, Message, Source
 
 
 def migrate_in_memory_data(
-    history: list[dict], session_id: str = None,
+    history: list[dict],
+    session_id: str | None = None,
 ) -> str:
     manager = SessionManager()
     if session_id:
         session = manager.get_or_create_session(session_id)
     else:
         session = manager.create_session()
-    thread = session.threads[0] if session.threads else manager.create_thread(
-        session.session_id
+    thread = (
+        session.threads[0]
+        if session.threads
+        else manager.create_thread(session.session_id)
     )
     migrated = 0
     for msg in history:
@@ -23,11 +25,15 @@ def migrate_in_memory_data(
             continue
         if role == "user":
             manager.add_user_message(
-                session.session_id, thread.thread_id, content,
+                session.session_id,
+                thread.thread_id,
+                content,
             )
         elif role == "assistant":
             manager.add_assistant_message(
-                session.session_id, thread.thread_id, content,
+                session.session_id,
+                thread.thread_id,
+                content,
                 sources=msg.get("sources", []),
                 context_used=msg.get("context_used", 0),
             )

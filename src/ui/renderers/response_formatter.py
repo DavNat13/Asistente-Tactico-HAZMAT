@@ -15,6 +15,7 @@ def format_response(text):
 
 def _render_tables(text):
     pattern = r"(\|.+\|)\n(\|[-:| ]+\|)\n((?:\|.+\|\n?)+)"
+
     def replace_table(m):
         header_row = m.group(1)
         rows = m.group(3).strip().split("\n")
@@ -23,12 +24,15 @@ def _render_tables(text):
         body = ""
         for row in rows:
             cells = [c.strip() for c in row.split("|")[1:-1]]
-            body += "<tr>" + "".join(f"<td>{html.escape(c)}</td>" for c in cells) + "</tr>"
+            body += (
+                "<tr>" + "".join(f"<td>{html.escape(c)}</td>" for c in cells) + "</tr>"
+            )
         return (
             '<table class="hazmat-table">'
             f"<thead><tr>{th}</tr></thead>"
             f"<tbody>{body}</tbody></table>"
         )
+
     return re.sub(pattern, replace_table, text)
 
 
@@ -78,12 +82,12 @@ def _render_page_refs(text):
 def _render_shortcodes(text):
     replacements = {
         ":danger:": '<span class="hazmat-badge hazard">'
-                    ":material/warning: PELIGRO</span>",
+        ":material/warning: PELIGRO</span>",
         ":caution:": '<span class="hazmat-badge warning">'
-                     ":material/info: PRECAUCION</span>",
+        ":material/info: PRECAUCION</span>",
         ":safe:": '<span class="hazmat-badge success">'
-                  ":material/check_circle: SEGURO</span>",
+        ":material/check_circle: SEGURO</span>",
     }
-    for code, html in replacements.items():
-        text = text.replace(code, html)
+    for code, replacement in replacements.items():
+        text = text.replace(code, replacement)
     return text

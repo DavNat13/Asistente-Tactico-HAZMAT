@@ -1,10 +1,12 @@
 # sidebar.py — Panel lateral estilo ChatGPT/Gemini
 """Sidebar con conversaciones recientes, exportación modal y tema visual."""
+
 import streamlit as st
-from src.utils.constants import APP_NAME, NEW_CHAT_ICON
+
+from src.ui.sidebar_export import render_exportar
 from src.ui.sidebar_helpers import create_thread, get_manager, get_sid
 from src.ui.sidebar_history import render_historial
-from src.ui.sidebar_export import render_exportar
+from src.utils.constants import APP_NAME, NEW_CHAT_ICON
 
 
 def render_sidebar():
@@ -17,7 +19,8 @@ def render_sidebar():
 
 
 def _inject_css():
-    st.markdown("""<style>
+    st.markdown(
+        """<style>
     /* Export button */
     [data-testid="stSidebar"] .stButton>button.key_export {
         background:transparent!important;color:rgba(245,242,233,.5)!important;
@@ -41,7 +44,9 @@ def _inject_css():
     .export-option-icon.md{background:rgba(206,32,41,.12);color:#CE2029}
     .export-option-label{color:#F5F2E9;font-size:14px;font-weight:600;margin-bottom:4px}
     .export-option-desc{color:rgba(245,242,233,.45);font-size:12px;line-height:1.4}
-    </style>""", unsafe_allow_html=True)
+    </style>""",
+        unsafe_allow_html=True,
+    )
 
 
 def _render_cabecera():
@@ -50,14 +55,18 @@ def _render_cabecera():
         f'margin-bottom:.75rem;text-align:center">'
         f'<div style="font-size:16px;font-weight:700;color:#F5F2E9;line-height:1.3">{APP_NAME}</div>'
         f'<div style="font-size:11px;color:#F5F2E9;line-height:1.2;margin-top:4px;opacity:.5">'
-        f'Bomberos de Chile - GRE</div></div>',
+        f"Bomberos de Chile - GRE</div></div>",
         unsafe_allow_html=True,
     )
 
 
 def _render_nuevo_chat():
-    if st.button(f"{NEW_CHAT_ICON} Nuevo Chat", use_container_width=True,
-                 type="primary", key="sidebar_nuevo"):
+    if st.button(
+        f"{NEW_CHAT_ICON} Nuevo Chat",
+        use_container_width=True,
+        type="primary",
+        key="sidebar_nuevo",
+    ):
         mgr, sid = get_manager(), get_sid()
         if mgr and sid:
             create_thread(mgr, sid)

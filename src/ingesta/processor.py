@@ -1,8 +1,9 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from datetime import datetime
 import os
 import sys
+from datetime import datetime, timezone
+
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.settings import settings
@@ -13,19 +14,20 @@ def get_text_splitter():
         chunk_size=settings.CHUNK_SIZE,
         chunk_overlap=settings.CHUNK_OVERLAP,
         length_function=len,
-        is_separator_regex=False
+        is_separator_regex=False,
     )
 
 
 _embeddings_instance = None
+
 
 def get_embeddings():
     global _embeddings_instance
     if _embeddings_instance is None:
         _embeddings_instance = HuggingFaceEmbeddings(
             model_name=settings.EMBEDDING_MODEL,
-            model_kwargs={'device': 'cpu'},
-            encode_kwargs={'normalize_embeddings': True}
+            model_kwargs={"device": "cpu"},
+            encode_kwargs={"normalize_embeddings": True},
         )
     return _embeddings_instance
 
@@ -52,9 +54,9 @@ def prepare_documents(chunks: list, embeddings_model) -> list:
             "metadata": {
                 "source": source_filename,
                 "page_number": page_number,
-                "ingestion_date": datetime.now().isoformat(),
-                "total_chunks": len(chunks)
-            }
+                "ingestion_date": datetime.now(tz=timezone.utc).isoformat(),
+                "total_chunks": len(chunks),
+            },
         }
         docs_to_insert.append(doc)
 

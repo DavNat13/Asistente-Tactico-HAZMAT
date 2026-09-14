@@ -1,5 +1,3 @@
-from typing import Optional
-
 from .models import Message, Source
 from .repository import SessionRepository
 from .security import InputSanitizer
@@ -34,7 +32,7 @@ class MessageManager:
         session_id: str,
         thread_id: str,
         content: str,
-        sources: Optional[list[dict]] = None,
+        sources: list[dict] | None = None,
         context_used: int = 0,
     ) -> Message:
         content = InputSanitizer.sanitize_message_content(content)
@@ -49,32 +47,35 @@ class MessageManager:
         return message
 
     def get_history(
-        self, session_id: str, thread_id: str,
-        limit: int = 100, skip: int = 0,
+        self,
+        session_id: str,
+        thread_id: str,
+        limit: int = 100,
+        skip: int = 0,
     ) -> list[Message]:
-        return self.repo.get_messages(
-            session_id, thread_id, limit=limit, skip=skip
-        )
+        return self.repo.get_messages(session_id, thread_id, limit=limit, skip=skip)
 
     def get_history_for_llm(
-        self, session_id: str, thread_id: str,
+        self,
+        session_id: str,
+        thread_id: str,
         max_messages: int = 6,
     ) -> list[dict]:
-        messages = self.get_history(
-            session_id, thread_id, limit=max_messages
-        )
+        messages = self.get_history(session_id, thread_id, limit=max_messages)
         return [{"role": m.role, "content": m.content} for m in messages]
 
     def _parse_sources(self, sources: list[dict]) -> list[Source]:
         parsed = []
         for s in sources:
             try:
-                parsed.append(Source(
-                    page=s.get("page", 0),
-                    source=s.get("source", "GRE"),
-                    score=InputSanitizer.validate_score(s.get("score", 0.0)),
-                    text_snippet=s.get("text_snippet"),
-                ))
+                parsed.append(
+                    Source(
+                        page=s.get("page", 0),
+                        source=s.get("source", "GRE"),
+                        score=InputSanitizer.validate_score(s.get("score", 0.0)),
+                        text_snippet=s.get("text_snippet"),
+                    )
+                )
             except (ValueError, KeyError):
                 pass
         return parsed

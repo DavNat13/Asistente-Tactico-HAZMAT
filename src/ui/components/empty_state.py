@@ -1,5 +1,6 @@
 # empty_state.py — Estado vacío de bienvenida
 """Muestra el estado inicial cuando no hay mensajes."""
+
 import streamlit as st
 
 
@@ -11,7 +12,7 @@ def render_empty_state():
         'margin:0 0 0.5rem 0">Bienvenido</h2>'
         '<p style="color:rgba(245,242,233,0.6);font-size:0.9rem;line-height:1.6;'
         'margin:0;max-width:400px;margin-left:auto;margin-right:auto">'
-        'Asistente táctico para consultas sobre el Manual GRE y '
-        'protocolos de emergencias HAZMAT.</p></div>',
+        "Asistente táctico para consultas sobre el Manual GRE y "
+        "protocolos de emergencias HAZMAT.</p></div>",
         unsafe_allow_html=True,
     )

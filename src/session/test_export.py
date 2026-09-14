@@ -1,12 +1,10 @@
 import json
-import pytest
-
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.session.models import Session, Thread, Message, Source
+from src.session.models import Message, Session, Source
 
 
 class TestExport:
@@ -16,7 +14,8 @@ class TestExport:
         thread.add_message(Message(role="user", content="Test question"))
         thread.add_message(
             Message(
-                role="assistant", content="Test answer",
+                role="assistant",
+                content="Test answer",
                 sources=[Source(page=1, source="GRE", score=0.9)],
             )
         )
@@ -27,8 +26,11 @@ class TestExport:
                 "message_count": thread.message_count,
             },
             "messages": [
-                {"role": m.role, "content": m.content,
-                 "timestamp": m.timestamp.isoformat()}
+                {
+                    "role": m.role,
+                    "content": m.content,
+                    "timestamp": m.timestamp.isoformat(),
+                }
                 for m in thread.messages
             ],
         }

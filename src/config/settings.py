@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,10 +18,14 @@ class Settings:
         self.GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
         self.MONGODB_URI: str = os.getenv("MONGODB_URI", "")
         self.MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "hazmat_gre")
-        self.MONGODB_COLLECTION_NAME: str = os.getenv("MONGODB_COLLECTION_NAME", "gre_chunks")
+        self.MONGODB_COLLECTION_NAME: str = os.getenv(
+            "MONGODB_COLLECTION_NAME", "gre_chunks"
+        )
         self.LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
         self.LANGCHAIN_TRACING_V2: str = os.getenv("LANGCHAIN_TRACING_V2", "true")
-        self.LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", "Bomberos-HAZMAT-RAG")
+        self.LANGCHAIN_PROJECT: str = os.getenv(
+            "LANGCHAIN_PROJECT", "Bomberos-HAZMAT-RAG"
+        )
         self.EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
         self.EMBEDDING_DIMENSIONS: int = 384
         self.LLM_MODEL: str = "gemini-3.5-flash"
@@ -37,9 +42,7 @@ class Settings:
         self.SESSION_MAX_HISTORY_MESSAGES: int = int(
             os.getenv("SESSION_MAX_HISTORY_MESSAGES", "100")
         )
-        self.SESSION_TTL_DAYS: int = int(
-            os.getenv("SESSION_TTL_DAYS", "90")
-        )
+        self.SESSION_TTL_DAYS: int = int(os.getenv("SESSION_TTL_DAYS", "90"))
 
         self._validate_required()
 

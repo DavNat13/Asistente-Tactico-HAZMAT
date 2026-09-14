@@ -1,7 +1,7 @@
-import pytest
-
-import sys
 import os
+import sys
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -22,9 +22,7 @@ class TestInputSanitizer:
             InputSanitizer.sanitize_string("<script>alert('xss')</script>")
 
     def test_sanitize_uuid_valid(self):
-        result = InputSanitizer.sanitize_uuid(
-            "550e8400-e29b-41d4-a716-446655440000"
-        )
+        result = InputSanitizer.sanitize_uuid("550e8400-e29b-41d4-a716-446655440000")
         assert result == "550e8400-e29b-41d4-a716-446655440000"
 
     def test_sanitize_uuid_invalid(self):

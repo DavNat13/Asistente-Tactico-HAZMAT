@@ -17,6 +17,5 @@ def render_error(message, details=None):
 
 def render_empty_context():
     st.warning(
-        "No se encontraron documentos relevantes. "
-        "Intente reformular su consulta."
+        "No se encontraron documentos relevantes. Intente reformular su consulta."
     )

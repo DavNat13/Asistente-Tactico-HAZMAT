@@ -1,9 +1,10 @@
 import streamlit as st
-from src.retrieval.retriever import retriever
+
 from src.generate.generator import generator
+from src.retrieval.retriever import retriever
 from src.ui.components.chat_bubble import render_assistant_bubble
-from src.ui.components.source_card import render_sources_section
 from src.ui.components.error_display import render_empty_context
+from src.ui.components.source_card import render_sources_section
 from src.ui.renderers.response_formatter import format_response
 
 
@@ -28,9 +29,7 @@ def handle_query(chat_container):
         thread_id = st.session_state.get("thread_id")
         manager = st.session_state.get("session_manager")
 
-        st.session_state.history.append(
-            {"role": "user", "content": query}
-        )
+        st.session_state.history.append({"role": "user", "content": query})
         if manager and session_id and thread_id:
             manager.add_user_message(session_id, thread_id, query)
 
@@ -49,7 +48,9 @@ def handle_query(chat_container):
 
         if manager and session_id and thread_id:
             manager.add_assistant_message(
-                session_id, thread_id, response["answer"],
+                session_id,
+                thread_id,
+                response["answer"],
                 sources=response.get("sources", []),
                 context_used=response.get("context_used", 0),
             )
@@ -73,8 +74,10 @@ def _render_response_sources(response):
 
 
 def _save_to_history(response):
-    st.session_state.history.append({
-        "role": "assistant",
-        "content": response["answer"],
-        "sources": response.get("sources", []),
-    })
+    st.session_state.history.append(
+        {
+            "role": "assistant",
+            "content": response["answer"],
+            "sources": response.get("sources", []),
+        }
+    )

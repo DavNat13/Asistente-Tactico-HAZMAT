@@ -1,10 +1,9 @@
-from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
 import os
 
+from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 
 DATA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "data"
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data"
 )
 
 
@@ -16,7 +15,7 @@ def load_single_pdf(pdf_path: str) -> list:
     return documents
 
 
-def load_directory(directory: str = None) -> list:
+def load_directory(directory: str | None = None) -> list:
     if directory is None:
         directory = DATA_DIR
 
@@ -27,10 +26,7 @@ def load_directory(directory: str = None) -> list:
         return []
 
     loader = DirectoryLoader(
-        directory,
-        glob="**/*.pdf",
-        loader_cls=PyPDFLoader,
-        show_progress=True
+        directory, glob="**/*.pdf", loader_cls=PyPDFLoader, show_progress=True
     )
 
     documents = loader.load()
@@ -52,7 +48,7 @@ def load_from_github(repo_url: str) -> list:
         subprocess.run(
             ["git", "clone", "--depth", "1", repo_url, tmp_dir],
             check=True,
-            capture_output=True
+            capture_output=True,
         )
 
         pdf_files = []

@@ -1,16 +1,23 @@
-from typing import Optional
-from pymongo import MongoClient, ASCENDING, DESCENDING
-from pymongo.errors import OperationFailure
+import os
+import sys
+
+from pymongo import ASCENDING, DESCENDING, MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
-import sys, os
+from pymongo.errors import (
+    ConnectionFailure,
+    OperationFailure,
+    ServerSelectionTimeoutError,
+)
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.settings import settings
-from .models import Session, Thread, Message
-from .session_crud import SessionCRUD
-from .thread_repository import ThreadRepository
+
 from .message_repository import MessageRepository
+from .models import Message, Session, Thread
+from .session_crud import SessionCRUD
 from .session_queries import SessionQueries
+from .thread_repository import ThreadRepository
 
 
 class SessionRepository:
@@ -27,7 +34,7 @@ class SessionRepository:
             try:
                 self.client.admin.command("ping")
                 return
-            except Exception:
+            except (ConnectionFailure, ServerSelectionTimeoutError):
                 SessionRepository._initialized = False
         self.client: MongoClient = MongoClient(settings.MONGODB_URI)
         self.db: Database = self.client[settings.MONGODB_DB_NAME]
@@ -43,7 +50,8 @@ class SessionRepository:
         try:
             self.collection.create_index(
                 [("session_id", ASCENDING)],
-                unique=True, name="idx_session_id_unique",
+                unique=True,
+                name="idx_session_id_unique",
             )
             self.collection.create_index(
                 [("is_active", DESCENDING), ("updated_at", DESCENDING)],
@@ -64,7 +72,7 @@ class SessionRepository:
     def create_session(self, session: Session) -> Session:
         return self._crud.create_session(session)
 
-    def get_session(self, session_id: str) -> Optional[Session]:
+    def get_session(self, session_id: str) -> Session | None:
         return self._crud.get_session(session_id)
 
     def update_session(self, session: Session) -> bool:
@@ -82,7 +90,7 @@ class SessionRepository:
     def add_thread(self, session_id: str, thread: Thread) -> bool:
         return self.threads.add_thread(session_id, thread)
 
-    def get_thread(self, session_id: str, thread_id: str) -> Optional[Thread]:
+    def get_thread(self, session_id: str, thread_id: str) -> Thread | None:
         return self.threads.get_thread(session_id, thread_id)
 
     def update_thread_title(self, session_id: str, thread_id: str, title: str) -> bool:
@@ -91,7 +99,9 @@ class SessionRepository:
     def add_message(self, session_id: str, thread_id: str, message: Message) -> bool:
         return self.messages.add_message(session_id, thread_id, message)
 
-    def get_messages(self, session_id: str, thread_id: str, limit: int = 100, skip: int = 0) -> list[Message]:
+    def get_messages(
+        self, session_id: str, thread_id: str, limit: int = 100, skip: int = 0
+    ) -> list[Message]:
         return self.messages.get_messages(session_id, thread_id, limit=limit, skip=skip)
 
     def close(self) -> None:

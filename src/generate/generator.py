@@ -1,7 +1,8 @@
+import os
+import sys
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langsmith import traceable
-import sys
-import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.settings import settings
@@ -24,12 +25,14 @@ class Generator:
         self.llm = ChatGoogleGenerativeAI(
             model=settings.LLM_MODEL,
             temperature=settings.LLM_TEMPERATURE,
-            google_api_key=settings.GOOGLE_API_KEY
+            google_api_key=settings.GOOGLE_API_KEY,
         )
         Generator._initialized = True
 
     @traceable(name="hazmat_generation")
-    def generate(self, query: str, context_chunks: list[dict], history: list[dict] = None) -> dict:
+    def generate(
+        self, query: str, context_chunks: list[dict], history: list[dict] | None = None
+    ) -> dict:
         if not context_chunks:
             return {
                 "answer": "ADVERTENCIA: No se encontraron documentos relevantes para esta consulta. Consulte el manual GRE físico.",
@@ -53,22 +56,24 @@ class Generator:
                 answer = response.content[0].get("text", str(response.content))
             else:
                 answer = response.content
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             answer = f"ADVERTENCIA: Error al generar respuesta. Intente nuevamente. Error: {str(e)[:100]}"
 
         sources = []
         for chunk in context_chunks:
             metadata = chunk.get("metadata", {})
-            sources.append({
-                "page": metadata.get("page_number", "N/A"),
-                "source": metadata.get("source", "GRE"),
-                "score": chunk.get("score", 0)
-            })
+            sources.append(
+                {
+                    "page": metadata.get("page_number", "N/A"),
+                    "source": metadata.get("source", "GRE"),
+                    "score": chunk.get("score", 0),
+                }
+            )
 
         return {
             "answer": answer,
             "sources": sources,
-            "context_used": len(context_chunks)
+            "context_used": len(context_chunks),
         }
 
 

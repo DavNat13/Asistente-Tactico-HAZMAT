@@ -1,6 +1,7 @@
-import streamlit as st
 import os
 import sys
+
+import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.session.manager import SessionManager
@@ -12,16 +13,28 @@ MATERIAL_SYMBOLS = (
 )
 
 CSS_FILES = [
-    "tokens/colors.css", "tokens/tokens.css", "tokens/typography.css",
-    "tokens/spacing.css", "tokens/component-tokens.css",
-    "base/animations.css", "base/animations-extra.css",
-    "base/reset.css", "base/rules.css", "base/rules-typography.css",
-    "components/header.css", "components/sidebar.css",
-    "components/chat.css", "components/buttons.css",
-    "components/tabs.css", "components/sources.css", "components/status.css",
+    "tokens/colors.css",
+    "tokens/tokens.css",
+    "tokens/typography.css",
+    "tokens/spacing.css",
+    "tokens/component-tokens.css",
+    "base/animations.css",
+    "base/animations-extra.css",
+    "base/reset.css",
+    "base/rules.css",
+    "base/rules-typography.css",
+    "components/header.css",
+    "components/sidebar.css",
+    "components/chat.css",
+    "components/buttons.css",
+    "components/tabs.css",
+    "components/sources.css",
+    "components/status.css",
     "components/components.css",
-    "utilities/utilities.css", "utilities/utilities-layout.css",
-    "utilities/responsive.css", "utilities/accessibility.css",
+    "utilities/utilities.css",
+    "utilities/utilities-layout.css",
+    "utilities/responsive.css",
+    "utilities/accessibility.css",
 ]
 
 
@@ -75,11 +88,14 @@ def _init_history(manager):
         )
         st.session_state.history = [
             {
-                "role": m.role, "content": m.content,
+                "role": m.role,
+                "content": m.content,
                 "sources": [
                     {"page": s.page, "source": s.source, "score": s.score}
                     for s in m.sources
-                ] if m.sources else [],
+                ]
+                if m.sources
+                else [],
             }
             for m in messages
         ]

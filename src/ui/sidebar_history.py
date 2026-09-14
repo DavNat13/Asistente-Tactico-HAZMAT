@@ -1,6 +1,7 @@
 # sidebar_history.py — Renderizado de conversaciones recientes
 import streamlit as st
-from src.ui.sidebar_helpers import switch_thread, get_manager, get_sid
+
+from src.ui.sidebar_helpers import get_manager, get_sid, switch_thread
 
 _EMPTY = '<p style="color:#F5F2E9;opacity:0.4;font-size:12px;padding:4px 8px">Sin conversaciones aún</p>'
 
@@ -32,8 +33,14 @@ def render_historial():
             if sel and sel != current_tid:
                 switch_thread(mgr, sid, sel)
 
-        st.radio("Historial", options=thread_ids, index=default_idx,
-                 format_func=_fmt, key="hist_radio", label_visibility="collapsed",
-                 on_change=_on_change)
-    except Exception:
+        st.radio(
+            "Historial",
+            options=thread_ids,
+            index=default_idx,
+            format_func=_fmt,
+            key="hist_radio",
+            label_visibility="collapsed",
+            on_change=_on_change,
+        )
+    except Exception:  # noqa: BLE001
         st.markdown(_EMPTY, unsafe_allow_html=True)

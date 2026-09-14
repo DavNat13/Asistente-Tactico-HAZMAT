@@ -1,14 +1,20 @@
-from pymongo import MongoClient
 import os
 import sys
+
+from pymongo import MongoClient
 
 APP_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if APP_DIR not in sys.path:
     sys.path.insert(0, APP_DIR)
 
 from src.config.settings import settings
-from src.ingesta.loaders import load_single_pdf, load_directory, load_from_github
-from src.ingesta.processor import get_text_splitter, get_embeddings, split_documents, prepare_documents
+from src.ingesta.loaders import load_directory, load_from_github, load_single_pdf
+from src.ingesta.processor import (
+    get_embeddings,
+    get_text_splitter,
+    prepare_documents,
+    split_documents,
+)
 
 
 class PDFIngester:
@@ -30,7 +36,7 @@ class PDFIngester:
         chunks = split_documents(documents, self.text_splitter)
         return self._insert_documents(prepare_documents(chunks, self.embeddings))
 
-    def ingest_directory(self, directory: str = None) -> int:
+    def ingest_directory(self, directory: str | None = None) -> int:
         documents = load_directory(directory)
         if not documents:
             return 0
@@ -52,8 +58,8 @@ class PDFIngester:
             name=index_name,
             vectorOptions={
                 "dimensions": settings.EMBEDDING_DIMENSIONS,
-                "similarity": "cosine"
-            }
+                "similarity": "cosine",
+            },
         )
         print(f"Índice vectorial '{index_name}' creado exitosamente.")
 
@@ -64,12 +70,19 @@ class PDFIngester:
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Ingesta de PDFs para HAZMAT RAG")
     parser.add_argument("--pdf", type=str, help="Ruta local al archivo PDF")
-    parser.add_argument("--data", action="store_true", help="Cargar todos los PDFs del directorio data/")
+    parser.add_argument(
+        "--data", action="store_true", help="Cargar todos los PDFs del directorio data/"
+    )
     parser.add_argument("--github", type=str, help="URL del repositorio GitHub")
-    parser.add_argument("--clear", action="store_true", help="Limpiar colección antes de ingerir")
-    parser.add_argument("--create-index", action="store_true", help="Crear índice vectorial")
+    parser.add_argument(
+        "--clear", action="store_true", help="Limpiar colección antes de ingerir"
+    )
+    parser.add_argument(
+        "--create-index", action="store_true", help="Crear índice vectorial"
+    )
     args = parser.parse_args()
     ingester = PDFIngester()
     if args.clear:

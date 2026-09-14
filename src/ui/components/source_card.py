@@ -11,7 +11,7 @@ def render_source_card(source):
         f'<span class="source-page">Pagina {page}</span>'
         f'<span class="source-score">{score:.2f}</span>'
         f'<span class="source-doc text-xs text-muted">{doc}</span>'
-        f'</div>'
+        f"</div>"
     )
     return html
 
@@ -21,6 +21,4 @@ def render_sources_section(sources):
         return
     with st.expander("Fuentes consultadas"):
         for s in sources:
-            st.markdown(
-                render_source_card(s), unsafe_allow_html=True
-            )
+            st.markdown(render_source_card(s), unsafe_allow_html=True)

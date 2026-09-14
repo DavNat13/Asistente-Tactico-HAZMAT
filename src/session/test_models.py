@@ -1,9 +1,10 @@
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.session.models import Session, Thread, Message, Source
+from src.session.models import Message, Session, Source, Thread
 
 
 class TestSource:
@@ -14,9 +15,9 @@ class TestSource:
     def test_source_score_boundary(self):
         Source(page=1, source="GRE", score=0.0)
         Source(page=1, source="GRE", score=1.0)
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             Source(page=1, source="GRE", score=-0.1)
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             Source(page=1, source="GRE", score=1.1)
 
 
@@ -26,16 +27,19 @@ class TestMessage:
         assert msg.role == "user" and msg.message_id
 
     def test_create_assistant_message(self):
-        msg = Message(role="assistant", content="Answer",
-                      sources=[Source(page=1, source="GRE", score=0.9)])
+        msg = Message(
+            role="assistant",
+            content="Answer",
+            sources=[Source(page=1, source="GRE", score=0.9)],
+        )
         assert len(msg.sources) == 1
 
     def test_invalid_role(self):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             Message(role="admin", content="Test")
 
     def test_empty_content(self):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             Message(role="user", content="")
 
     def test_content_stripped(self):

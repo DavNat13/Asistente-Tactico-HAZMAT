@@ -9,10 +9,16 @@ def switch_thread(mgr, sid, tid):
     st.session_state.thread = t
     msgs = mgr.get_history(sid, tid)
     st.session_state.history = [
-        {"role": m.role, "content": m.content,
-         "sources": [{"page": s.page, "source": s.source,
-                      "score": s.score} for s in m.sources]
-         if m.sources else []}
+        {
+            "role": m.role,
+            "content": m.content,
+            "sources": [
+                {"page": s.page, "source": s.source, "score": s.score}
+                for s in m.sources
+            ]
+            if m.sources
+            else [],
+        }
         for m in msgs
     ]
     st.rerun()

@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Optional
 
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
@@ -13,9 +12,7 @@ class SessionCRUD:
 
     def create_session(self, session: Session) -> Session:
         try:
-            session.session_id = InputSanitizer.sanitize_uuid(
-                session.session_id
-            )
+            session.session_id = InputSanitizer.sanitize_uuid(session.session_id)
             doc = session.model_dump(mode="json")
             doc["_id"] = session.session_id
             self.collection.insert_one(doc)
@@ -25,7 +22,7 @@ class SessionCRUD:
         except PyMongoError as e:
             raise RuntimeError(f"Failed to create session: {e}")
 
-    def get_session(self, session_id: str) -> Optional[Session]:
+    def get_session(self, session_id: str) -> Session | None:
         try:
             session_id = InputSanitizer.sanitize_uuid(session_id)
             doc = self.collection.find_one(
@@ -55,8 +52,12 @@ class SessionCRUD:
             session_id = InputSanitizer.sanitize_uuid(session_id)
             result = self.collection.update_one(
                 {"session_id": session_id},
-                {"$set": {"is_active": False,
-                           "updated_at": datetime.now(timezone.utc)}},
+                {
+                    "$set": {
+                        "is_active": False,
+                        "updated_at": datetime.now(timezone.utc),
+                    }
+                },
             )
             return result.modified_count > 0
         except PyMongoError as e:

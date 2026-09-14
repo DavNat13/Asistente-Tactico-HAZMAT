@@ -1,17 +1,13 @@
-import json
 import argparse
+import json
 
 from .migrate import migrate_in_memory_data
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Migrate HAZMAT chat data to MongoDB"
-    )
+    parser = argparse.ArgumentParser(description="Migrate HAZMAT chat data to MongoDB")
     parser.add_argument("--file", type=str, help="JSON file to migrate")
-    parser.add_argument(
-        "--session-id", type=str, help="Existing session ID"
-    )
+    parser.add_argument("--session-id", type=str, help="Existing session ID")
     parser.add_argument(
         "--dry-run", action="store_true", help="Preview without writing"
     )

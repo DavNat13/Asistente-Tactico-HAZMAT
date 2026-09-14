@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
@@ -7,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
 
 def _uuid() -> str:
     return str(uuid4())
@@ -16,7 +16,7 @@ class Source(BaseModel):
     page: int = Field(..., ge=0)
     source: str = Field(default="GRE")
     score: float = Field(..., ge=0.0, le=1.0)
-    text_snippet: Optional[str] = Field(default=None)
+    text_snippet: str | None = Field(default=None)
 
 
 class Message(BaseModel):
@@ -61,17 +61,17 @@ class Session(BaseModel):
     session_id: str = Field(default_factory=_uuid)
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
-    title: Optional[str] = Field(default=None, max_length=200)
+    title: str | None = Field(default=None, max_length=200)
     is_active: bool = True
     threads: list[Thread] = Field(default_factory=list)
 
-    def create_thread(self, title: Optional[str] = None) -> Thread:
+    def create_thread(self, title: str | None = None) -> Thread:
         thread = Thread(title=title or "Nueva consulta")
         self.threads.append(thread)
         self.updated_at = _utcnow()
         return thread
 
-    def get_thread(self, thread_id: str) -> Optional[Thread]:
+    def get_thread(self, thread_id: str) -> Thread | None:
         for t in self.threads:
             if t.thread_id == thread_id and t.is_active:
                 return t
@@ -80,7 +80,7 @@ class Session(BaseModel):
     def get_active_threads(self) -> list[Thread]:
         return [t for t in self.threads if t.is_active]
 
-    def get_or_create_thread(self, thread_id: Optional[str] = None) -> Thread:
+    def get_or_create_thread(self, thread_id: str | None = None) -> Thread:
         if thread_id:
             t = self.get_thread(thread_id)
             if t:
