@@ -106,6 +106,9 @@ jobs:
             src/
         env:
           PYTHONPATH: ${{ github.workspace }}
+          GOOGLE_API_KEY: "test-dummy-key"
+          MONGODB_URI: "mongodb://localhost:27017/test"
+          MONGODB_DB_NAME: "test_db"
 
       - name: "Subir resultados de pruebas"
         if: always()
