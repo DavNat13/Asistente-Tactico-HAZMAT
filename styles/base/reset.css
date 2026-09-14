@@ -1,39 +1,35 @@
-/* Base Resets & Scrollbar */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* Reset base — Tema oscuro institucional */
+.stApp{background-color:#1A1A1A!important;color:#F5F2E9;-webkit-font-smoothing:antialiased}
+.stMain{background-color:#1A1A1A!important;padding-top:0!important}
+header[data-testid="stHeader"]{background:transparent!important;border:none!important;height:0!important;min-height:0!important}
+[data-testid="stAppDeployButton"],[data-testid="stMainMenu"],[data-testid="stStatusWidget"],[data-testid="stToolbarActions"]{display:none!important}
+[data-testid="stSidebar"]{background-color:#1A1A1A!important;border-right:1px solid rgba(245,242,233,0.08)!important}
+[data-testid="stSidebar"] hr{border-color:rgba(245,242,233,0.08)!important;opacity:0.5}
+[data-testid="stMain"]{padding-top:0!important}
+[data-testid="stMainBlockContainer"]{padding-top:0!important}
+/* Radio — nuclear option: hide ALL direct children, show only last */
+[data-testid="stSidebar"] [data-testid="stRadio"]{gap:0!important}
+[data-testid="stSidebar"] [data-testid="stRadio"] > div{gap:0!important}
+[data-testid="stSidebar"] [data-testid="stRadio"] label > *{display:none!important}
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:last-child{
+    display:block!important;color:rgba(245,242,233,.85)!important;font-size:13px!important;
+    font-weight:400!important;padding:8px 12px!important;margin:0!important;
+    border-radius:8px!important;width:100%!important;cursor:pointer!important;
+    transition:background .15s ease!important;background:transparent!important;
+    white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+    line-height:1.4!important
 }
-.stApp {
-  background-color: var(--bg-app) !important;
-  font-family: var(--font-family-primary);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+[data-testid="stSidebar"] [data-testid="stRadio"] label > div:last-child:hover{
+    background:rgba(245,242,233,.08)!important
 }
-.stHeader {
-  background-color: var(--bg-header) !important;
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) > div:last-child{
+    background:rgba(245,242,233,.10)!important;font-weight:500!important;color:#F5F2E9!important
 }
-.stMain {
-  background-color: var(--bg-app) !important;
+[data-testid="stSidebar"] [data-testid="stRadio"] input{
+    position:absolute!important;opacity:0!important;width:0!important;height:0!important;
+    pointer-events:none!important;visibility:hidden!important
 }
-::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-  height: var(--scrollbar-width);
-}
-::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: var(--radius-full);
-  transition: background var(--transition-fast);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
-}
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1A1A1A;border-radius:999px}
+::-webkit-scrollbar-thumb{background:rgba(245,242,233,0.15);border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:rgba(245,242,233,0.25)}

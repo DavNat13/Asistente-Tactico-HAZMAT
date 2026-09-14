@@ -1,51 +1,43 @@
-/* Semantic Colors, Surfaces, Text, Borders, Component Colors */
+/* Colores semánticos — Tema oscuro institucional */
 :root {
-  --color-primary: var(--color-primary-500);
-  --color-primary-hover: var(--color-primary-600);
-  --color-primary-active: var(--color-primary-700);
-  --color-primary-light: var(--color-primary-100);
-  --color-primary-dark: var(--color-primary-900);
-  --color-accent: var(--color-accent-500);
-  --color-accent-hover: var(--color-accent-600);
-  --color-accent-active: var(--color-accent-700);
-  --color-accent-light: var(--color-accent-100);
-  --color-accent-dark: var(--color-accent-900);
-  --color-emergency: var(--color-emergency-500);
-  --color-emergency-hover: var(--color-emergency-600);
-  --color-emergency-light: var(--color-emergency-100);
-  --color-success: #10b981;
-  --color-success-light: #d1fae5;
-  --color-success-dark: #059669;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
-  --color-warning-dark: #d97706;
-  --color-error: var(--color-emergency-500);
-  --color-error-light: var(--color-emergency-100);
-  --color-info: #3b82f6;
-  --color-info-light: #dbeafe;
-  --color-info-dark: #2563eb;
-  --bg-app: var(--color-slate-950);
-  --bg-header: var(--color-slate-950);
-  --bg-sidebar: var(--color-primary-900);
-  --bg-chat: var(--color-slate-950);
-  --bg-input: var(--color-slate-900);
-  --surface-primary: var(--color-slate-800);
-  --surface-secondary: var(--color-slate-700);
-  --surface-elevated: var(--color-slate-700);
-  --surface-overlay: rgba(2, 6, 23, 0.8);
-  --surface-interactive: var(--color-primary-600);
-  --surface-interactive-hover: var(--color-primary-700);
-  --text-primary: var(--color-slate-50);
-  --text-secondary: var(--color-slate-200);
-  --text-tertiary: var(--color-slate-300);
-  --text-muted: var(--color-slate-400);
+  /* Superficies */
+  --bg-app: #1A1A1A;
+  --bg-header: #1A1A1A;
+  --bg-header-elevated: #2A2722;
+  --bg-sidebar: #1A1A1A;
+  --bg-chat: #1A1A1A;
+  --bg-input: #2A2722;
+  --bg-input-focus: #3D3932;
+  --surface-primary: #1A1A1A;
+  --surface-secondary: #2A2722;
+  --surface-elevated: #3D3932;
+  --surface-hover: #3D3932;
+  --surface-overlay: rgba(26, 26, 26, 0.9);
+  --surface-interactive: var(--color-primary-500);
+  --surface-interactive-hover: var(--color-primary-600);
+
+  /* Texto */
+  --text-primary: #F5F2E9;
+  --text-secondary: rgba(245, 242, 233, 0.7);
+  --text-tertiary: rgba(245, 242, 233, 0.5);
+  --text-muted: rgba(245, 242, 233, 0.35);
   --text-on-primary: #ffffff;
-  --text-on-accent: var(--color-primary-900);
-  --text-link: var(--color-accent-400);
-  --text-link-hover: var(--color-accent-300);
-  --border-primary: var(--color-slate-600);
-  --border-secondary: var(--color-slate-700);
-  --border-focus: var(--color-accent-500);
+  --text-on-accent: #1A1A1A;
+  --text-link: #FFB000;
+  --text-link-hover: #ffc61a;
+
+  /* Bordes */
+  --border-primary: rgba(245, 242, 233, 0.12);
+  --border-secondary: rgba(245, 242, 233, 0.06);
+  --border-subtle: rgba(245, 242, 233, 0.04);
+  --border-default: rgba(245, 242, 233, 0.08);
+  --border-focus: var(--color-primary-500);
   --border-error: var(--color-emergency-500);
   --border-success: var(--color-success);
+
+  /* Cabecera */
+  --header-height: 56px;
+  --header-bg: #1A1A1A;
+  --header-border: rgba(245, 242, 233, 0.08);
+  --header-icon-hover: rgba(245, 242, 233, 0.08);
 }

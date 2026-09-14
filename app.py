@@ -1,3 +1,4 @@
+# app.py — Punto de entrada del Dashboard RAG HAZMAT
 import streamlit as st
 import sys
 import os
@@ -14,11 +15,20 @@ st.set_page_config(
     page_title=APP_NAME,
     page_icon=APP_ICON,
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 load_css_files()
-init_session_state()
+
+# La sesión puede fallar si MongoDB no está disponible.
+# El sidebar debe renderizarse SIEMPRE, aunque la sesión falle.
+try:
+    init_session_state()
+except Exception:
+    st.session_state.setdefault("history", [])
+
 render_sidebar()
+
 render_header()
 
 if not st.session_state.get("history"):

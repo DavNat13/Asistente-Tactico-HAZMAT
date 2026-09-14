@@ -1,37 +1,32 @@
-/* Component-Specific Color Tokens */
+/* Component Tokens — Tema oscuro institucional */
 :root {
-  --chat-user-bg: var(--color-primary-600);
-  --chat-user-text: var(--text-on-primary);
-  --chat-assistant-bg: var(--surface-primary);
-  --chat-assistant-text: var(--text-primary);
-  --chat-timestamp: var(--text-muted);
-  --button-primary-bg: var(--color-accent-500);
-  --button-primary-text: var(--color-primary-900);
-  --button-primary-hover: var(--color-accent-600);
+  /* Chat */
+  --chat-user-bg: #2A2722;
+  --chat-user-text: #F5F2E9;
+  --chat-assistant-bg: #1A1A1A;
+  --chat-assistant-text: #F5F2E9;
+  --chat-timestamp: rgba(245, 242, 233, 0.35);
+
+  /* Buttons */
+  --button-primary-bg: #CE2029;
+  --button-primary-text: #ffffff;
+  --button-primary-hover: #b81c24;
   --button-secondary-bg: transparent;
-  --button-secondary-text: var(--color-accent-400);
-  --button-secondary-border: var(--color-accent-500);
-  --button-emergency-bg: var(--color-emergency-500);
-  --button-emergency-text: #ffffff;
-  --button-emergency-hover: var(--color-emergency-600);
+  --button-secondary-text: #CE2029;
+  --button-secondary-border: #CE2029;
   --button-ghost-bg: transparent;
-  --button-ghost-text: var(--text-secondary);
-  --button-ghost-hover: var(--surface-secondary);
-  --tab-bg: var(--surface-primary);
-  --tab-text: var(--text-primary);
-  --tab-active-bg: var(--color-accent-500);
-  --tab-active-text: var(--color-primary-900);
-  --tab-hover-bg: var(--surface-secondary);
-  --source-card-bg: var(--surface-primary);
-  --source-card-border: var(--color-accent-500);
-  --source-card-hover: var(--surface-secondary);
-  --source-card-icon: var(--color-accent-400);
-  --sidebar-bg: var(--bg-sidebar);
-  --sidebar-item-hover: rgba(255, 255, 255, 0.08);
-  --sidebar-item-active: rgba(212, 160, 23, 0.15);
-  --sidebar-divider: rgba(255, 255, 255, 0.1);
+  --button-ghost-text: rgba(245, 242, 233, 0.7);
+  --button-ghost-hover: #2A2722;
+
+  /* Sidebar */
+  --sidebar-bg: #1A1A1A;
+  --sidebar-item-hover: rgba(245, 242, 233, 0.06);
+  --sidebar-item-active: rgba(206, 32, 41, 0.15);
+  --sidebar-divider: rgba(245, 242, 233, 0.06);
+
+  /* Status */
   --status-online: var(--color-success);
   --status-processing: var(--color-accent-500);
   --status-error: var(--color-emergency-500);
-  --status-idle: var(--color-slate-500);
+  --status-idle: rgba(245, 242, 233, 0.3);
 }

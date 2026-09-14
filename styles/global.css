@@ -25,6 +25,7 @@
 @import "base/rules-typography.css";
 
 /* Components */
+@import "components/header.css";
 @import "components/sidebar.css";
 @import "components/chat.css";
 @import "components/buttons.css";

@@ -1,72 +1,35 @@
-/* Typography Rules - Base */
-body,
-.stMarkdown,
-.stMarkdown p {
+/* Typography Rules — Tema oscuro institucional */
+body, .stMarkdown, .stMarkdown p {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
-  color: var(--text-primary);
+  color: #F5F2E9;
 }
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.stMarkdown h1,
-.stMarkdown h2,
-.stMarkdown h3,
-.stMarkdown h4,
-.stMarkdown h5,
-.stMarkdown h6 {
-  color: var(--text-primary) !important;
+h1, h2, h3, h4, h5, h6,
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
+.stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+  color: #F5F2E9 !important;
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-tight);
   margin-bottom: var(--space-3);
 }
-h1,
-.stMarkdown h1 {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-extrabold);
-}
-h2,
-.stMarkdown h2 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-}
-h3,
-.stMarkdown h3 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-}
-h4,
-.stMarkdown h4 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-h5,
-.stMarkdown h5,
-h6,
-.stMarkdown h6 {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-}
-p,
-.stMarkdown p {
-  color: var(--text-secondary);
+h1, .stMarkdown h1 { font-size: var(--font-size-3xl); font-weight: var(--font-weight-extrabold); }
+h2, .stMarkdown h2 { font-size: var(--font-size-2xl); }
+h3, .stMarkdown h3 { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); }
+h4, .stMarkdown h4 { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); }
+h5, .stMarkdown h5, h6, .stMarkdown h6 { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); }
+p, .stMarkdown p {
+  color: rgba(245,242,233,0.7);
   margin-bottom: var(--space-4);
   line-height: var(--line-height-relaxed);
 }
-a,
-.stMarkdown a {
-  color: var(--text-link);
+a, .stMarkdown a {
+  color: #FFB000;
   text-decoration: none;
-  transition: color var(--transition-fast);
 }
-a:hover,
-.stMarkdown a:hover {
-  color: var(--text-link-hover);
+a:hover, .stMarkdown a:hover {
+  color: #ffc61a;
   text-decoration: underline;
 }

@@ -1,67 +1,41 @@
-/* Sidebar Styles */
-[data-testid="stSidebar"] {
-  background-color: var(--sidebar-bg) !important;
-  border-right: 1px solid var(--sidebar-divider);
-  animation: sidebarSlideIn 0.4s var(--ease-out) both;
+/* Sidebar — Tema oscuro institucional */
+[data-testid="stSidebar"]{
+  background-color:#1A1A1A!important;
+  width:320px!important
 }
-[data-testid="stSidebar"] > div:first-child {
-  background-color: var(--sidebar-bg) !important;
+[data-testid="stSidebar"] *{color:#F5F2E9!important}
+[data-testid="stSidebar"] [data-testid="stSidebarHeader"]{display:none!important}
+[data-testid="stSidebar"] [data-testid="stSidebarContent"]{padding-top:0.5rem!important}
+[data-testid="stSidebar"] .stDeployButton{display:none!important}
+
+/* Collapse button */
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]{
+  top:0.75rem!important;right:0.5rem!important;
+  background:rgba(245,242,233,0.08)!important;border-radius:8px!important;
+  width:32px!important;height:32px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  transition:background 0.2s ease!important
 }
-[data-testid="stSidebar"] .stMarkdown h1,
-[data-testid="stSidebar"] .stMarkdown h2,
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2 {
-  color: var(--text-primary) !important;
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xl);
-  letter-spacing: var(--letter-spacing-tight);
-  padding-bottom: var(--space-2);
-  border-bottom: 2px solid var(--color-accent-500);
-  margin-bottom: var(--space-4);
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]:hover{
+  background:rgba(245,242,233,0.15)!important
 }
-[data-testid="stSidebar"] .stMarkdown h3,
-[data-testid="stSidebar"] h3 {
-  color: var(--color-accent-400) !important;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
-  margin-top: var(--space-4);
-  margin-bottom: var(--space-2);
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg{
+  fill:#F5F2E9!important;width:18px!important;height:18px!important
 }
-[data-testid="stSidebar"] [data-testid="stMetric"] {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--sidebar-divider);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  transition: all var(--transition-fast);
+
+/* Primary button */
+[data-testid="stSidebar"] .stButton>button{
+  background:#CE2029!important;color:#ffffff!important;
+  border:none!important;border-radius:8px!important;
+  transition:background 0.15s ease!important
 }
-[data-testid="stSidebar"] [data-testid="stMetric"]:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--color-accent-500);
-  box-shadow: var(--shadow-glow-accent);
+[data-testid="stSidebar"] .stButton>button:hover{background:#b81c24!important}
+
+/* Download buttons */
+[data-testid="stSidebar"] .stDownloadButton>button{
+  background:rgba(245,242,233,0.04)!important;color:#F5F2E9!important;
+  border:1px solid rgba(245,242,233,0.06)!important;border-radius:8px!important
 }
-[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
-  color: var(--text-muted) !important;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
-}
-[data-testid="stSidebar"] [data-testid="stMetricValue"] {
-  color: var(--color-accent-400) !important;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  font-family: var(--font-family-mono);
-}
-[data-testid="stSidebar"] hr {
-  border-color: var(--sidebar-divider) !important;
-  margin: var(--space-4) 0;
-}
-[data-testid="stSidebar"] .stCaption,
-[data-testid="stSidebar"] caption {
-  color: var(--text-muted) !important;
-  font-size: var(--font-size-xs);
-  font-family: var(--font-family-mono);
-  opacity: 0.7;
+[data-testid="stSidebar"] .stDownloadButton>button:hover{
+  background:rgba(245,242,233,0.08)!important;border-color:#FFB000!important;color:#FFB000!important
 }

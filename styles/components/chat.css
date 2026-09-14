@@ -1,99 +1,48 @@
-/* Chat Input, Messages, Typing Indicator */
+/* Chat — Tema oscuro institucional */
 div[data-testid="stChatInput"] {
-  background-color: var(--bg-input) !important;
-  border: 1px solid var(--border-secondary);
+  background-color: #2A2722 !important;
+  border: 1px solid rgba(245,242,233,0.08) !important;
   border-radius: var(--radius-xl);
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
 }
 div[data-testid="stChatInput"]:focus-within {
-  border-color: var(--color-accent-500) !important;
-  box-shadow: var(--shadow-glow-accent);
+  border-color: #CE2029 !important;
 }
 div[data-testid="stChatInput"] textarea {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-base);
-  color: var(--text-primary) !important;
+  color: #F5F2E9 !important;
   background: transparent !important;
-  border: none !important;
-  outline: none !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder {
-  color: var(--text-muted) !important;
+  color: rgba(245,242,233,0.35) !important;
 }
 div[data-testid="stChatInput"] button {
-  background-color: var(--color-accent-500) !important;
-  color: var(--color-primary-900) !important;
-  border-radius: var(--radius-lg) !important;
-  transition: all var(--transition-fast) !important;
+  background-color: #CE2029 !important;
+  color: #ffffff !important;
   border: none !important;
+  border-radius: var(--radius-lg) !important;
 }
 div[data-testid="stChatInput"] button:hover {
-  background-color: var(--color-accent-600) !important;
-  transform: scale(1.05);
-}
-div[data-testid="stChatInput"] button:active {
-  transform: scale(0.95);
+  background-color: #b81c24 !important;
 }
 div[data-testid="stChatMessage"] {
-  background-color: var(--chat-assistant-bg) !important;
-  border: 1px solid var(--border-secondary);
+  background-color: #1A1A1A !important;
+  border: 1px solid rgba(245,242,233,0.06);
   border-radius: var(--radius-xl);
   padding: var(--space-4) var(--space-5);
   margin-bottom: var(--space-3);
-  animation: messageFadeIn 0.3s var(--ease-out) both;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-div[data-testid="stChatMessage"]:hover {
-  border-color: var(--border-primary);
 }
 div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-600),
-    var(--color-primary-700)
-  ) !important;
-  border-color: var(--color-primary-500);
-  animation-name: slideInRight;
+  background: #2A2722 !important;
+  border-color: rgba(245,242,233,0.08);
 }
 div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-  background: var(--surface-primary) !important;
-  border-color: var(--border-secondary);
-  animation-name: slideInLeft;
+  background: #1A1A1A !important;
 }
 div[data-testid="stChatMessage"] p {
-  color: var(--text-primary) !important;
+  color: #F5F2E9 !important;
   line-height: var(--line-height-relaxed);
 }
-div[data-testid="stChatMessage"] .stMarkdown p {
-  color: inherit !important;
-}
-div[data-testid="chatAvatarIcon-user"],
-div[data-testid="chatAvatarIcon-assistant"] {
-  border-radius: var(--radius-full);
-}
-.typing-indicator {
-  display: inline-flex;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-}
 .typing-indicator span {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-accent-400);
-  animation: typingBounce 1.4s infinite ease-in-out;
-}
-.typing-indicator span:nth-child(1) {
-  animation-delay: 0s;
-}
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
+  background-color: #CE2029;
 }

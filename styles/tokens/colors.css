@@ -1,44 +1,65 @@
-/* Bomberos de Chile Brand Colors */
+/* Paleta de colores — Institucional Bomberos */
 :root {
-  --color-primary-50: #e8eaf6;
-  --color-primary-100: #c5cae9;
-  --color-primary-200: #9fa8da;
-  --color-primary-300: #7986cb;
-  --color-primary-400: #5c6bc0;
-  --color-primary-500: #1a237e;
-  --color-primary-600: #283593;
-  --color-primary-700: #303f9f;
-  --color-primary-800: #3949ab;
-  --color-primary-900: #0d1642;
-  --color-accent-50: #fff8e1;
-  --color-accent-100: #ffecb3;
-  --color-accent-200: #ffe082;
-  --color-accent-300: #ffd54f;
-  --color-accent-400: #ffca28;
-  --color-accent-500: #d4a017;
-  --color-accent-600: #c5911a;
-  --color-accent-700: #b5831d;
-  --color-accent-800: #a57520;
-  --color-accent-900: #8d6014;
-  --color-emergency-50: #ffebee;
-  --color-emergency-100: #ffcdd2;
-  --color-emergency-200: #ef9a9a;
-  --color-emergency-300: #e57373;
-  --color-emergency-400: #ef5350;
-  --color-emergency-500: #c62828;
-  --color-emergency-600: #b71c1c;
-  --color-emergency-700: #a31515;
-  --color-emergency-800: #8b0f0f;
-  --color-emergency-900: #5f0a0a;
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  --color-slate-950: #020617;
+  /* Marca primaria: Rojo institucional */
+  --color-primary-50: #fce4e6;
+  --color-primary-100: #f9c5c8;
+  --color-primary-200: #f09da3;
+  --color-primary-300: #e5717a;
+  --color-primary-400: #d94d57;
+  --color-primary-500: #CE2029;
+  --color-primary-600: #b81c24;
+  --color-primary-700: #7A1E24;
+  --color-primary-800: #5c161b;
+  --color-primary-900: #3d0f12;
+
+  /* Acento secundario: Dorado */
+  --color-accent-50: #fff9e6;
+  --color-accent-100: #ffefb3;
+  --color-accent-200: #ffe580;
+  --color-accent-300: #ffd94d;
+  --color-accent-400: #ffc61a;
+  --color-accent-500: #FFB000;
+  --color-accent-600: #e69f00;
+  --color-accent-700: #b37a00;
+  --color-accent-800: #805700;
+  --color-accent-900: #4d3400;
+
+  /* Emergencia: Rojo */
+  --color-emergency-50: #fce4e6;
+  --color-emergency-100: #f9c5c8;
+  --color-emergency-200: #f09da3;
+  --color-emergency-300: #e5717a;
+  --color-emergency-400: #d94d57;
+  --color-emergency-500: #CE2029;
+  --color-emergency-600: #b81c24;
+  --color-emergency-700: #7A1E24;
+  --color-emergency-800: #5c161b;
+  --color-emergency-900: #3d0f12;
+
+  /* Neutros: Gris cálido sobre fondo claro */
+  --color-slate-50: #FAFAF7;
+  --color-slate-100: #F5F2E9;
+  --color-slate-200: #E8E4D9;
+  --color-slate-300: #D4CFC2;
+  --color-slate-400: #A39E91;
+  --color-slate-500: #787268;
+  --color-slate-600: #5C574E;
+  --color-slate-700: #3D3932;
+  --color-slate-800: #2A2722;
+  --color-slate-900: #1A1A1A;
+  --color-slate-950: #0D0D0D;
+
+  /* Estado semántico */
+  --color-success: #2d7a3a;
+  --color-success-light: #e6f4e8;
+  --color-success-dark: #1f5a28;
+  --color-warning: #FFB000;
+  --color-warning-light: #fff9e6;
+  --color-warning-dark: #b37a00;
+  --color-error: #CE2029;
+  --color-error-light: #fce4e6;
+  --color-error-dark: #7A1E24;
+  --color-info: #4a6fa5;
+  --color-info-light: #e8eff8;
+  --color-info-dark: #345080;
 }

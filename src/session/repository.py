@@ -1,17 +1,12 @@
 from typing import Optional
-
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.errors import OperationFailure
 from pymongo.collection import Collection
 from pymongo.database import Database
-
-import sys
-import os
-
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.settings import settings
 from .models import Session, Thread, Message
-from .security import InputSanitizer
 from .session_crud import SessionCRUD
 from .thread_repository import ThreadRepository
 from .message_repository import MessageRepository
@@ -28,8 +23,12 @@ class SessionRepository:
         return cls._instance
 
     def __init__(self):
-        if SessionRepository._initialized:
-            return
+        if SessionRepository._initialized and hasattr(self, "client"):
+            try:
+                self.client.admin.command("ping")
+                return
+            except Exception:
+                SessionRepository._initialized = False
         self.client: MongoClient = MongoClient(settings.MONGODB_URI)
         self.db: Database = self.client[settings.MONGODB_DB_NAME]
         self.collection: Collection = self.db[settings.SESSION_COLLECTION_NAME]

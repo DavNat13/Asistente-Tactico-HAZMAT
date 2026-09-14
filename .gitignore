@@ -25,6 +25,7 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+dev.bat
 
 # Logs
 *.log

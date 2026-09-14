@@ -1,0 +1,12 @@
+/* Cabecera custom — Tema claro institucional */
+.hazmat-cab{position:sticky;top:0;z-index:998;background:#1A1A1A;border-bottom:1px solid #3D3932;display:flex;align-items:center;height:56px;padding:0 1rem;gap:.75rem}
+.hazmat-cab__toggle{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:none;border-radius:8px;background:transparent;color:#A39E91;cursor:pointer;transition:all .2s;flex-shrink:0;padding:0}
+.hazmat-cab__toggle:hover{background:rgba(255,255,255,0.1);color:#ffffff}
+.hazmat-cab__centro{flex:1;display:flex;align-items:center;justify-content:center;gap:10px}
+.hazmat-cab__centro h1{margin:0;font-size:17px;font-weight:600;color:#ffffff;letter-spacing:-.015em;white-space:nowrap}
+.hazmat-cab__centro .sub{font-size:11px;color:#A39E91;margin-top:1px}
+.hazmat-cab__icono{width:28px;height:28px;border-radius:8px;background:#CE2029;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.hazmat-cab__icono svg{width:16px;height:16px;color:#fff}
+.hazmat-cab__der{display:flex;align-items:center}
+.hazmat-cab__der .stButton>button{background:#1A1A1A!important;color:#ffffff!important;border:1px solid #3D3932!important;border-radius:8px!important;padding:0 14px!important;height:36px!important;font-size:13px!important;font-weight:500!important;width:auto!important;min-width:120px!important;transition:all .2s!important;box-shadow:none!important}
+.hazmat-cab__der .stButton>button:hover{border-color:#CE2029!important;color:#CE2029!important}

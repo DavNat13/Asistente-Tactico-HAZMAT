@@ -1,16 +1,17 @@
+# empty_state.py — Estado vacío de bienvenida
+"""Muestra el estado inicial cuando no hay mensajes."""
 import streamlit as st
-from src.utils.constants import APP_NAME
 
 
 def render_empty_state():
+    """Renderiza el estado vacío con diseño limpio."""
     st.markdown(
-        '<div class="animate-fade-in-up" '
-        'style="text-align:center; padding:2rem 0;">'
-        '<span style="font-size:3rem;">:material/local_fire_department:</span>'
-        f"<h2 style='color:var(--text-primary);'>Bienvenido a {APP_NAME}</h2>"
-        '<p class="text-secondary" style="max-width:500px; margin:0 auto;">'
-        "Realice preguntas sobre el Manual GRE y obtenga "
-        "respuestas tacticas para emergencias HAZMAT."
-        "</p></div>",
+        '<div style="text-align:center;padding:8rem 1.5rem 0;max-width:520px;margin:0 auto">'
+        '<h2 style="color:#F5F2E9;font-size:1.5rem;font-weight:700;'
+        'margin:0 0 0.5rem 0">Bienvenido</h2>'
+        '<p style="color:rgba(245,242,233,0.6);font-size:0.9rem;line-height:1.6;'
+        'margin:0;max-width:400px;margin-left:auto;margin-right:auto">'
+        'Asistente táctico para consultas sobre el Manual GRE y '
+        'protocolos de emergencias HAZMAT.</p></div>',
         unsafe_allow_html=True,
     )

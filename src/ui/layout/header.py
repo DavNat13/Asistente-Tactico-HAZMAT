@@ -1,17 +1,19 @@
+# header.py — Cabecera mínima
+"""Oculta decoraciones del header nativo de Streamlit."""
 import streamlit as st
-from src.utils.constants import APP_NAME, APP_SUBTITLE
 
 
 def render_header():
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.markdown(f"## {APP_NAME}")
-        st.caption(APP_SUBTITLE)
-    with col2:
-        st.markdown(
-            '<div class="status-label">'
-            '<span class="status-dot online"></span>'
-            '<span class="text-sm">En linea</span>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
+    """Oculta Deploy, menú hamburguesa y status widget."""
+    st.markdown(
+        '<style>'
+        '[data-testid="stAppDeployButton"],'
+        '[data-testid="stMainMenu"],'
+        '[data-testid="stStatusWidget"],'
+        '[data-testid="stToolbarActions"]{display:none!important}'
+        'header[data-testid="stHeader"]{background:transparent!important;border:none!important;height:0!important;min-height:0!important}'
+        '[data-testid="stMain"]{padding-top:0!important}'
+        '[data-testid="stMainBlockContainer"]{padding-top:0!important;margin-top:0!important}'
+        '</style>',
+        unsafe_allow_html=True,
+    )
