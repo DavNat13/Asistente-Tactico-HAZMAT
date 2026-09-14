@@ -17,12 +17,17 @@ def get_text_splitter():
     )
 
 
+_embeddings_instance = None
+
 def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name=settings.EMBEDDING_MODEL,
-        model_kwargs={'device': 'cpu'},
-        encode_kwargs={'normalize_embeddings': True}
-    )
+    global _embeddings_instance
+    if _embeddings_instance is None:
+        _embeddings_instance = HuggingFaceEmbeddings(
+            model_name=settings.EMBEDDING_MODEL,
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
+        )
+    return _embeddings_instance
 
 
 def split_documents(documents: list, text_splitter) -> list:
