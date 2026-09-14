@@ -1,0 +1,61 @@
+/* Typography Rules - Extended */
+code,
+.stMarkdown code {
+  font-family: var(--font-family-mono);
+  font-size: 0.875em;
+  background: var(--surface-primary);
+  color: var(--color-accent-300);
+  padding: var(--space-0-5) var(--space-1-5);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-secondary);
+}
+pre,
+.stMarkdown pre {
+  font-family: var(--font-family-mono);
+  background: var(--color-slate-900);
+  color: var(--text-primary);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-secondary);
+  overflow-x: auto;
+  line-height: var(--line-height-relaxed);
+}
+.stMarkdown ul,
+.stMarkdown ol {
+  color: var(--text-secondary);
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+.stMarkdown li {
+  color: var(--text-secondary) !important;
+  margin-bottom: var(--space-2);
+  line-height: var(--line-height-normal);
+}
+.stMarkdown li::marker {
+  color: var(--color-accent-500);
+}
+.stMarkdown blockquote {
+  border-left: 3px solid var(--color-accent-500);
+  padding-left: var(--space-4);
+  margin-left: 0;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+.stCaption,
+.stMarkdown small {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+.stMarkdown strong {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+.stMarkdown em {
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+.stMarkdown hr {
+  border: none;
+  border-top: 1px solid var(--border-secondary);
+  margin: var(--space-6) 0;
+}

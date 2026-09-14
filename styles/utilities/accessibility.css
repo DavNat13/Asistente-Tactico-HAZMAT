@@ -1,0 +1,78 @@
+/* Accessibility, Print, Forced Colors */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .typing-indicator span,
+  .hazmat-spinner-ring,
+  .status-dot::after {
+    animation: none !important;
+  }
+}
+@media (prefers-contrast: high) {
+  :root {
+    --border-primary: var(--color-slate-900);
+    --border-secondary: var(--color-slate-700);
+    --text-primary: #ffffff;
+    --text-secondary: var(--color-slate-100);
+    --shadow-sm: none;
+    --shadow-md: none;
+  }
+  .stButton > button {
+    border: 2px solid var(--color-accent-500) !important;
+  }
+  .source-card {
+    border-left-width: 4px;
+  }
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+@media print {
+  .stApp {
+    background: white !important;
+    color: black !important;
+  }
+  [data-testid="stSidebar"],
+  div[data-testid="stChatInput"],
+  .stButton,
+  .hazmat-toast {
+    display: none !important;
+  }
+  div[data-testid="stChatMessage"] {
+    border: 1px solid #ccc;
+    background: #f9f9f9 !important;
+    color: black !important;
+    page-break-inside: avoid;
+  }
+}
+@media (forced-colors: active) {
+  .stButton > button {
+    border: 2px solid ButtonText;
+  }
+  .source-card {
+    border-left: 4px solid Highlight;
+  }
+  .status-dot {
+    border: 2px solid currentColor;
+  }
+}

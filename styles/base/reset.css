@@ -1,5 +1,9 @@
 /* Base Resets & Scrollbar */
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 .stApp {
   background-color: var(--bg-app) !important;
   font-family: var(--font-family-primary);
@@ -7,8 +11,12 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.stHeader { background-color: var(--bg-header) !important; }
-.stMain { background-color: var(--bg-app) !important; }
+.stHeader {
+  background-color: var(--bg-header) !important;
+}
+.stMain {
+  background-color: var(--bg-app) !important;
+}
 ::-webkit-scrollbar {
   width: var(--scrollbar-width);
   height: var(--scrollbar-width);
@@ -22,7 +30,9 @@
   border-radius: var(--radius-full);
   transition: background var(--transition-fast);
 }
-::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
