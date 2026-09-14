@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout del código fuente"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Configurar Python ${{ env.PYTHON_VERSION }}"
         uses: actions/setup-python@v5
@@ -75,7 +75,7 @@ jobs:
     needs: lint-formateo
     steps:
       - name: "Checkout del código fuente"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Configurar Python ${{ env.PYTHON_VERSION }}"
         uses: actions/setup-python@v5
@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout del código fuente"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Configurar Python"
         uses: actions/setup-python@v5
@@ -166,7 +166,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout del código fuente"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Instalar Hadolint"
         uses: hadolint/hadolint-action@v3.1.0
@@ -188,7 +188,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout del código fuente"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Validar docker-compose.yml"
         run: |
