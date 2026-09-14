@@ -9,9 +9,7 @@ Usage:
 """
 
 import json
-import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 
 import sys
 import os
@@ -125,8 +123,20 @@ def main():
 
     if args.file:
         print(f"Migrating from file: {args.file}")
-        session_id = migrate_from_json_file(args.file)
-        print(f"Successfully migrated to session: {session_id}")
+        with open(args.file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        messages = data.get("messages", [])
+        print(f"Found {len(messages)} messages to migrate")
+        if args.dry_run:
+            for i, msg in enumerate(messages, 1):
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                preview = content[:80] + "..." if len(content) > 80 else content
+                print(f"  [{i}] {role}: {preview}")
+            print("Dry run complete. No changes were made.")
+        else:
+            session_id = migrate_in_memory_data(messages)
+            print(f"Successfully migrated to session: {session_id}")
     else:
         print("No file specified. Use --file <path> to migrate from JSON.")
 
