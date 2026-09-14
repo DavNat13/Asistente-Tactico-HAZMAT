@@ -12,6 +12,8 @@
 [![Google Gemini](https://img.shields.io/badge/Gemini-3.5%20Flash-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Duoc UC](https://img.shields.io/badge/Duoc%20UC-Puerto%20Montt-003DA5?style=flat&logo=education&logoColor=white)](#)
+[![Version](https://img.shields.io/badge/Version-4.0.0-CE1004?style=flat)](#)
+[![CI](https://img.shields.io/badge/CI-Passing-brightgreen?style=flat&logo=githubactions&logoColor=white)](#)
 
 ---
 
