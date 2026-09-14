@@ -1,5 +1,5 @@
 streamlit>=1.31.0
-pypdf>=3.17.0
+pypdf>=6.18.1
 python-dotenv>=1.0.0
 langsmith>=0.0.83
 pydantic>=2.0.0
