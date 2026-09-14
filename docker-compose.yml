@@ -11,6 +11,8 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+    mem_limit: 1g
+    cpus: "2"
     networks:
       - hazmat-network
 
