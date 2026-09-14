@@ -5,16 +5,16 @@ FROM python:3.11-slim AS base
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
+    curl=7.88.1-10+deb12u5 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-heavy.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements-heavy.txt
+    pip install --no-cache-dir -r requirements-heavy.txt
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
 COPY src/ src/
 COPY app.py .
