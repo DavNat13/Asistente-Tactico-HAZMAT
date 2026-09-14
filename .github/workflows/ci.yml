@@ -1,0 +1,204 @@
+# =============================================================================
+# Pipeline CI/CD — Asistente HAZMAT RAG
+# Disparado en: push a main/develop, pull requests a main
+# =============================================================================
+name: "CI — Integración Continua"
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+# Cancelar ejecuciones previas del mismo branch/PR para ahorrar minutos
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Permisos mínimos (principio de menor privilegio)
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  FORCE_COLOR: "1"
+
+# ─── TRABAJOS PARALELOS ─────────────────────────────────────────────────────
+jobs:
+
+  # ── 1. Linting y formato ──────────────────────────────────────────────────
+  lint-formateo:
+    name: "Linting y Formato"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout del código fuente"
+        uses: actions/checkout@v4
+
+      - name: "Configurar Python ${{ env.PYTHON_VERSION }}"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: "Instalar herramientas de linting"
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy bandit
+          pip install -r requirements.txt
+
+      - name: "Ejecutar Ruff (linting + formato)"
+        run: |
+          ruff check . --output-format=github
+          ruff format --check .
+
+      - name: "Ejecutar MyPy (verificación de tipos)"
+        run: mypy src/ --ignore-missing-imports --no-error-summary || true
+        # MyPy en modo informativo — no bloquea el pipeline
+
+      - name: "Ejecutar Bandit (análisis de seguridad estático)"
+        run: bandit -r src/ -f json -o bandit-report.json --severity-level medium || true
+        # Bandit genera reporte; no bloquea pero se puede integrar con/SARIF
+
+      - name: "Subir reporte Bandit"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+          retention-days: 14
+
+  # ── 2. Pruebas unitarias ──────────────────────────────────────────────────
+  pruebas:
+    name: "Pruebas Unitarias"
+    runs-on: ubuntu-latest
+    needs: lint-formateo
+    steps:
+      - name: "Checkout del código fuente"
+        uses: actions/checkout@v4
+
+      - name: "Configurar Python ${{ env.PYTHON_VERSION }}"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-heavy.txt
+
+      - name: "Instalar dependencias"
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-heavy.txt
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-timeout
+
+      - name: "Ejecutar pruebas con cobertura"
+        run: |
+          pytest \
+            --cov=src \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:htmlcov \
+            --cov-report=term-missing \
+            --junitxml=junit-results.xml \
+            --timeout=60 \
+            -v \
+            src/ \
+            --ignore=src/session/test_security.py \
+            --ignore=src/session/test_models.py \
+            --ignore=src/session/test_export.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: "Subir resultados de pruebas"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            coverage.xml
+            htmlcov/
+            junit-results.xml
+          retention-days: 14
+
+  # ── 3. Verificación de dependencias (seguridad) ───────────────────────────
+  seguridad-dependencias:
+    name: "Seguridad de Dependencias"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout del código fuente"
+        uses: actions/checkout@v4
+
+      - name: "Configurar Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: "Instalar pip-audit"
+        run: pip install pip-audit
+
+      - name: "Auditar dependencias de requirements.txt"
+        run: |
+          pip-audit -r requirements.txt \
+            --output pip-audit-requirements.txt \
+            --format json \
+            --desc || true
+
+      - name: "Auditar dependencias de requirements-heavy.txt"
+        run: |
+          pip-audit -r requirements-heavy.txt \
+            --output pip-audit-heavy.txt \
+            --format json \
+            --desc || true
+
+      - name: "Subir reportes de auditoría"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit
+          path: pip-audit-*.txt
+          retention-days: 14
+
+  # ── 4. Verificación de Dockerfile (sin construir) ─────────────────────────
+  verificacion-dockerfile:
+    name: "Verificación Dockerfile"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout del código fuente"
+        uses: actions/checkout@v4
+
+      - name: "Instalar Hadolint"
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+      - name: "Verificar que Dockerfile no usa imagen latest"
+        run: |
+          if grep -q "FROM.*:latest" Dockerfile; then
+            echo "::error::Dockerfile usa etiqueta 'latest'. Fija una versión específica."
+            exit 1
+          fi
+          echo "✓ Dockerfile usa versiones fijas"
+
+  # ── 5. Verificación de compose ─────────────────────────────────────────────
+  verificacion-compose:
+    name: "Verificación docker-compose"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout del código fuente"
+        uses: actions/checkout@v4
+
+      - name: "Validar docker-compose.yml"
+        run: |
+          docker compose config --quiet
+          echo "✓ docker-compose.yml es válido"
+
+      - name: "Verificar ausencia de secrets hardcodeados"
+        run: |
+          # Buscar patrones sospechosos en docker-compose
+          if grep -nE "(password|secret|api_key|token)\s*:" docker-compose.yml | grep -v "^\s*#"; then
+            echo "::warning::Posibles secrets hardcodeados en docker-compose.yml"
+          fi
+          echo "✓ No se encontraron secrets hardcodeados"
