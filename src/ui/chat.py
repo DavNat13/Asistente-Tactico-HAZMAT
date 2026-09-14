@@ -3,8 +3,8 @@ from src.retrieval.retriever import retriever
 from src.generate.generator import generator
 from src.ui.components.chat_bubble import render_assistant_bubble
 from src.ui.components.source_card import render_sources_section
-from src.ui.components.error_display import render_error, render_empty_context
-from src.ui.components.loading_states import render_skeleton
+from src.ui.components.error_display import render_empty_context
+from src.ui.renderers.response_formatter import format_response
 
 
 def render_history():
@@ -40,7 +40,8 @@ def handle_query(chat_container):
             with st.chat_message("assistant"):
                 response = _process_query(query)
                 if response["answer"]:
-                    st.markdown(response["answer"])
+                    formatted = format_response(response["answer"])
+                    st.markdown(formatted, unsafe_allow_html=True)
                     _render_response_sources(response)
                 else:
                     render_empty_context()

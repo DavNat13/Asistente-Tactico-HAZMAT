@@ -57,13 +57,13 @@ def _render_export():
     with c1:
         d = mgr.export_chat_bytes(sid, tid, "json")
         if d:
-            st.download_button("JSON", d=d, file_name=d.name,
+            st.download_button("JSON", data=d, file_name=d.name,
                                mime="application/json",
                                use_container_width=True)
     with c2:
         d = mgr.export_chat_bytes(sid, tid, "markdown")
         if d:
-            st.download_button("Markdown", d=d, file_name=d.name,
+            st.download_button("Markdown", data=d, file_name=d.name,
                                mime="text/markdown",
                                use_container_width=True)
 
