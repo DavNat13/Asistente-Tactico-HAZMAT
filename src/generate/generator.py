@@ -25,7 +25,7 @@ class Generator:
         self.llm = ChatGoogleGenerativeAI(
             model=settings.LLM_MODEL,
             temperature=settings.LLM_TEMPERATURE,
-            google_api_key=settings.GOOGLE_API_KEY,
+            google_api_key=settings.get_next_api_key(),
         )
         Generator._initialized = True
 

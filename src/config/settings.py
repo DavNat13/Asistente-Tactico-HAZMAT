@@ -1,4 +1,6 @@
 import os
+import threading
+import itertools
 
 from dotenv import load_dotenv
 
@@ -28,12 +30,30 @@ class Settings:
         )
         self.EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
         self.EMBEDDING_DIMENSIONS: int = 384
-        self.LLM_MODEL: str = "gemini-3.5-flash"
+        self.LLM_MODEL: str = "gemini-3.6-flash"
         self.LLM_TEMPERATURE: float = 0.1
+
+        # --- Pool de API keys (rotación thread-safe) ---
+        def _clean(s: str) -> str:
+            return s.strip().strip('"').strip("'")
+
+        _raw_keys = os.getenv("GEMINI_API_KEYS", "")
+        keys = [_clean(k) for k in _raw_keys.split(",") if _clean(k)]
+        if not keys:  # compat hacia atrás
+            _single = _clean(os.getenv("GEMINI_API_KEY") or self.GOOGLE_API_KEY)
+            keys = [_single] if _single else []
+        self.API_KEYS: list[str] = keys
+        self._key_cycle = itertools.cycle(keys)
+        self._key_lock = threading.Lock()
+        self.LLM_MAX_RETRIES: int = int(
+            os.getenv("LLM_MAX_RETRIES", str(max(len(keys), 1)))
+        )
+
         self.CHUNK_SIZE: int = 1000
         self.CHUNK_OVERLAP: int = 150
         self.RETRIEVAL_TOP_K: int = 8
         self.RETRIEVAL_MIN_SCORE: float = 0.50
+        self.AGENT_ENABLED: bool = True
 
         # Session Management
         self.SESSION_COLLECTION_NAME: str = os.getenv(
@@ -45,6 +65,10 @@ class Settings:
         self.SESSION_TTL_DAYS: int = int(os.getenv("SESSION_TTL_DAYS", "90"))
 
         self._validate_required()
+
+    def get_next_api_key(self) -> str:
+        with self._key_lock:  # itertools.cycle no es thread-safe
+            return next(self._key_cycle)
 
     def _validate_required(self):
         required = {
