@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO
 
 from .repository import SessionRepository
@@ -28,7 +28,7 @@ class ExportManager:
             "export_info": {
                 "format": "hazmat_chat_export",
                 "version": "1.0",
-                "exported_at": datetime.now(timezone.utc).isoformat(),
+                "exported_at": datetime.now(UTC).isoformat(),
                 "session_id": session_id,
             },
             "thread": {

@@ -1,6 +1,6 @@
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -54,7 +54,7 @@ def prepare_documents(chunks: list, embeddings_model) -> list:
             "metadata": {
                 "source": source_filename,
                 "page_number": page_number,
-                "ingestion_date": datetime.now(tz=timezone.utc).isoformat(),
+                "ingestion_date": datetime.now(tz=UTC).isoformat(),
                 "total_chunks": len(chunks),
             },
         }

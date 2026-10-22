@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
@@ -37,7 +37,7 @@ class SessionCRUD:
 
     def update_session(self, session: Session) -> bool:
         try:
-            session.updated_at = datetime.now(timezone.utc)
+            session.updated_at = datetime.now(UTC)
             doc = session.model_dump(mode="json")
             doc.pop("session_id", None)
             result = self.collection.update_one(
@@ -55,7 +55,7 @@ class SessionCRUD:
                 {
                     "$set": {
                         "is_active": False,
-                        "updated_at": datetime.now(timezone.utc),
+                        "updated_at": datetime.now(UTC),
                     }
                 },
             )

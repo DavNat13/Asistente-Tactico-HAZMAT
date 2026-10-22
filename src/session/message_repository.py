@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pymongo.errors import PyMongoError
 
@@ -19,7 +19,7 @@ class MessageRepository:
                 {"session_id": session_id, "threads.thread_id": thread_id},
                 {
                     "$push": {"threads.$.messages": message_doc},
-                    "$set": {"updated_at": datetime.now(timezone.utc)},
+                    "$set": {"updated_at": datetime.now(UTC)},
                 },
             )
             return result.modified_count > 0
