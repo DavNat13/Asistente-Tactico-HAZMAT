@@ -1,6 +1,6 @@
+import itertools
 import os
 import threading
-import itertools
 
 from dotenv import load_dotenv
 

@@ -1,18 +1,20 @@
 # chat_helpers.py — Lógica de streaming, status y transformación para el chat
 import streamlit as st
 
-from src.generate.generator import generator
-from src.retrieval.retriever import retriever
 from src.agent.agent import agent_app
 from src.config.settings import settings
+from src.generate.generator import generator
+from src.retrieval.retriever import retriever
 from src.ui.greetings import match_greeting
 
 
 def friendly_api_error(exc: Exception) -> str:
     text = f"{type(exc).__name__}: {exc}".lower()
     if "429" in text or "resource_exhausted" in text or "quota" in text:
-        return ("⚠️ Se alcanzó el límite de consultas de la API de IA (cuota temporal). "
-                "Espere unos minutos y vuelva a intentarlo. Su conversación no se ha perdido.")
+        return (
+            "⚠️ Se alcanzó el límite de consultas de la API de IA (cuota temporal). "
+            "Espere unos minutos y vuelva a intentarlo. Su conversación no se ha perdido."
+        )
     return "⚠️ Ocurrió un error al contactar al asistente. Intente nuevamente en unos segundos."
 
 
@@ -51,8 +53,10 @@ def process_query(query, status):
     """Devuelve {"stream": gen, "ctx": {...}} (agente) o {"response": {...}} (fallback)."""
     presentation = match_greeting(query)
     if presentation:
-        return {"stream": iter([presentation]),
-                "ctx": {"chunks": [], "error": None, "generating": False}}
+        return {
+            "stream": iter([presentation]),
+            "ctx": {"chunks": [], "error": None, "generating": False},
+        }
     if settings.AGENT_ENABLED:
         status.update(label="🔍 Buscando documentos en el manual GRE...")
         thread_id = st.session_state.get("thread_id") or "sesion_actual"
@@ -66,15 +70,23 @@ def process_query(query, status):
                     config=config,
                     stream_mode=["updates", "messages"],
                 ):
-                    mode, payload = (item.get("type"), item.get("data")) if isinstance(item, dict) else item
+                    mode, payload = (
+                        (item.get("type"), item.get("data"))
+                        if isinstance(item, dict)
+                        else item
+                    )
                     if mode == "updates":
                         for node, update in (payload or {}).items():
                             if node == "tools":
                                 ctx["chunks"] = tool_docs(update)
                                 if not ctx["chunks"]:
-                                    status.update(label="⚠️ No se encontraron referencias exactas en el manual.")
+                                    status.update(
+                                        label="⚠️ No se encontraron referencias exactas en el manual."
+                                    )
                     elif mode == "messages":
-                        chunk, meta = payload if isinstance(payload, tuple) else (payload, {})
+                        chunk, meta = (
+                            payload if isinstance(payload, tuple) else (payload, {})
+                        )
                         if meta.get("langgraph_node") != "agent":
                             continue
                         if not ctx["generating"]:
@@ -95,8 +107,14 @@ def process_query(query, status):
     try:
         context_chunks = retriever.retrieve(query)
     except Exception:  # noqa: BLE001 — MongoDB caído
-        return {"response": {"answer": "⚠️ Base de datos no disponible temporalmente. Intente en unos minutos.",
-                             "sources": [], "context_used": 0, "_error": True}}
+        return {
+            "response": {
+                "answer": "⚠️ Base de datos no disponible temporalmente. Intente en unos minutos.",
+                "sources": [],
+                "context_used": 0,
+                "_error": True,
+            }
+        }
     if not context_chunks:
         status.update(label="⚠️ No se encontraron referencias exactas en el manual.")
     else:
@@ -121,7 +139,9 @@ def drain_stream(result, status) -> dict:
         text = ""
     answer = text or ctx.get("error") or ""
     if ctx.get("error"):
-        status.update(label="⚠️ Error de cuota o servicio", state="error", expanded=False)
+        status.update(
+            label="⚠️ Error de cuota o servicio", state="error", expanded=False
+        )
     elif not answer:
         answer = "⚠️ El modelo devolvió una respuesta vacía. Intente nuevamente."
         status.update(label="⚠️ Respuesta vacía", state="error", expanded=False)
@@ -136,9 +156,14 @@ def drain_stream(result, status) -> dict:
 
 def finalize_status(status, response):
     if response.get("_error"):
-        status.update(label="⚠️ Error de cuota o servicio", state="error", expanded=False)
+        status.update(
+            label="⚠️ Error de cuota o servicio", state="error", expanded=False
+        )
     elif response.get("_no_docs"):
-        status.update(label="⚠️ No se encontraron referencias exactas en el manual.",
-                      state="complete", expanded=False)
+        status.update(
+            label="⚠️ No se encontraron referencias exactas en el manual.",
+            state="complete",
+            expanded=False,
+        )
     else:
         status.update(label="✅ Respuesta generada", state="complete", expanded=False)

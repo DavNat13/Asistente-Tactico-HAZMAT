@@ -1,5 +1,6 @@
-import streamlit as st
 from uuid import UUID
+
+import streamlit as st
 
 
 def _is_uuid(value) -> bool:
@@ -62,8 +63,8 @@ def reset_session():
     if mgr:
         try:
             mgr.close()
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception:  # noqa: BLE001 — el cierre fallido no debe romper el reset
+            print("DEBUG: no se pudo cerrar la sesion", flush=True)
     for k in list(st.session_state.keys()):
         del st.session_state[k]
     st.rerun()

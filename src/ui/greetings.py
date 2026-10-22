@@ -24,8 +24,10 @@ PRESENTATION = """**¡Hola! Soy el Asistente HAZMAT — Agente IA de Bomberos de
 
 _GREET = r"(hola|hey|holi|buenas|buenos dias|buenas tardes|buenas noches)"
 _ID = r"(quien eres|que eres|como te llamas|cuentame de ti|presentate|hablame de ti)"
-_CAP = (r"(que puedes hacer|que hace|que haces|para que sirves|en que me puedes ayudar|"
-        r"como puedes ayudarme|que sabes hacer|cuales son tus capacidades)")
+_CAP = (
+    r"(que puedes hacer|que hace|que haces|para que sirves|en que me puedes ayudar|"
+    r"como puedes ayudarme|que sabes hacer|cuales son tus capacidades)"
+)
 _PATTERNS = (
     rf"^{_GREET}\s*$",
     rf"^{_ID}\s*$",

@@ -56,11 +56,14 @@ def is_quota_error(exc: Exception) -> bool:
     El 404 de modelo (GoogleModelNotFoundError) NO rota: todas las llaves
     fallarían igual, es un problema del ID del modelo, no de la llave."""
     text = f"{type(exc).__name__}: {exc}".lower()
-    if ("modelnotfound" in text or "model not found" in text
-            or "no longer available" in text):
+    if (
+        "modelnotfound" in text
+        or "model not found" in text
+        or "no longer available" in text
+    ):
         return False
     if "function call turn comes" in text:
-        return False  
+        return False
     return any(marker in text for marker in _QUOTA_MARKERS)
 
 
@@ -92,10 +95,13 @@ class LLMRouter:
             t0 = time.time()
             try:
                 return self._bound.invoke(messages)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 dt = time.time() - t0
-                print(f"DEBUG ERROR intento {attempt}/{attempts} ({dt:.1f}s): "
-                      f"{type(e).__name__} - {e}", flush=True)
+                print(
+                    f"DEBUG ERROR intento {attempt}/{attempts} ({dt:.1f}s): "
+                    f"{type(e).__name__} - {e}",
+                    flush=True,
+                )
                 if not is_quota_error(e) or attempt == attempts:
                     raise
                 self._rotate()

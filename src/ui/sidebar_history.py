@@ -1,6 +1,7 @@
 # sidebar_history.py — Renderizado de conversaciones recientes
-import streamlit as st
 from uuid import UUID
+
+import streamlit as st
 
 from src.ui.sidebar_helpers import create_thread, get_manager, get_sid, switch_thread
 
@@ -43,21 +44,21 @@ def render_historial():
             try:
                 if not sel or sel == current_tid:
                     return
-                if sel in (_NEW_KEY, _NEW_LABEL):      # 1) interceptar sentinelas
+                if sel in (_NEW_KEY, _NEW_LABEL):  # 1) interceptar sentinelas
                     return create_thread(mgr, sid)
-                tid = display_to_id.get(sel, sel)      # 2) label → UUID
-                UUID(tid)                              # 3) validación dura
+                tid = display_to_id.get(sel, sel)  # 2) label → UUID
+                UUID(tid)  # 3) validación dura
                 switch_thread(mgr, sid, tid)
-            except (ValueError, TypeError):            # 4) UI no se cae
+            except (ValueError, TypeError):  # 4) UI no se cae
                 st.warning("Selección de conversación inválida.")
-            except Exception:                          # noqa: BLE001 — evita ConnectionResetError
+            except Exception:  # noqa: BLE001 — evita ConnectionResetError
                 st.warning("No se pudo cambiar de conversación. Intente nuevamente.")
 
         st.radio(
             "Historial",
-            options=[_NEW_KEY] + thread_ids,   # estado interno = claves reales
-            index=default_idx + 1,             # +1 por el sentinel al inicio
-            format_func=_fmt,                  # usuario ve "▸ Nueva consulta..." / títulos
+            options=[_NEW_KEY] + thread_ids,  # estado interno = claves reales
+            index=default_idx + 1,  # +1 por el sentinel al inicio
+            format_func=_fmt,  # usuario ve "▸ Nueva consulta..." / títulos
             key="hist_radio",
             label_visibility="collapsed",
             on_change=_on_change,

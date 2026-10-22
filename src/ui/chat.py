@@ -46,8 +46,9 @@ def handle_query(chat_container):
 
                 if response["answer"]:
                     if result.get("stream") is None:
-                        st.markdown(format_response(response["answer"]),
-                                    unsafe_allow_html=True)
+                        st.markdown(
+                            format_response(response["answer"]), unsafe_allow_html=True
+                        )
                     _render_response_sources(response)
                 else:
                     render_empty_context()
