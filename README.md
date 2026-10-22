@@ -9,7 +9,7 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.63-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-[![Google Gemini](https://img.shields.io/badge/Gemini-3.5%20Flash-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Google Gemini](https://img.shields.io/badge/Gemini-3.6%20Flash-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Duoc UC](https://img.shields.io/badge/Duoc%20UC-Puerto%20Montt-003DA5?style=flat&logo=education&logoColor=white)](#)
 [![Version](https://img.shields.io/badge/Version-4.0.0-CE1004?style=flat)](#)
@@ -72,7 +72,7 @@ El sistema implementa una arquitectura **RAG (Retrieval-Augmented Generation)** 
 │                                      │                             │
 │                                      ▼                             │
 │                              ┌────────────────┐                    │
-│                              │  Gemini 3.5    │                    │
+│                              │   Gemini 3.6   │                    │
 │                              │     Flash      │                    │
 │                              └───────┬────────┘                    │
 │                                      │                             │
@@ -100,17 +100,17 @@ El sistema implementa una arquitectura **RAG (Retrieval-Augmented Generation)** 
 | Componente | Tecnología | Versión |
 |------------|------------|---------|
 | Lenguaje | Python | 3.12 |
-| LLM | Google Gemini 3.5 Flash | — |
+| LLM | Google Gemini 3.6 Flash | — |
 | Embeddings | all-MiniLM-L6-v2 (HuggingFace) | 384 dim |
 | Vector Store | MongoDB Atlas Vector Search | — |
-| Framework IA | LangChain | — |
+| Framework IA | LangChain + LangGraph (agente) | — |
 | Observabilidad | LangSmith | — |
 
 ### Infraestructura
 | Componente | Tecnología | Versión |
 |------------|------------|---------|
 | Containerización | Docker + Docker Compose | — |
-| Base de datos | MongoDB Atlas (M10+) | — |
+| Base de datos | MongoDB Atlas (M0+ con Vector Search) | — |
 | CI/CD | GitHub Actions | v4 |
 | Seguridad | Hadolint, Bandit, pip-audit | — |
 
@@ -144,8 +144,15 @@ Asistente_HAZMAT/
 │   ├── retrieval/
 │   │   └── retriever.py           # Vector Search MongoDB
 │   │
+│   ├── agent/
+│   │   ├── agent.py               # Grafo LangGraph (reset→agent⇄tools)
+│   │   ├── tools.py               # Tool buscar_normas_hazmat (citas [GRE p. N])
+│   │   ├── prompts.py             # Prompt del agente y formato táctico
+│   │   ├── llm_factory.py         # Rotación de API keys + reintentos
+│   │   └── states.py              # Estado del agente (TypedDict)
+│   │
 │   ├── generate/
-│   │   └── generator.py           # Integración Gemini
+│   │   └── generator.py           # Integración Gemini (fallback RAG lineal)
 │   │
 │   ├── session/
 │   │   ├── manager.py             # Gestión de sesiones
@@ -159,6 +166,8 @@ Asistente_HAZMAT/
 │   │   ├── sidebar_history.py     # Historial de conversaciones
 │   │   ├── sidebar_export.py      # Modal de exportación
 │   │   ├── chat.py                # Lógica de chat
+│   │   ├── chat_helpers.py        # Streaming, status y errores de API
+│   │   ├── greetings.py           # Presentación instantánea (sin LLM)
 │   │   ├── styles.py              # Carga de estilos
 │   │   ├── components/            # Componentes reutilizables
 │   │   ├── layout/                # Layout y headers
@@ -202,12 +211,21 @@ Asistente_HAZMAT/
    ```
    Edita `.env` con tus credenciales:
    ```env
-   GOOGLE_API_KEY=tu_api_key_de_google_ai_studio
-   MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/?retryWrites=true&w=majority
+   # Pool de API keys (rotación automática ante 429/403/503; separadas por coma)
+   GEMINI_API_KEYS=key1,key2,key3,key4,key5,key6
+   GOOGLE_API_KEY=llave_respaldo_o_validacion
+
+   MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/
+   MONGODB_DB_NAME=hazmat_gre
+   MONGODB_COLLECTION_NAME=gre_chunks
+
    LANGCHAIN_API_KEY=tu_langsmith_key  # Opcional
    LANGCHAIN_TRACING_V2=true           # Opcional
    LANGCHAIN_PROJECT=Bomberos-HAZMAT-RAG
    ```
+
+   > **Atlas**: crear índice Vector Search `vector_index` sobre `hazmat_gre.gre_chunks`
+   > (campo `embedding`, 384 dimensiones, similitud `cosine`).
 
 ### Ejecución con Docker
 
@@ -236,9 +254,22 @@ Asistente_HAZMAT/
 | Fase | Componente | Descripción |
 |------|------------|-------------|
 | **Ingesta** | `src/ingesta/` | Carga PDFs, fragmenta texto (1000 chr, 150 overlap), genera embeddings |
-| **Indexación** | MongoDB Atlas | Índice vectorial HNSW con similitud coseno |
+| **Indexación** | MongoDB Atlas | Índice `vector_index` (HNSW, coseno, 384 dim) sobre `gre_chunks` |
 | **Recuperación** | `src/retrieval/` | Vector Search con top_k=8, numCandidates=80, min_score=0.50 |
-| **Generación** | `src/generate/` | Gemini 3.5 Flash con temperature=0.1, historial de 6 mensajes |
+| **Generación** | `src/agent/` | Agente LangGraph + Gemini 3.6 Flash con tool calling y citas de página |
+
+### Agente IA (LangGraph)
+
+El asistente opera como **agente autónomo** (no un simple chat RAG):
+
+| Componente | Descripción |
+|------------|-------------|
+| **Grafo** | `reset → agent ⇄ tools` con `MemorySaver` por `thread_id` (`src/agent/agent.py`) |
+| **Tool** | `buscar_normas_hazmat`: consulta Atlas y devuelve fragmentos con marcadores `[GRE p. N]` para cita exacta |
+| **Historial Gemini-proof** | `_clean_history` + bloques atómicos: nunca se corta un par functionCall/functionResponse (evita el error 400 de Gemini); la última pregunta siempre se incluye |
+| **Rotación de API keys** | `GEMINI_API_KEYS` (pool de 6) + `LLMRouter`: rota ante 429/403/503 con `max_retries=1` (sin backoff interno de langchain ≈38 s) |
+| **Presentación instantánea** | `src/ui/greetings.py`: saludos/identidad respondidos sin LLM (0 s, 0 cuota) con presentación estructurada |
+| **Formato** | Secciones **Identificación · Aislamiento · Acciones · Equipo**, viñetas `- `, distancias en negrita, cita *(GRE, p. N)* por dato, opcional **Nota táctica** |
 
 ### Seguridad Multicapa
 
@@ -291,7 +322,7 @@ correspondientes.
 
 **Respuesta del sistema:**
 - Riesgos a la salud del amoníaco anhidro
-- Distancias de evacuación por浓度
+- Distancias de evacuación por concentración
 - Acciones iniciales de contención
 - EPP requerido para el personal
 - Fuente citada: GRE 2024, página 42
@@ -299,10 +330,10 @@ correspondientes.
 ### Formato de Respuesta
 
 Cada respuesta incluye:
-- **Listas con viñetas** para distancias, riesgos y acciones
-- **Citación de fuentes** con número de página del manual
-- **Advertencias** cuando la información no está disponible en el contexto
-- **Indicador de trazabilidad** para verificación en documento físico
+- **Secciones en negrita** (Identificación · Aislamiento · Acciones · Equipo) con viñetas `- `
+- **Citación de página por dato**: *(GRE, p. N)* a partir de los marcadores del contexto
+- **Saludos e identidad**: presentación estructurada instantánea (sin llamada al LLM)
+- **Advertencias** solo cuando el manual realmente no contiene el dato (0 resultados)
 
 ---
 
@@ -310,7 +341,9 @@ Cada respuesta incluye:
 
 | Métrica | Valor |
 |---------|-------|
-| Latencia promedio de respuesta | < 5 segundos |
+| Saludo / identidad | < 0.1 s (respuesta fija, sin LLM) |
+| Consulta técnica (agente + tool) | ~8–20 s (2–4 llamadas LLM; incluye rotación si hay cuota agotada) |
+| Cuota free-tier `gemini-3.6-flash` | 20 req/día/proyecto (~120/día con pool de 6 proyectos) |
 | Tiempo de ingestión por PDF | ~30 segundos |
 | Dimensionalidad de embeddings | 384 dimensiones |
 | Tamaño del chunk | 1000 caracteres |
