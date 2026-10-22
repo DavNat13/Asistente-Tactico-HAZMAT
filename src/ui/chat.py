@@ -1,7 +1,7 @@
+# chat.py — Orquestación UI del chat (status + streaming vía chat_helpers)
 import streamlit as st
 
-from src.generate.generator import generator
-from src.retrieval.retriever import retriever
+from src.ui.chat_helpers import drain_stream, finalize_status, process_query
 from src.ui.components.chat_bubble import render_assistant_bubble
 from src.ui.components.error_display import render_empty_context
 from src.ui.components.source_card import render_sources_section
@@ -12,14 +12,11 @@ def render_history():
     chat_container = st.container()
     with chat_container:
         for message in st.session_state.history:
-            role = message["role"]
-            content = message["content"]
-            sources = message.get("sources", [])
-            if role == "assistant":
-                render_assistant_bubble(content, sources)
+            if message["role"] == "assistant":
+                render_assistant_bubble(message["content"], message.get("sources", []))
             else:
                 with st.chat_message("user"):
-                    st.markdown(content)
+                    st.markdown(message["content"])
     return chat_container
 
 
@@ -37,10 +34,20 @@ def handle_query(chat_container):
             with st.chat_message("user"):
                 st.markdown(query)
             with st.chat_message("assistant"):
-                response = _process_query(query)
+                # Sin `with`: el estado no se auto-cierra; lo cerramos con update()
+                status = st.status("Analizando consulta...", expanded=True)
+                result = process_query(query, status)
+
+                if result.get("stream") is not None:
+                    response = drain_stream(result, status)
+                else:
+                    response = result["response"]
+                    finalize_status(status, response)
+
                 if response["answer"]:
-                    formatted = format_response(response["answer"])
-                    st.markdown(formatted, unsafe_allow_html=True)
+                    if result.get("stream") is None:
+                        st.markdown(format_response(response["answer"]),
+                                    unsafe_allow_html=True)
                     _render_response_sources(response)
                 else:
                     render_empty_context()
@@ -55,17 +62,6 @@ def handle_query(chat_container):
                 context_used=response.get("context_used", 0),
             )
         _save_to_history(response)
-
-
-def _process_query(query):
-    with st.spinner("Buscando en el manual GRE..."):
-        context_chunks = retriever.retrieve(query)
-        response = generator.generate(
-            query=query,
-            context_chunks=context_chunks,
-            history=st.session_state.history[:-1],
-        )
-    return response
 
 
 def _render_response_sources(response):
