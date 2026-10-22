@@ -1,0 +1,9 @@
+from typing import TypedDict, Annotated, List, Any
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
+
+class AgentState(TypedDict):
+    messages: Annotated[list[BaseMessage], add_messages]
+    tool_used: bool
+    tool_calls: int
+    retrieved_docs: List[Any]
