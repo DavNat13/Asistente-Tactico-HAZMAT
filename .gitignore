@@ -33,3 +33,11 @@ dev.bat
 
 # Data files (optional - uncomment if you don't want to track PDFs)
 # data/*.pdf
+
+# Informes academicos y tooling de PDF (no se versionan)
+Informe_*
+Presentacion_*.pdf
+md_to_pdf.py
+generar_presentacion.py
+_informe_ev2.html
+mermaid.min.js
