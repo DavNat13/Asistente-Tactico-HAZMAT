@@ -1,396 +1,124 @@
 <div align="center">
 
-# Asistente Táctico HAZMAT
+# Asistente HAZMAT
 
 ### Ingeniería de Soluciones con Inteligencia Artificial — Duoc UC
 
-**Sistema de Consulta Inteligente basado en RAG para Emergencias con Materiales Peligrosos**
+**Agente RAG para emergencias con materiales peligrosos · Bomberos de Chile**
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.63-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-1.2-1C3C3C?style=flat)](https://langchain-ai.github.io/langgraph/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-[![Google Gemini](https://img.shields.io/badge/Gemini-3.6%20Flash-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Duoc UC](https://img.shields.io/badge/Duoc%20UC-Puerto%20Montt-003DA5?style=flat&logo=education&logoColor=white)](#)
-[![Version](https://img.shields.io/badge/Version-4.0.0-CE1004?style=flat)](#)
-[![CI](https://img.shields.io/badge/CI-Passing-brightgreen?style=flat&logo=githubactions&logoColor=white)](#)
+[![Version](https://img.shields.io/badge/Version-5.0.0-C8102E?style=flat)](#)
 
----
-
-*Consulta instantánea y precisa de protocolos HAZMAT con trazabilidad de fuentes y cero alucinaciones.*
+*Respuestas verificables de la GRE 2024 y el Manual ABC-V, con la página citada.*
 
 </div>
 
 ---
 
-## Descripción General
+## Qué hace
 
-El **Asistente Táctico HAZMAT** es un sistema de inteligencia artificial desarrollado como proyecto académico para la asignatura **Ingeniería de Soluciones con Inteligencia Artificial** en **Duoc UC Puerto Montt**. El sistema permite consultar de manera instantánea la **Guía de Respuesta en Emergencias (GRE 2024)** y el **Manual ABC-V** durante incidentes con materiales peligrosos.
+Un bombero pregunta por un **N° UN**, un **material** o describe un **incidente**, y el agente responde
+con la guía naranja, distancias de aislamiento/evacuación, acciones y EPP, **citando la página impresa**
+de la GRE 2024. Si el dato no está en los manuales, lo dice.
 
-El sistema implementa una arquitectura **RAG (Retrieval-Augmented Generation)** que combina búsqueda semántica vectorial con generación de texto controlada, garantizando respuestas verificadas, trazables y sin alucinaciones.
-
-### Problema que Resuelve
-
-| Dimensión | Desafío |
-|-----------|---------|
-| **Latencia** | Consulta manual de documentos extensos genera demoras inaceptables en escenarios donde cada minuto es crítico |
-| **Error humano** | La presión operativa incrementa la probabilidad de seleccionar protocolos incorrectos |
-| **Dispersión** | La información relevante está distribuida entre múltiples documentos y secciones |
-
-### Solución
-
-- **Respuesta en tiempo real** (< 5 segundos) para consultas tácticas
-- **Cero alucinaciones** mediante anclaje estricto al contexto recuperado
-- **Trazabilidad de fuentes** con citación de página y sección del manual
-- **Formato táctico** con distancias de evacuación, riesgos y acciones inmediatas
-
----
-
-## Arquitectura del Sistema
+## Arquitectura v5 — agente por niveles de complejidad
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        FLUJO RAG COMPLETO                           │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐     │
-│  │  PDFs    │───▶│ Chunking │───▶│Embeddings│───▶│ MongoDB  │     │
-│  │  GRE/ABC │    │ 1000 chr │    │ 384 dim  │    │  Atlas   │     │
-│  └──────────┘    └──────────┘    └──────────┘    └────┬─────┘     │
-│                                                       │            │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐        │            │
-│  │Consulta  │───▶│ Embedding│───▶│  Vector  │◀───────┘            │
-│  │ Usuario  │    │  Query   │    │  Search  │                     │
-│  └──────────┘    └──────────┘    └────┬─────┘                     │
-│                                       │                            │
-│                                       ▼                            │
-│                              ┌────────────────┐                    │
-│                              │ System Prompt  │                    │
-│                              │   + Contexto   │                    │
-│                              │   + Historial  │                    │
-│                              └───────┬────────┘                    │
-│                                      │                             │
-│                                      ▼                             │
-│                              ┌────────────────┐                    │
-│                              │   Gemini 3.6   │                    │
-│                              │     Flash      │                    │
-│                              └───────┬────────┘                    │
-│                                      │                             │
-│                                      ▼                             │
-│                              ┌────────────────┐                    │
-│                              │   Respuesta    │                    │
-│                              │  Verificada    │                    │
-│                              └────────────────┘                    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+consulta ─► rate limit ─► redacción PII ─► guard_in ─┬─ bloqueada ─────────────────────► respuesta segura
+                                                     └─ classify ─┬─ BAJO  (saludo) ──► respuesta directa, 0 tokens
+                                                                  ├─ MEDIO (dato)  ──┐
+                                                                  └─ ALTO  (incidente)┴► prefetch ─► agente ⇄ herramientas
+                                                                                                        └─► guard_out ─► respuesta citada
 ```
 
----
+| Nivel | Ejemplo | Estrategia | Presupuesto de herramientas |
+|---|---|---|---|
+| Bajo | "hola", "gracias" | Respuesta determinista sin LLM | 0 |
+| Medio | "¿Qué guía es el UN 1203?" | Prefetch exacto (UN → guía) + 1 llamada LLM | 2 |
+| Alto | "Fuga de cloro en camión cisterna…" | Prefetch + agente con plantilla de plan de respuesta | 5 |
 
-## Stack Tecnológico
+**Recuperación:** índice estructurado de 1.983 N° UN (páginas amarillas + Tabla 1), guías naranjas
+completas por número, y búsqueda híbrida (vectorial multilingüe + léxica en español, fusión RRF).
+**Resiliencia:** rotación de API keys ante 429 y cadena de modelos de respaldo ante 503/timeout
+(circuit breaker). **Detalle de seguridad:** [`docs/SEGURIDAD_ETICA.md`](docs/SEGURIDAD_ETICA.md).
 
-### Frontend
-| Componente | Tecnología | Versión |
-|------------|------------|---------|
-| Framework UI | Streamlit | 1.63.0 |
-| Diseño CSS | Sistema institucional (23 archivos) | — |
-| Iconografía | Material Symbols | — |
-
-### Backend
-| Componente | Tecnología | Versión |
-|------------|------------|---------|
-| Lenguaje | Python | 3.12 |
-| LLM | Google Gemini 3.6 Flash | — |
-| Embeddings | all-MiniLM-L6-v2 (HuggingFace) | 384 dim |
-| Vector Store | MongoDB Atlas Vector Search | — |
-| Framework IA | LangChain + LangGraph (agente) | — |
-| Observabilidad | LangSmith | — |
-
-### Infraestructura
-| Componente | Tecnología | Versión |
-|------------|------------|---------|
-| Containerización | Docker + Docker Compose | — |
-| Base de datos | MongoDB Atlas (M0+ con Vector Search) | — |
-| CI/CD | GitHub Actions | v4 |
-| Seguridad | Hadolint, Bandit, pip-audit | — |
-
-### Documentos Fuente
-| Documento | Descripción |
-|-----------|-------------|
-| GRE 2024 | Guía de Respuesta en Emergencias |
-| Manual ABC-V | Clasificación de incendios y materiales peligrosos |
-
----
-
-## Estructura del Proyecto
+## Estructura
 
 ```
-Asistente_HAZMAT/
-├── app.py                          # Punto de entrada principal
-├── Dockerfile                      # Containerización multi-etapa
-├── docker-compose.yml              # Orquestación de servicios
-├── requirements.txt                # Dependencias ligeras
-├── requirements-heavy.txt          # Dependencias ML/NLP
-│
-├── src/
-│   ├── config/
-│   │   └── settings.py            # Configuración Singleton
-│   │
-│   ├── ingesta/
-│   │   ├── loaders.py             # Carga de PDFs
-│   │   ├── processor.py           # Chunking y embeddings
-│   │   └── ingest.py              # Orquestador CLI
-│   │
-│   ├── retrieval/
-│   │   └── retriever.py           # Vector Search MongoDB
-│   │
-│   ├── agent/
-│   │   ├── agent.py               # Grafo LangGraph (reset→agent⇄tools)
-│   │   ├── tools.py               # Tool buscar_normas_hazmat (citas [GRE p. N])
-│   │   ├── prompts.py             # Prompt del agente y formato táctico
-│   │   ├── llm_factory.py         # Rotación de API keys + reintentos
-│   │   └── states.py              # Estado del agente (TypedDict)
-│   │
-│   ├── generate/
-│   │   └── generator.py           # Integración Gemini (fallback RAG lineal)
-│   │
-│   ├── session/
-│   │   ├── manager.py             # Gestión de sesiones
-│   │   ├── models.py              # Modelos Pydantic v2
-│   │   ├── repository.py          # Capa de persistencia
-│   │   ├── security.py            # Seguridad multicapa
-│   │   └── export_manager.py      # Exportación JSON/MD
-│   │
-│   ├── ui/
-│   │   ├── sidebar.py             # Panel lateral
-│   │   ├── sidebar_history.py     # Historial de conversaciones
-│   │   ├── sidebar_export.py      # Modal de exportación
-│   │   ├── chat.py                # Lógica de chat
-│   │   ├── chat_helpers.py        # Streaming, status y errores de API
-│   │   ├── greetings.py           # Presentación instantánea (sin LLM)
-│   │   ├── styles.py              # Carga de estilos
-│   │   ├── components/            # Componentes reutilizables
-│   │   ├── layout/                # Layout y headers
-│   │   └── renderers/             # Formateo de respuestas
-│   │
-│   └── utils/
-│       ├── prompts.py             # System prompt HAZMAT
-│       └── constants.py           # Constantes globales
-│
-├── styles/                        # Sistema de diseño CSS
-│   ├── tokens/                    # Variables de diseño
-│   ├── base/                      # Reset y reglas base
-│   ├── components/                # Estilos de componentes
-│   └── utilities/                 # Utilidades CSS
-│
-└── data/                          # Documentos PDF fuente
+app.py                     Entrada Streamlit (login, navegación por rol)
+src/agent/                 Grafo LangGraph: router, nodos, prompts, herramientas, servicio, cliente LLM
+src/retrieval/             Búsqueda híbrida, índice UN, guías
+src/ingesta/               Carga de PDFs con metadatos de la GRE, chunking, índices Atlas
+src/security/              Guardrails, PII, autenticación, rate limit
+src/observability/         Telemetría por ejecución, persistencia, métricas del dashboard
+src/session/               Historial de conversaciones por usuario
+src/ui/                    Chat, sidebar, login, dashboard de observabilidad
+evals/                     Set de evaluación (31 casos) y runner de métricas
+tests/                     Pruebas unitarias (sin red ni base de datos)
 ```
 
----
-
-## Instalación y Configuración
-
-### Requisitos Previos
-
-- [Docker](https://docs.docker.com/get-docker/) y Docker Compose v2
-- Cuenta en [Google AI Studio](https://aistudio.google.com/) (API Key gratuita)
-- Cluster en [MongoDB Atlas](https://www.mongodb.com/atlas) con Vector Search habilitado
-- (Opcional) Cuenta en [LangSmith](https://smith.langchain.com/) para observabilidad
-
-### Configuración
-
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/DavNat13/Asistente_HAZMAT.git
-   cd Asistente_HAZMAT
-   ```
-
-2. **Configurar variables de entorno:**
-   ```bash
-   cp .env.example .env
-   ```
-   Edita `.env` con tus credenciales:
-   ```env
-   # Pool de API keys (rotación automática ante 429/403/503; separadas por coma)
-   GEMINI_API_KEYS=key1,key2,key3,key4,key5,key6
-   GOOGLE_API_KEY=llave_respaldo_o_validacion
-
-   MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/
-   MONGODB_DB_NAME=hazmat_gre
-   MONGODB_COLLECTION_NAME=gre_chunks
-
-   LANGCHAIN_API_KEY=tu_langsmith_key  # Opcional
-   LANGCHAIN_TRACING_V2=true           # Opcional
-   LANGCHAIN_PROJECT=Bomberos-HAZMAT-RAG
-   ```
-
-   > **Atlas**: crear índice Vector Search `vector_index` sobre `hazmat_gre.gre_chunks`
-   > (campo `embedding`, 384 dimensiones, similitud `cosine`).
-
-### Ejecución con Docker
-
-1. **Fase de Ingesta** (primera vez):
-   ```bash
-   docker-compose run --rm hazmat-rag python src/ingesta/ingest.py --data
-   ```
-
-2. **Levantar la Interfaz:**
-   ```bash
-   docker-compose up --build -d
-   ```
-   Accede en: `http://localhost:8501`
-
-3. **Detener el sistema:**
-   ```bash
-   docker-compose down
-   ```
-
----
-
-## Módulos Principales
-
-### Pipeline RAG
-
-| Fase | Componente | Descripción |
-|------|------------|-------------|
-| **Ingesta** | `src/ingesta/` | Carga PDFs, fragmenta texto (1000 chr, 150 overlap), genera embeddings |
-| **Indexación** | MongoDB Atlas | Índice `vector_index` (HNSW, coseno, 384 dim) sobre `gre_chunks` |
-| **Recuperación** | `src/retrieval/` | Vector Search con top_k=8, numCandidates=80, min_score=0.50 |
-| **Generación** | `src/agent/` | Agente LangGraph + Gemini 3.6 Flash con tool calling y citas de página |
-
-### Agente IA (LangGraph)
-
-El asistente opera como **agente autónomo** (no un simple chat RAG):
-
-| Componente | Descripción |
-|------------|-------------|
-| **Grafo** | `reset → agent ⇄ tools` con `MemorySaver` por `thread_id` (`src/agent/agent.py`) |
-| **Tool** | `buscar_normas_hazmat`: consulta Atlas y devuelve fragmentos con marcadores `[GRE p. N]` para cita exacta |
-| **Historial Gemini-proof** | `_clean_history` + bloques atómicos: nunca se corta un par functionCall/functionResponse (evita el error 400 de Gemini); la última pregunta siempre se incluye |
-| **Rotación de API keys** | `GEMINI_API_KEYS` (pool de 6) + `LLMRouter`: rota ante 429/403/503 con `max_retries=1` (sin backoff interno de langchain ≈38 s) |
-| **Presentación instantánea** | `src/ui/greetings.py`: saludos/identidad respondidos sin LLM (0 s, 0 cuota) con presentación estructurada |
-| **Formato** | Secciones **Identificación · Aislamiento · Acciones · Equipo**, viñetas `- `, distancias en negrita, cita *(GRE, p. N)* por dato, opcional **Nota táctica** |
-
-### Seguridad Multicapa
-
-| Capa | Mecanismo |
-|------|-----------|
-| **Validación** | UUID v4, Pydantic models |
-| **Anti-inyección** | Detección de patrones NoSQL (`$where`, `$regex`, `$ne`) |
-| **Anti-XSS** | `html.escape()`, sanitización recursiva |
-| **Persistencia** | TTL automático de 90 días para sesiones inactivas |
-
-### Sistema de Diseño
-
-- **23 archivos CSS** organizados en tokens, base, componentes y utilidades
-- **Paleta institucional**: Rojo (#CE2029), Dorado (#FFB000), Texto (#F5F2E9), Fondo (#1A1A1A)
-- **Responsive** con breakpoints para móvil, tablet y escritorio
-- **Accesibilidad** con contraste WCAG 2.1 AA
-
----
-
-## Integración Continua
-
-El pipeline de CI/CD ejecuta automáticamente:
-
-| Job | Descripción |
-|-----|-------------|
-| **Linting** | Ruff (linting + formato), MyPy (tipos), Bandit (seguridad) |
-| **Pruebas** | pytest con cobertura (coverage.xml, htmlcov/) |
-| **Seguridad** | pip-audit para vulnerabilidades de dependencias |
-| **Docker** | Hadolint (linting Dockerfile), verificación de compose |
+## Ejecución
 
 ```bash
-# Ejecutar localmente
-ruff check .
-ruff format --check .
-pytest --cov=src -v
+pip install -r requirements-heavy.txt -r requirements.txt
+cp .env.example .env                                   # completar credenciales
+
+python -m src.ingesta.ingest --data --clear --create-index   # ingesta (una vez)
+python -m src.security.create_user --username admin --role admin
+streamlit run app.py
 ```
 
----
+Con Docker: `docker compose up --build` (la imagen incluye el modelo de embeddings).
 
-## Uso del Sistema
+## Calidad y evaluación
 
-### Ejemplo de Consulta
-
-```
-Consulta: Emergencia química en curso. Volcadura de camión cisterna en carretera
-con fuga activa de Amoníaco Anhidro (UN 1005). Indique de inmediato los riesgos
-a la salud, las acciones iniciales de aislamiento y las distancias de evacuación
-correspondientes.
+```bash
+pytest tests src -q                                    # pruebas unitarias
+ruff check . && ruff format --check .                  # estilo
+python -m evals.run_evals --label v5 --repeat 3 --judge --save-db
 ```
 
-**Respuesta del sistema:**
-- Riesgos a la salud del amoníaco anhidro
-- Distancias de evacuación por concentración
-- Acciones iniciales de contención
-- EPP requerido para el personal
-- Fuente citada: GRE 2024, página 42
+Las corridas quedan en `evals/results/` y en MongoDB (`eval_runs`); el dashboard de observabilidad
+(rol admin) las compara.
 
-### Formato de Respuesta
+## Resultados (31 casos, mismo modelo `gemini-3.5-flash-lite`, set v1.1)
 
-Cada respuesta incluye:
-- **Secciones en negrita** (Identificación · Aislamiento · Acciones · Equipo) con viñetas `- `
-- **Citación de página por dato**: *(GRE, p. N)* a partir de los marcadores del contexto
-- **Saludos e identidad**: presentación estructurada instantánea (sin llamada al LLM)
-- **Advertencias** solo cuando el manual realmente no contiene el dato (0 resultados)
+| Métrica | v4 (antes) | v5 (después) |
+|---|---|---|
+| Datos clave correctos (`keyword_score`) | 41% | **100%** |
+| Evidencia recuperada (`retrieval_hit`) | 29% | **86%** (100% tras ajuste del documento UN) |
+| Página citada correcta (`citation_ok`) | 0% | **100%** |
+| Fidelidad (juez LLM, 1-5) | 2,05 | **4,2** |
+| Consistencia entre 3 corridas | 0,36 | **0,67** |
+| Ataques / fuera de dominio rechazados | 100% | **100%** |
+| Salida segura (sin HTML, secretos ni PII) | 100% | **100%** |
+| Tokens de entrada (total) | 147.522 | **97.935 (−34%)** |
+| Latencia p50 / p95 | 4,9 s / 16,3 s | 6,8 s / 32,6 s |
 
----
+La latencia p95 subió porque el modelo principal (`gemini-3.6-flash`) estaba saturado (503/timeout de 30 s)
+antes de pasar al respaldo; el circuit breaker evita repetir esa espera durante 120 s. Detalle por caso en
+`evals/results/*_rescored.json`.
 
-## Rendimiento
+## Observabilidad
 
-| Métrica | Valor |
-|---------|-------|
-| Saludo / identidad | < 0.1 s (respuesta fija, sin LLM) |
-| Consulta técnica (agente + tool) | ~8–20 s (2–4 llamadas LLM; incluye rotación si hay cuota agotada) |
-| Cuota free-tier `gemini-3.6-flash` | 20 req/día/proyecto (~120/día con pool de 6 proyectos) |
-| Tiempo de ingestión por PDF | ~30 segundos |
-| Dimensionalidad de embeddings | 384 dimensiones |
-| Tamaño del chunk | 1000 caracteres |
-| Overlap entre chunks | 150 caracteres |
-| Candidatos por consulta (HNSW) | 80 |
-| Resultados retornados (top_k) | 8 |
+Cada consulta registra en `agent_runs` (seudonimizado, TTL 180 días): latencia total, TTFT y por nodo,
+herramientas, tokens, rotaciones de llave y fallback de modelo, guardrails, grounding de citas, CPU y
+memoria, error tipificado y feedback 👍/👎. Las trazas detalladas van a LangSmith.
 
----
+## Convenciones
 
-## Contribuir
-
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Haz commit con convención ([Conventional Commits](https://www.conventionalcommits.org/))
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
-
-### Convención de Commits
-
-```
-feat(scope): descripción en español v3.4.0
-fix(scope): corrección de bug
-refactor(scope): reestructuración de código
-docs(scope): documentación
-```
+- Máximo **150 líneas por archivo** (verificado en CI).
+- Commits: `tipo(scope): descripción en español vX.Y.Z`.
 
 ---
 
 ## Licencia
 
-Este proyecto es de carácter **académico** para la asignatura Ingeniería de Soluciones con Inteligencia Artificial en Duoc UC. El código fuente está disponible para fines de auditoría y colaboración técnica.
-
----
+Proyecto **académico** para la asignatura Ingeniería de Soluciones con Inteligencia Artificial, Duoc UC.
 
 ## Contacto
 
-**David Nahuelcar Tecas**
-- Proyecto: Asistente Táctico HAZMAT
-- Institución: Duoc UC Puerto Montt
-- Asignatura: Ingeniería de Soluciones con Inteligencia Artificial
-
----
-
-<div align="center">
-
-**Desarrollado con compromiso para la investigación y desarrollo de soluciones de IA**
-
-*Duoc UC Puerto Montt — Septiembre 2026*
-
-</div>
+**David Nahuelcar Tecas** · Duoc UC Puerto Montt
