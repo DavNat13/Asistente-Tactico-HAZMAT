@@ -1,0 +1,44 @@
+# Asistente HAZMAT — configuración de Streamlit (tema minimalista + servidor endurecido)
+
+[server]
+enableXsrfProtection = true     # protección CSRF en formularios
+enableCORS = true
+maxUploadSize = 1               # la app no recibe archivos
+headless = true
+
+[browser]
+gatherUsageStats = false        # privacidad: no enviar telemetría de uso a terceros
+
+[client]
+showErrorDetails = "none"       # nunca mostrar trazas internas al usuario
+toolbarMode = "minimal"
+
+[theme]
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+baseRadius = "0.75rem"
+showSidebarBorder = true
+
+[theme.light]
+primaryColor = "#C8102E"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F5F4"
+textColor = "#1C1917"
+borderColor = "#E7E5E4"
+linkColor = "#C8102E"
+
+[theme.light.sidebar]
+backgroundColor = "#FAFAF9"
+secondaryBackgroundColor = "#F0EFED"
+
+[theme.dark]
+primaryColor = "#F04A5A"
+backgroundColor = "#0F0F10"
+secondaryBackgroundColor = "#1C1C1F"
+textColor = "#EDEDED"
+borderColor = "#2A2A2E"
+linkColor = "#F47A86"
+
+[theme.dark.sidebar]
+backgroundColor = "#141416"
+secondaryBackgroundColor = "#1F1F23"

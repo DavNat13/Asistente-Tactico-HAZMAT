@@ -1,80 +1,100 @@
-# chat.py — Orquestación UI del chat (status + streaming vía chat_helpers)
+"""Flujo del chat: entrada → agente (streaming) → render seguro → persistencia."""
+
+from __future__ import annotations
+
+import logging
+
 import streamlit as st
 
-from src.ui.chat_helpers import drain_stream, finalize_status, process_query
-from src.ui.components.chat_bubble import render_assistant_bubble
-from src.ui.components.error_display import render_empty_context
-from src.ui.components.source_card import render_sources_section
-from src.ui.renderers.response_formatter import format_response
+from src.agent.service import stream_query
+from src.security.pii import redact
+from src.ui import state
+from src.ui.message import AVATARS, meta_html, render_message, sources_from_docs
+
+log = logging.getLogger("hazmat.ui")
 
 
-def render_history():
-    chat_container = st.container()
-    with chat_container:
-        for message in st.session_state.history:
-            if message["role"] == "assistant":
-                render_assistant_bubble(message["content"], message.get("sources", []))
-            else:
-                with st.chat_message("user"):
-                    st.markdown(message["content"])
-    return chat_container
+def render_history() -> None:
+    for msg in st.session_state.get("history", []):
+        render_message(msg)
 
 
-def handle_query(chat_container):
-    if query := st.chat_input("Consulte el manual GRE..."):
-        session_id = st.session_state.get("session_id")
-        thread_id = st.session_state.get("thread_id")
-        manager = st.session_state.get("session_manager")
-
-        st.session_state.history.append({"role": "user", "content": query})
-        if manager and session_id and thread_id:
-            manager.add_user_message(session_id, thread_id, query)
-
-        with chat_container:
-            with st.chat_message("user"):
-                st.markdown(query)
-            with st.chat_message("assistant"):
-                # Sin `with`: el estado no se auto-cierra; lo cerramos con update()
-                status = st.status("Analizando consulta...", expanded=True)
-                result = process_query(query, status)
-
-                if result.get("stream") is not None:
-                    response = drain_stream(result, status)
-                else:
-                    response = result["response"]
-                    finalize_status(status, response)
-
-                if response["answer"]:
-                    if result.get("stream") is None:
-                        st.markdown(
-                            format_response(response["answer"]), unsafe_allow_html=True
-                        )
-                    _render_response_sources(response)
-                else:
-                    render_empty_context()
-                    response["answer"] = ""
-
-        if manager and session_id and thread_id:
-            manager.add_assistant_message(
-                session_id,
-                thread_id,
-                response["answer"],
-                sources=response.get("sources", []),
-                context_used=response.get("context_used", 0),
+def _persist(role: str, content: str, sources: list[dict] | None = None) -> None:
+    mgr, sid, tid = (
+        state.manager(),
+        st.session_state.get("session_id"),
+        st.session_state.get("thread_id"),
+    )
+    if not (mgr and sid and tid and content):
+        return
+    try:
+        if role == "user":
+            mgr.add_user_message(sid, tid, content)
+        else:
+            rows = [
+                {
+                    "page": int(s["page"]) if str(s["page"]).isdigit() else 0,
+                    "source": s["source"],
+                    "score": min(max(s["score"], 0.0), 1.0),
+                }
+                for s in sources or []
+            ]
+            mgr.add_assistant_message(
+                sid, tid, content, sources=rows, context_used=len(rows)
             )
-        _save_to_history(response)
+    except Exception as e:  # noqa: BLE001 — no perder la respuesta si falla la BD
+        log.warning("No se pudo guardar el mensaje: %s", type(e).__name__)
 
 
-def _render_response_sources(response):
-    if response.get("sources"):
-        render_sources_section(response["sources"])
+def ask(query: str) -> None:
+    user = state.user() or {}
+    clean, _ = redact(query)  # el historial nunca guarda datos personales
+    prior = [
+        {"role": m["role"], "content": m["content"]} for m in st.session_state.history
+    ]
+    st.session_state.history.append({"role": "user", "content": clean})
+    _persist("user", clean)
+    render_message({"role": "user", "content": clean})
 
+    with st.chat_message("assistant", avatar=AVATARS["assistant"]):
+        status = st.status("Analizando consulta…", expanded=False)
+        placeholder = st.empty()
+        text, final = "", {}
+        for event in stream_query(
+            query,
+            thread_id=st.session_state.get("thread_id"),
+            user_id=user.get("username"),
+            history=prior,
+        ):
+            if event["type"] == "status":
+                status.update(label=event["label"])
+            elif event["type"] == "token":
+                text += event["text"]
+                placeholder.markdown(text + " ▌")
+            else:
+                final = event
+        answer = final.get("answer") or "No se obtuvo respuesta. Intenta nuevamente."
+        placeholder.markdown(answer)
+        sources = sources_from_docs(final.get("chunks", []))
+        if final.get("blocked"):
+            status.update(label="Consulta no permitida", state="error")
+        else:
+            secs = (final.get("latency_ms") or 0) / 1000
+            status.update(
+                label=f"Respuesta verificada · {secs:.1f} s", state="complete"
+            )
+        meta = meta_html(final.get("complexity"), sources, final.get("latency_ms"))
+        if meta:
+            st.html(meta)
 
-def _save_to_history(response):
     st.session_state.history.append(
         {
             "role": "assistant",
-            "content": response["answer"],
-            "sources": response.get("sources", []),
+            "content": answer,
+            "sources": sources,
+            "complexity": final.get("complexity"),
+            "run_id": final.get("run_id"),
         }
     )
+    _persist("assistant", answer, sources)
+    st.rerun()  # re-render para mostrar el feedback del último mensaje

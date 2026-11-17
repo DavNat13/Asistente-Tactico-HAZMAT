@@ -1,39 +1,60 @@
-# app.py — Punto de entrada del Dashboard RAG HAZMAT
+"""Asistente HAZMAT — punto de entrada Streamlit.
+
+Navegación por rol: `operador` ve el chat; `admin` además ve el dashboard de observabilidad.
+"""
+
+import logging
 import os
 import sys
+import threading
 
 import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from src.ui.chat import handle_query, render_history
-from src.ui.components.empty_state import render_empty_state
-from src.ui.layout.header import render_header
-from src.ui.sidebar import render_sidebar
-from src.ui.styles import init_session_state, load_css_files
+
+from src.config.settings import settings
+from src.ui import state
+from src.ui.auth_view import render_login
+from src.ui.chat_page import chat_page
+from src.ui.theme import load_css
 from src.utils.constants import APP_ICON, APP_NAME
 
-st.set_page_config(
-    page_title=APP_NAME,
-    page_icon=APP_ICON,
-    layout="wide",
-    initial_sidebar_state="expanded",
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 
-load_css_files()
+st.set_page_config(page_title=APP_NAME, page_icon=APP_ICON, layout="centered")
+load_css()
 
-# La sesión puede fallar si MongoDB no está disponible.
-# El sidebar debe renderizarse SIEMPRE, aunque la sesión falle.
-try:
-    init_session_state()
-except Exception:  # noqa: BLE001
-    st.session_state.setdefault("history", [])
 
-render_sidebar()
+@st.cache_resource(show_spinner=False)
+def _warmup() -> bool:
+    """Carga el modelo de embeddings en segundo plano al iniciar (evita ~30 s en la 1.ª consulta)."""
+    from src.ingesta.processor import get_embeddings
 
-render_header()
+    threading.Thread(target=get_embeddings, daemon=True).start()
+    return True
 
-if not st.session_state.get("history"):
-    render_empty_state()
 
-chat_container = render_history()
-handle_query(chat_container)
+_warmup()
+
+if settings.AUTH_ENABLED and not state.user():
+    render_login()
+    st.stop()
+if not settings.AUTH_ENABLED and not state.user():
+    st.session_state.user = {"username": "local", "name": "Modo local", "role": "admin"}
+
+pages = [st.Page(chat_page, title="Asistente", icon=":material/chat:", default=True)]
+if state.is_admin():
+    from src.ui.observability_page import observability_page
+
+    pages.append(
+        st.Page(
+            observability_page,
+            title="Observabilidad",
+            icon=":material/monitoring:",
+            url_path="observabilidad",
+        )
+    )
+st.navigation(pages, position="top" if len(pages) > 1 else "hidden").run()
