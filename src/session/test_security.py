@@ -13,13 +13,24 @@ class TestInputSanitizer:
         result = InputSanitizer.sanitize_string("Hello world")
         assert result == "Hello world"
 
-    def test_sanitize_noSQL_injection(self):
+    def test_operator_keys_rejected(self):
         with pytest.raises(ValueError):
-            InputSanitizer.sanitize_string('{"$ne": null}')
+            InputSanitizer.sanitize_dict({"$ne": None})
+        with pytest.raises(ValueError):
+            InputSanitizer.sanitize_dict({"a": {"$where": "1"}})
 
-    def test_sanitize_xss(self):
+    def test_text_values_are_stored_not_blocked(self):
+        # El texto se guarda con consultas parametrizadas; el XSS se neutraliza al renderizar.
+        text = "<script>alert('xss')</script> $in"
+        assert InputSanitizer.sanitize_string(text) == text
+
+    def test_control_chars_removed(self):
+        assert InputSanitizer.sanitize_string("ok\x00\x07") == "ok"
+
+    def test_username(self):
+        assert InputSanitizer.sanitize_username(" Bombero.1 ") == "bombero.1"
         with pytest.raises(ValueError):
-            InputSanitizer.sanitize_string("<script>alert('xss')</script>")
+            InputSanitizer.sanitize_username("a$b")
 
     def test_sanitize_uuid_valid(self):
         result = InputSanitizer.sanitize_uuid("550e8400-e29b-41d4-a716-446655440000")

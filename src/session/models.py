@@ -59,6 +59,7 @@ class Thread(BaseModel):
 
 class Session(BaseModel):
     session_id: str = Field(default_factory=_uuid)
+    user_id: str | None = Field(default=None, max_length=32)  # dueño de la sesión
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
     title: str | None = Field(default=None, max_length=200)

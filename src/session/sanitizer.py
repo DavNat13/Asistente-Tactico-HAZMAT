@@ -1,65 +1,49 @@
+"""Validación de entradas hacia MongoDB.
+
+Principio: los VALORES se guardan siempre con consultas parametrizadas (pymongo), por lo que el
+texto del usuario no puede inyectar operadores. El riesgo real de NoSQL injection está en las
+CLAVES (`$where`, `$ne`…) y en identificadores no validados; eso es lo que se controla aquí.
+El XSS se controla al RENDERIZAR (src/ui/renderers), no bloqueando texto legítimo al guardar.
+"""
+
 import re
 from typing import Any, ClassVar
 
 from .validators import validate_role, validate_score
 
+_UUID_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE
+)
+_CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+_USERNAME_RE = re.compile(r"^[a-z0-9._-]{3,32}$")
+
 
 class InputSanitizer:
-    NOSQL_INJECTION_PATTERNS: ClassVar[list] = [
-        re.compile(r"\$where", re.IGNORECASE),
-        re.compile(r"\$regex", re.IGNORECASE),
-        re.compile(r"\$ne", re.IGNORECASE),
-        re.compile(r"\$gt", re.IGNORECASE),
-        re.compile(r"\$lt", re.IGNORECASE),
-        re.compile(r"\$exists", re.IGNORECASE),
-        re.compile(r"\$in", re.IGNORECASE),
-        re.compile(r"\$nin", re.IGNORECASE),
-        re.compile(r"\$and", re.IGNORECASE),
-        re.compile(r"\$or", re.IGNORECASE),
-        re.compile(r"function\s*\(", re.IGNORECASE),
-        re.compile(r"ObjectId\s*\(", re.IGNORECASE),
-        re.compile(r"ISODate\s*\(", re.IGNORECASE),
-    ]
-    XSS_PATTERNS: ClassVar[list] = [
-        re.compile(r"<script", re.IGNORECASE),
-        re.compile(r"javascript:", re.IGNORECASE),
-        re.compile(r"on(?:click|load|error|mouse\w+)\s*=", re.IGNORECASE),
-        re.compile(r"<iframe", re.IGNORECASE),
-        re.compile(r"<object", re.IGNORECASE),
-        re.compile(r"<embed", re.IGNORECASE),
-    ]
-    MAX_SESSION_ID_LENGTH = 64
-    MAX_MESSAGE_LENGTH = 50000
-    MAX_TITLE_LENGTH = 200
+    MAX_SESSION_ID_LENGTH: ClassVar[int] = 64
+    MAX_MESSAGE_LENGTH: ClassVar[int] = 50000
+    MAX_TITLE_LENGTH: ClassVar[int] = 200
 
     @classmethod
     def sanitize_string(cls, value: str, max_length: int = 10000) -> str:
         if not isinstance(value, str):
             raise TypeError(f"Expected string, got {type(value).__name__}")
-        value = value.strip()[:max_length]
-        for pattern in cls.NOSQL_INJECTION_PATTERNS:
-            if pattern.search(value):
-                raise ValueError("Input contains dangerous characters")
-        for pattern in cls.XSS_PATTERNS:
-            if pattern.search(value):
-                raise ValueError("Input contains dangerous HTML")
-        return value
+        return _CONTROL.sub("", value).strip()[:max_length]
 
     @classmethod
     def sanitize_uuid(cls, value: str) -> str:
         if not isinstance(value, str):
             raise TypeError(f"Expected string, got {type(value).__name__}")
         value = value.strip()
-        uuid_re = re.compile(
-            r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
-            r"[0-9a-f]{4}-[0-9a-f]{12}$",
-            re.IGNORECASE,
-        )
-        if not uuid_re.match(value):
-            raise ValueError(f"Invalid UUID: {value[:20]}...")
-        if len(value) > cls.MAX_SESSION_ID_LENGTH:
-            raise ValueError("UUID exceeds maximum length")
+        if len(value) > cls.MAX_SESSION_ID_LENGTH or not _UUID_RE.match(value):
+            raise ValueError("Invalid UUID")
         return value.lower()
+
+    @classmethod
+    def sanitize_username(cls, value: str) -> str:
+        value = (value or "").strip().lower()
+        if not _USERNAME_RE.match(value):
+            raise ValueError("Usuario inválido (3-32 caracteres: a-z, 0-9, . _ -)")
+        return value
 
     @classmethod
     def sanitize_message_content(cls, content: str) -> str:
@@ -71,28 +55,24 @@ class InputSanitizer:
 
     @classmethod
     def sanitize_dict(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Rechaza claves con operadores MongoDB ($) o rutas (.) de forma recursiva."""
         if not isinstance(data, dict):
             return data
-        sanitized = {}
+        clean: dict[str, Any] = {}
         for key, value in data.items():
-            if key.startswith("$"):
-                raise ValueError(f"Key '{key}' contains MongoDB operator")
-            if isinstance(value, str):
-                sanitized[key] = cls.sanitize_string(value)
-            elif isinstance(value, dict):
-                sanitized[key] = cls.sanitize_dict(value)
+            if not isinstance(key, str) or key.startswith("$") or "." in key:
+                raise ValueError(f"Clave no permitida: {str(key)[:20]}")
+            if isinstance(value, dict):
+                clean[key] = cls.sanitize_dict(value)
             elif isinstance(value, list):
-                sanitized[key] = [
-                    cls.sanitize_dict(v)
-                    if isinstance(v, dict)
-                    else cls.sanitize_string(v)
-                    if isinstance(v, str)
-                    else v
-                    for v in value
+                clean[key] = [
+                    cls.sanitize_dict(v) if isinstance(v, dict) else v for v in value
                 ]
+            elif isinstance(value, str):
+                clean[key] = cls.sanitize_string(value)
             else:
-                sanitized[key] = value
-        return sanitized
+                clean[key] = value
+        return clean
 
     @classmethod
     def validate_role(cls, role: str) -> str:

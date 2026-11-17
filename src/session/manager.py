@@ -22,8 +22,8 @@ class SessionManager:
         self.repo = SessionRepository()
         SessionManager._initialized = True
 
-    def create_session(self) -> Session:
-        session = Session()
+    def create_session(self, user_id: str | None = None) -> Session:
+        session = Session(user_id=user_id)
         session.create_thread(title="Nueva consulta")
         self.repo.create_session(session)
         return session
@@ -38,6 +38,13 @@ class SessionManager:
             except (ValueError, RuntimeError):
                 pass
         return self.create_session()
+
+    def get_or_create_user_session(self, user_id: str) -> Session:
+        """La sesión SIEMPRE se resuelve desde el usuario autenticado (nunca desde la URL)."""
+        return self.repo.get_latest_for_user(user_id) or self.create_session(user_id)
+
+    def delete_user_data(self, user_id: str) -> int:
+        return self.repo.delete_user_data(user_id)
 
     def get_session(self, session_id: str) -> Session | None:
         return self.repo.get_session(session_id)
@@ -109,8 +116,8 @@ class SessionManager:
     def get_session_stats(self, session_id: str) -> dict:
         return self.repo.get_session_stats(session_id)
 
-    def list_sessions(self, limit: int = 50) -> list[Session]:
-        return self.repo.get_user_sessions(limit=limit)
+    def list_sessions(self, user_id: str, limit: int = 50) -> list[Session]:
+        return self.repo.get_user_sessions(user_id, limit=limit)
 
     def close(self) -> None:
         self.repo.close()

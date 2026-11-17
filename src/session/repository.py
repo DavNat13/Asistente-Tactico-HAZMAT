@@ -1,6 +1,3 @@
-import os
-import sys
-
 from pymongo import ASCENDING, DESCENDING, MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -10,8 +7,7 @@ from pymongo.errors import (
     ServerSelectionTimeoutError,
 )
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config.settings import settings
+from src.config.settings import settings
 
 from .message_repository import MessageRepository
 from .models import Message, Session, Thread
@@ -36,7 +32,9 @@ class SessionRepository:
                 return
             except (ConnectionFailure, ServerSelectionTimeoutError):
                 SessionRepository._initialized = False
-        self.client: MongoClient = MongoClient(settings.MONGODB_URI)
+        self.client: MongoClient = MongoClient(
+            settings.MONGODB_URI, serverSelectionTimeoutMS=settings.MONGODB_TIMEOUT_MS
+        )
         self.db: Database = self.client[settings.MONGODB_DB_NAME]
         self.collection: Collection = self.db[settings.SESSION_COLLECTION_NAME]
         self._crud = SessionCRUD(self.collection)
@@ -56,6 +54,10 @@ class SessionRepository:
             self.collection.create_index(
                 [("is_active", DESCENDING), ("updated_at", DESCENDING)],
                 name="idx_active_sessions_updated",
+            )
+            self.collection.create_index(
+                [("user_id", ASCENDING), ("updated_at", DESCENDING)],
+                name="idx_user_sessions",
             )
             self.collection.create_index(
                 [("threads.thread_id", ASCENDING)],
@@ -81,8 +83,16 @@ class SessionRepository:
     def delete_session(self, session_id: str) -> bool:
         return self._crud.delete_session(session_id)
 
-    def get_user_sessions(self, limit: int = 50, skip: int = 0) -> list[Session]:
-        return self._queries.get_user_sessions(limit=limit, skip=skip)
+    def get_user_sessions(
+        self, user_id: str, limit: int = 50, skip: int = 0
+    ) -> list[Session]:
+        return self._queries.get_user_sessions(user_id, limit=limit, skip=skip)
+
+    def get_latest_for_user(self, user_id: str) -> Session | None:
+        return self._queries.get_latest_for_user(user_id)
+
+    def delete_user_data(self, user_id: str) -> int:
+        return self._queries.delete_user_data(user_id)
 
     def get_session_stats(self, session_id: str) -> dict:
         return self._queries.get_session_stats(session_id)
