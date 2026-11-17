@@ -1,107 +1,126 @@
-# llm_factory.py — Cliente LLM con rotación de API keys y reintentos por cuota (429)
+"""Cliente Gemini resiliente: rotación de API keys + cadena de modelos de respaldo + telemetría.
+
+- Error de llave (429/403)          → siguiente API key del pool.
+- Error de modelo (503/timeout/404) → siguiente modelo de LLM_FALLBACK_MODELS. El modelo caído queda
+  "abierto" (circuit breaker) por MODEL_COOLDOWN_S antes de volver a probarlo.
+- Otro error (400, bug)             → se relanza sin reintentos.
+"""
+
+from __future__ import annotations
+
+import logging
 import threading
 import time
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from src.agent.llm_utils import content_text, failure_kind
 from src.config.settings import settings
+from src.observability.telemetry import current
 
-_QUOTA_MARKERS = (
-    "429",
-    "resource_exhausted",
-    "resourceexhausted",
-    "quota",
-    "rate limit",
-    "503",
-    "unavailable",
-    "overloaded",
-    "high demand",
-    "403",
-    "400",
-    "permission",
-    "permission denied",
-    "permission_denied",
-    "permissiondenied",
-    "denied",
-    "unauthenticated",
-    "forbidden",
-    "not_found",
-    "not found",
-    "invalid_argument",
-    "invalid argument",
-    "api key not valid",
-    "api_key_not_valid",
-    "project",
-    "googleapierror",
-    "googleapicallerror",
-)
+log = logging.getLogger("hazmat.llm")
+
+_down_until: dict[
+    str, float
+] = {}  # modelo -> timestamp hasta el que se considera caído
+_down_lock = threading.Lock()
 
 
-def build_llm(api_key: str | None = None) -> ChatGoogleGenerativeAI:
-    """Construye el cliente Gemini con la siguiente llave del pool (rotación).
-    max_retries=1 desactiva el backoff interno de langchain (6 reintentos ≈ 38 s
-    por 429): el reintento lo hace LLMRouter rotando de llave al instante."""
+def model_chain(first: str | None = None) -> list[str]:
+    chain = [settings.LLM_MODEL, *settings.LLM_FALLBACK_MODELS]
+    if first:  # p. ej. el clasificador de guardrails prefiere el modelo liviano
+        chain = [first, *[m for m in chain if m != first]]
+    now = time.time()
+    healthy = [m for m in chain if _down_until.get(m, 0) <= now]
+    return healthy or chain
+
+
+def _mark_down(model: str) -> None:
+    with _down_lock:
+        _down_until[model] = time.time() + settings.MODEL_COOLDOWN_S
+
+
+def build_llm(
+    model: str | None = None, temperature: float | None = None
+) -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(
-        model=settings.LLM_MODEL,
-        temperature=settings.LLM_TEMPERATURE,
-        google_api_key=api_key or settings.get_next_api_key(),
-        max_retries=1,
+        model=model or settings.LLM_MODEL,
+        temperature=settings.LLM_TEMPERATURE if temperature is None else temperature,
+        google_api_key=settings.get_next_api_key(),
+        max_retries=0,  # los reintentos los gestiona LLMRouter
+        timeout=settings.LLM_TIMEOUT_S,
     )
 
 
-def is_quota_error(exc: Exception) -> bool:
-    """True si el error justifica ROTAR de API key: cuota (429) o fallo de
-    auth/proyecto de una llave específica (403/400/not_found/invalid_argument/
-    GoogleAPICallError/PermissionDenied...).
-    El 404 de modelo (GoogleModelNotFoundError) NO rota: todas las llaves
-    fallarían igual, es un problema del ID del modelo, no de la llave."""
-    text = f"{type(exc).__name__}: {exc}".lower()
-    if (
-        "modelnotfound" in text
-        or "model not found" in text
-        or "no longer available" in text
-    ):
-        return False
-    if "function call turn comes" in text:
-        return False
-    return any(marker in text for marker in _QUOTA_MARKERS)
+def _record(response, model: str) -> None:
+    rec = current()
+    if rec is not None:
+        rec.llm(getattr(response, "usage_metadata", None))
+        rec.set(model=model)
 
 
 class LLMRouter:
-    """Cliente hilo-seguro: invoca con reintentos rotando llaves del pool ante 429.
+    """Invoca el LLM con reintentos dirigidos según la causa del error (hilo-seguro)."""
 
-    Intento 1 usa la llave actual del ciclo; cada rotación avanza el pool y
-    re-bindea las tools al nuevo cliente. Agota `LLM_MAX_RETRIES` (== tamaño
-    del pool) antes de re-lanzar la excepción.
-    """
+    def __init__(self, tools: list | None = None):
+        self._tools = tools or []
 
-    def __init__(self, tools: list):
-        self._tools = tools
-        self._lock = threading.Lock()
-        self._bound = build_llm().bind_tools(tools)
+    def _client(self, model: str, with_tools: bool, temperature: float | None):
+        llm = build_llm(model, temperature)
+        return llm.bind_tools(self._tools) if (with_tools and self._tools) else llm
 
-    @property
-    def bound(self):
-        return self._bound
-
-    def _rotate(self) -> None:
-        with self._lock:
-            # build_llm() avanza itertools.cycle al siguiente pool de llaves
-            self._bound = build_llm().bind_tools(self._tools)
-
-    def invoke(self, messages):
-        attempts = settings.LLM_MAX_RETRIES
-        for attempt in range(1, attempts + 1):
-            t0 = time.time()
+    def invoke(
+        self,
+        messages,
+        *,
+        with_tools: bool = True,
+        temperature: float | None = None,
+        prefer: str | None = None,
+    ):
+        models = model_chain(prefer)
+        max_attempts = settings.LLM_MAX_RETRIES + len(models)
+        idx, attempt = 0, 0
+        while attempt < max_attempts:
+            attempt += 1
+            model = models[idx]
+            t0 = time.perf_counter()
             try:
-                return self._bound.invoke(messages)
+                response = self._client(model, with_tools, temperature).invoke(messages)
+                _record(response, model)
+                return response
             except Exception as e:
-                dt = time.time() - t0
-                print(
-                    f"DEBUG ERROR intento {attempt}/{attempts} ({dt:.1f}s): "
-                    f"{type(e).__name__} - {e}",
-                    flush=True,
+                kind = failure_kind(e)
+                log.warning(
+                    "LLM %s intento %d falló en %.1fs (%s): %s",
+                    model,
+                    attempt,
+                    time.perf_counter() - t0,
+                    kind,
+                    type(e).__name__,
                 )
-                if not is_quota_error(e) or attempt == attempts:
+                rec = current()
+                if kind is None or attempt >= max_attempts:
                     raise
-                self._rotate()
+                if kind == "model":
+                    _mark_down(model)
+                    if idx + 1 >= len(models):
+                        raise
+                    idx += 1
+                    if rec is not None:
+                        rec.set(model_fallback=True)
+                elif rec is not None:  # "key": build_llm toma la siguiente llave
+                    rec.rotation()
+        raise RuntimeError("LLM sin intentos disponibles")
+
+
+_plain_router = LLMRouter()
+
+
+def invoke_plain(
+    messages, temperature: float | None = None, prefer: str | None = None
+) -> str:
+    """Llamada simple sin herramientas (clasificador de guardrails, juez de evals)."""
+    response = _plain_router.invoke(
+        messages, with_tools=False, temperature=temperature, prefer=prefer
+    )
+    return content_text(response.content)
