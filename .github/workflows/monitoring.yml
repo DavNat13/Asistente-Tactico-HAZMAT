@@ -1,0 +1,50 @@
+# Monitoreo: revisión de salud cada 30 min y reporte semanal los lunes.
+# Ambas tareas leen la telemetría real (agent_runs, canal ui) y avisan por correo a ADMIN_EMAILS.
+name: "Monitoreo y reportes"
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # health-check
+    - cron: "0 12 * * 1"     # reporte semanal (lunes 12:00 UTC ≈ 09:00 en Chile)
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Tarea a ejecutar"
+        type: choice
+        options: [health-check, weekly-report]
+        default: health-check
+
+permissions:
+  contents: read
+
+jobs:
+  tarea:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: "Instalar dependencias mínimas"
+        run: pip install python-dotenv==1.2.3 pymongo==4.18.3 psutil==6.0.0
+      - name: "Elegir tarea"
+        id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "task=${{ inputs.task }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 12 * * 1" ]; then
+            echo "task=weekly-report" >> "$GITHUB_OUTPUT"
+          else
+            echo "task=health-check" >> "$GITHUB_OUTPUT"
+          fi
+      - name: "Ejecutar ${{ steps.pick.outputs.task }}"
+        run: python -m src.automation.jobs ${{ steps.pick.outputs.task }}
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}

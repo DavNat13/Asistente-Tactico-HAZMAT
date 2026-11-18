@@ -13,6 +13,7 @@ import streamlit as st
 from src.observability import metrics as m
 from src.observability import metrics_breakdown as mb
 from src.ui import state
+from src.ui.observability_improve import tab_improve
 from src.ui.observability_records import tab_evals, tab_log
 from src.ui.observability_tabs import tab_security, tab_usage
 from src.ui.sidebar import render_sidebar
@@ -80,11 +81,12 @@ def observability_page() -> None:
         f":green[●] Datos en vivo desde MongoDB · {len(runs)} ejecuciones en el periodo · "
         f"actualizado {loaded_at}"
     )
-    usage, security, offline, log = st.tabs(
+    usage, security, offline, improve, log = st.tabs(
         [
             ":material/insights: Uso real",
             ":material/shield: Seguridad",
             ":material/science: Evaluación offline",
+            ":material/thumbs_up_down: Mejora continua",
             ":material/list_alt: Registro",
         ]
     )
@@ -94,5 +96,7 @@ def observability_page() -> None:
         tab_security(runs, sec)
     with offline:
         tab_evals(evals)
+    with improve:
+        tab_improve()
     with log:
         tab_log(runs)

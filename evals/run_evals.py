@@ -84,10 +84,21 @@ def main() -> None:
     ap.add_argument(
         "--sleep", type=float, default=1.0, help="pausa entre casos (cuota API)"
     )
+    ap.add_argument(
+        "--include-db-cases",
+        action="store_true",
+        help="sumar casos aprobados desde el feedback (colección eval_cases)",
+    )
     args = ap.parse_args()
 
     data = json.loads(EVALS_PATH.read_text(encoding="utf-8"))
     cases = data["cases"]
+    if args.include_db_cases:
+        from src.observability.feedback import approved_cases
+
+        extra = approved_cases()
+        cases = cases + extra
+        print(f"Casos desde feedback aprobados: {len(extra)}")
     if args.only:
         cases = [c for c in cases if c["id"] in set(args.only.split(","))]
 
