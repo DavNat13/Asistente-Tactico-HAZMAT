@@ -15,6 +15,8 @@ import hmac
 import os
 from datetime import UTC, datetime, timedelta
 
+from pymongo.errors import DuplicateKeyError
+
 from src.config.settings import settings
 from src.observability.store import get_db, security_event
 from src.session.sanitizer import InputSanitizer
@@ -58,7 +60,11 @@ def validate_password(password: str) -> None:
 
 
 def create_user(
-    username: str, password: str, role: str = "operador", name: str = ""
+    username: str,
+    password: str,
+    role: str = "operador",
+    name: str = "",
+    overwrite: bool = False,
 ) -> dict:
     username = InputSanitizer.sanitize_username(username)
     if role not in ROLES:
@@ -74,7 +80,13 @@ def create_user(
         "locked_until": None,
         "active": True,
     }
-    get_db()[USERS].replace_one({"_id": username}, doc, upsert=True)
+    if overwrite:  # solo el CLI de administración puede reemplazar una cuenta existente
+        get_db()[USERS].replace_one({"_id": username}, doc, upsert=True)
+    else:
+        try:
+            get_db()[USERS].insert_one(doc)
+        except DuplicateKeyError:
+            raise ValueError("Ese nombre de usuario ya está registrado") from None
     return {k: doc[k] for k in ("_id", "name", "role")}
 
 

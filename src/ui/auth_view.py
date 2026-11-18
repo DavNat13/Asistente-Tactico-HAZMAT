@@ -1,55 +1,70 @@
-"""Pantalla de inicio de sesión con aviso de privacidad."""
+"""Pantalla de acceso: panel de marca + formularios de inicio de sesión y registro."""
 
 from __future__ import annotations
-
-import html
 
 import streamlit as st
 
 from src.config.settings import settings
-from src.utils.constants import APP_NAME, APP_SHORT
+from src.ui.auth_forms import login_form, register_form
+from src.ui.icons import icon
+from src.ui.theme import mark
 
-PRIVACY_NOTICE = (
-    "Al ingresar aceptas que tus consultas se procesen para responderte. Los datos personales "
-    "(RUT, teléfonos, correos, patentes) se ocultan automáticamente antes de enviarse al modelo de IA. "
-    f"El historial se conserva {settings.SESSION_TTL_DAYS} días y puedes eliminarlo cuando quieras "
-    "(Ley 19.628 y Ley 21.719). Herramienta de apoyo: no reemplaza al mando del incidente."
+FEATURES = (
+    (
+        "book",
+        "Respuestas con fuente",
+        "Cada dato cita la página de la GRE 2024 o del Manual ABC-V.",
+    ),
+    (
+        "zap",
+        "Del dato al plan de respuesta",
+        "Desde un N° UN hasta un plan completo para el incidente.",
+    ),
+    (
+        "shield",
+        "Privado y seguro",
+        "Tus conversaciones son solo tuyas. Los datos personales se ocultan.",
+    ),
+)
+
+PRIVACY = (
+    f"{icon('lock')}Tus consultas se procesan para responderte. RUT, teléfonos, correos y patentes se "
+    "ocultan automáticamente antes de llegar al modelo de IA. El historial se conserva "
+    f"{settings.SESSION_TTL_DAYS} días y puedes eliminarlo cuando quieras (Ley 19.628 y Ley 21.719). "
+    "Herramienta de apoyo: no reemplaza al mando del incidente."
 )
 
 
-def render_login() -> None:
-    st.html(
-        '<div class="hz-login-head">'
-        f'<div class="hz-mark">{html.escape(APP_SHORT)}</div>'
-        f'<div class="hz-title">{html.escape(APP_NAME)}</div>'
-        '<div class="hz-sub">Acceso para personal autorizado</div></div>'
+def _brand_panel() -> None:
+    features = "".join(
+        f'<div class="hz-feature"><i>{icon(ic)}</i><div><b>{t}</b><span>{d}</span></div></div>'
+        for ic, t, d in FEATURES
     )
-    _, col, _ = st.columns([1, 2, 1])
-    with col, st.form("login", border=True):
-        username = st.text_input("Usuario", autocomplete="username", max_chars=32)
-        password = st.text_input(
-            "Contraseña",
-            type="password",
-            autocomplete="current-password",
-            max_chars=128,
+    st.html(
+        '<div class="hz-auth">'
+        f'<div><div class="hz-auth-brand">{mark()}<b>Asistente HAZMAT</b></div>'
+        "<h2>Decisiones más seguras ante materiales peligrosos.</h2>"
+        '<p class="lead">Asistente de IA para Bomberos de Chile basado en la Guía de Respuesta '
+        "en Emergencias 2024.</p>"
+        f"{features}</div>"
+        "<small>GRE 2024 · Manual ABC-V · Uso exclusivo de personal de emergencias</small></div>"
+    )
+
+
+def render_auth() -> None:
+    left, right = st.columns([1.05, 1], gap="large", vertical_alignment="center")
+    with left:
+        _brand_panel()
+    with right, st.container(key="auth_panel"):
+        mode = st.segmented_control(
+            "Acceso",
+            ["Iniciar sesión", "Crear cuenta"],
+            default="Iniciar sesión",
+            key="auth_mode",
+            label_visibility="collapsed",
         )
-        submitted = st.form_submit_button("Ingresar", type="primary", width="stretch")
-    if submitted:
-        _login(username, password)
-    with col:
-        st.html(f'<p class="hz-legal">{html.escape(PRIVACY_NOTICE)}</p>')
-
-
-def _login(username: str, password: str) -> None:
-    from src.security.auth import authenticate
-
-    try:
-        account = authenticate(username, password)
-    except Exception:  # noqa: BLE001 — BD caída: no revelar detalles
-        st.error("El servicio de autenticación no está disponible. Intenta más tarde.")
-        return
-    if not account:
-        st.error("Usuario o contraseña incorrectos, o cuenta bloqueada temporalmente.")
-        return
-    st.session_state.user = account
-    st.rerun()
+        if mode == "Crear cuenta":
+            register_form()
+        else:
+            login_form()
+        st.html(f'<p class="hz-legal">{PRIVACY}</p>')

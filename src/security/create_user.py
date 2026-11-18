@@ -27,7 +27,9 @@ def main() -> None:
     if password != getpass.getpass("Repite la contraseña: "):
         sys.exit("Las contraseñas no coinciden.")
     try:
-        user = create_user(args.username, password, args.role, args.name)
+        user = create_user(
+            args.username, password, args.role, args.name, overwrite=True
+        )
     except ValueError as e:
         sys.exit(f"Error: {e}")
     print(f"Usuario '{user['_id']}' ({user['role']}) creado/actualizado.")
