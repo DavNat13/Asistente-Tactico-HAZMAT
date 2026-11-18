@@ -1,0 +1,44 @@
+/* Controles de formulario profesionales en todo el sistema (login, registro, diálogos, mapa). */
+
+[data-testid="stWidgetLabel"] p { font-size: .82rem; font-weight: 560; letter-spacing: -.005em; }
+[data-testid="stTextInputRootElement"], [data-testid="stNumberInputContainer"],
+[data-baseweb="select"] > div, [data-testid="stTextArea"] textarea {
+  min-height: 46px; border-radius: 12px !important; border: 1px solid var(--hairline-strong) !important;
+  background: var(--subtle) !important; transition: border-color .18s, box-shadow .18s, background .18s;
+}
+[data-testid="stTextInputRootElement"]:hover, [data-baseweb="select"] > div:hover {
+  border-color: color-mix(in srgb, currentColor 28%, transparent) !important;
+}
+[data-testid="stTextInputRootElement"]:focus-within, [data-baseweb="select"] > div:focus-within,
+[data-testid="stTextArea"] textarea:focus {
+  border-color: var(--accent) !important; background: transparent !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent) !important;
+}
+[data-testid="stTextInputRootElement"] input { font-size: .95rem; padding-left: .25rem; }
+[data-testid="stTextInputRootElement"] input::placeholder { color: var(--muted); opacity: .75; }
+[data-testid="stTextInputRootElement"] [data-testid="stIconMaterial"] { color: var(--muted); }
+[data-testid="stTextInputRootElement"]:focus-within [data-testid="stIconMaterial"] { color: var(--accent); }
+[data-testid="InputInstructions"] { display: none; }  /* oculta "Press Enter to submit" */
+[data-testid="stCheckbox"] label p { font-size: .84rem; color: var(--muted); }
+[data-testid="stAlert"] { border-radius: 12px; }
+div[data-testid="stDialog"] div[role="dialog"] { border-radius: 20px; box-shadow: var(--shadow-lg); }
+[data-testid="stPopoverBody"] { border-radius: 14px; box-shadow: var(--shadow-lg); }
+
+/* Barra de acciones bajo las respuestas (mapa, checklist, ficha) */
+[class*="st-key-actions_"] { margin-top: .25rem; }
+[class*="st-key-actions_"] button {
+  min-height: 32px; padding: .2rem .7rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid var(--hairline) !important; background: var(--subtle); transition: border-color .2s, transform .2s var(--ease);
+}
+[class*="st-key-actions_"] button:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important; }
+[class*="st-key-actions_"] [data-testid="stIconMaterial"] { color: var(--accent); }
+
+/* Panel del incidente en curso */
+[data-testid="stExpander"]:has([data-testid="stProgress"]) details {
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); box-shadow: var(--shadow-md);
+  background: var(--accent-soft);
+}
+[data-testid="stProgress"] > div > div > div { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+
+/* Mapa de zonas */
+iframe[title="streamlit_folium.st_folium"] { border-radius: 18px; box-shadow: var(--shadow-md); border: 1px solid var(--hairline); }

@@ -1,10 +1,35 @@
-APP_NAME = "Asistente Táctico HAZMAT"
-APP_SUBTITLE = "Bomberos de Chile - Guía de Respuesta en Emergencias"
-APP_ICON = ""
-NEW_CHAT_ICON = ":material/add_comment:"
-EXAMPLE_QUERIES = [
-    "protocolo de spill quimico",
-    "materiales peligrosos classe 3",
-    "equipamiento para incidente HAZMAT",
-    "evacuacion zona contaminada",
+APP_NAME = "Asistente HAZMAT"
+APP_SUBTITLE = "Bomberos de Chile · GRE 2024"
+APP_ICON = ":material/local_fire_department:"
+
+# (ícono Material, texto visible, consulta enviada)
+SUGGESTIONS = [
+    (
+        ":material/search:",
+        "¿Qué guía corresponde al UN 1203?",
+        "¿Qué guía corresponde al UN 1203?",
+    ),
+    (
+        ":material/radar:",
+        "Distancias de aislamiento para cloro (UN 1017)",
+        "Distancia de aislamiento y evacuación para cloro UN 1017",
+    ),
+    (
+        ":material/emergency:",
+        "Fuga de amoniaco en planta frigorífica: plan de respuesta",
+        "Fuga de amoniaco anhidro en una planta frigorífica con nube visible, ¿cómo respondo?",
+    ),
+    (
+        ":material/health_and_safety:",
+        "EPP para un derrame de ácido sulfúrico",
+        "¿Qué EPP necesito para un derrame de ácido sulfúrico?",
+    ),
 ]
+
+LEVEL_LABELS = {
+    "low": "Nivel bajo",
+    "medium": "Nivel medio",
+    "high": "Nivel alto",
+}
+
+ROLE_LABELS = {"admin": "Administrador", "operador": "Operador"}

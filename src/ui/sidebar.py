@@ -1,73 +1,68 @@
-# sidebar.py — Panel lateral estilo ChatGPT/Gemini
-"""Sidebar con conversaciones recientes, exportación modal y tema visual."""
+"""Barra lateral estilo asistentes de IA: marca, nueva conversación, historial y menú de usuario."""
+
+from __future__ import annotations
+
+import html
 
 import streamlit as st
 
-from src.ui.sidebar_export import render_exportar
-from src.ui.sidebar_helpers import create_thread, get_manager, get_sid
-from src.ui.sidebar_history import render_historial
-from src.utils.constants import APP_NAME, NEW_CHAT_ICON
+from src.ui import state
+from src.ui.dialogs import delete_data_dialog, export_dialog
+from src.ui.sidebar_threads import render_threads
+from src.ui.theme import sidebar_brand
+from src.utils.constants import ROLE_LABELS
 
 
-def render_sidebar():
-    with st.sidebar:
-        _inject_css()
-        _render_cabecera()
-        _render_nuevo_chat()
-        render_historial()
-        render_exportar()
+def _initials(name: str) -> str:
+    parts = [p for p in (name or "?").split() if p]
+    return "".join(p[0] for p in parts[:2]).upper() or "?"
 
 
-def _inject_css():
-    st.markdown(
-        """<style>
-    /* Export button */
-    [data-testid="stSidebar"] .stButton>button.key_export {
-        background:transparent!important;color:rgba(245,242,233,.5)!important;
-        border:1px solid rgba(245,242,233,.08)!important;border-radius:8px!important;
-        font-size:12px!important;padding:6px 12px!important;
-        transition:all .2s ease!important;width:100%!important;margin:0!important;
-        box-shadow:none!important
-    }
-    [data-testid="stSidebar"] .stButton>button.key_export:hover {
-        background:rgba(245,242,233,.06)!important;border-color:rgba(245,242,233,.15)!important;
-        color:#F5F2E9!important
-    }
-    /* Export modal */
-    .export-title{color:#F5F2E9;font-size:18px;font-weight:700;margin-bottom:4px;text-align:center}
-    .export-subtitle{color:rgba(245,242,233,.5);font-size:13px;margin-bottom:1.5rem;text-align:center}
-    .export-options{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
-    .export-option{background:#2A2722;border:1px solid #333;border-radius:12px;padding:1.5rem 1rem;text-align:center;transition:all .2s ease}
-    .export-option:hover{border-color:#FFB000;transform:translateY(-2px)}
-    .export-option-icon{width:40px;height:40px;margin:0 auto 12px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-    .export-option-icon.json{background:rgba(255,176,0,.12);color:#FFB000}
-    .export-option-icon.md{background:rgba(206,32,41,.12);color:#CE2029}
-    .export-option-label{color:#F5F2E9;font-size:14px;font-weight:600;margin-bottom:4px}
-    .export-option-desc{color:rgba(245,242,233,.45);font-size:12px;line-height:1.4}
-    </style>""",
-        unsafe_allow_html=True,
+def _user_card() -> None:
+    user = state.user() or {}
+    name, role = (
+        user.get("name") or user.get("username", ""),
+        user.get("role", "operador"),
     )
-
-
-def _render_cabecera():
-    st.markdown(
-        f'<div style="padding:.5rem 0 1.25rem;border-bottom:1px solid rgba(245,242,233,.08);'
-        f'margin-bottom:.75rem;text-align:center">'
-        f'<div style="font-size:16px;font-weight:700;color:#F5F2E9;line-height:1.3">{APP_NAME}</div>'
-        f'<div style="font-size:11px;color:#F5F2E9;line-height:1.2;margin-top:4px;opacity:.5">'
-        f"Bomberos de Chile - GRE</div></div>",
-        unsafe_allow_html=True,
-    )
-
-
-def _render_nuevo_chat():
-    if st.button(
-        f"{NEW_CHAT_ICON} Nuevo Chat",
-        use_container_width=True,
-        type="primary",
-        key="sidebar_nuevo",
+    with (
+        st.container(key="user_card"),
+        st.popover(name, icon=":material/account_circle:", width="stretch"),
     ):
-        mgr, sid = get_manager(), get_sid()
-        if mgr and sid:
-            create_thread(mgr, sid)
-    st.markdown("")
+        st.html(
+            f'<div class="hz-user-head"><div class="hz-avatar">{html.escape(_initials(name))}</div>'
+            f"<div><b>{html.escape(name)}</b><span>@{html.escape(user.get('username', ''))} · "
+            f"{ROLE_LABELS.get(role, role)}</span></div></div>"
+        )
+        if st.button(
+            "Exportar conversación", icon=":material/download:", width="stretch"
+        ):
+            export_dialog()
+        if st.button(
+            "Eliminar mis datos", icon=":material/delete_forever:", width="stretch"
+        ):
+            delete_data_dialog()
+        st.divider()
+        if st.button(
+            "Cerrar sesión", icon=":material/logout:", width="stretch", key="logout"
+        ):
+            state.logout()
+            st.rerun()
+
+
+def render_sidebar(full: bool = True) -> None:
+    """full=False (dashboard): solo marca y menú de usuario."""
+    with st.sidebar:
+        sidebar_brand()
+        if not full:
+            _user_card()
+            return
+        if st.button(
+            "Nueva conversación",
+            icon=":material/edit_square:",
+            key="new_chat",
+            width="stretch",
+        ):
+            state.new_thread()
+            st.rerun()
+        render_threads()
+        _user_card()

@@ -40,6 +40,7 @@ class Thread(BaseModel):
     updated_at: datetime = Field(default_factory=_utcnow)
     is_active: bool = True
     messages: list[Message] = Field(default_factory=list)
+    incident: dict | None = None  # checklist y bitácora del incidente asociado
 
     def add_message(self, message: Message) -> None:
         self.messages.append(message)
@@ -59,6 +60,7 @@ class Thread(BaseModel):
 
 class Session(BaseModel):
     session_id: str = Field(default_factory=_uuid)
+    user_id: str | None = Field(default=None, max_length=32)  # dueño de la sesión
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
     title: str | None = Field(default=None, max_length=200)

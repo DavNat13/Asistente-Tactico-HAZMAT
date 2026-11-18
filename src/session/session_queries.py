@@ -9,14 +9,35 @@ class SessionQueries:
     def __init__(self, collection):
         self.collection = collection
 
+    def get_latest_for_user(self, user_id: str) -> Session | None:
+        """Sesión activa más reciente del usuario (aislamiento entre usuarios)."""
+        try:
+            doc = self.collection.find_one(
+                {"user_id": user_id, "is_active": True},
+                sort=[("updated_at", DESCENDING)],
+            )
+            return (
+                Session(**{k: v for k, v in doc.items() if k != "_id"}) if doc else None
+            )
+        except PyMongoError as e:
+            raise RuntimeError(f"Failed to get user session: {e}")
+
+    def delete_user_data(self, user_id: str) -> int:
+        """Derecho de supresión: elimina físicamente las sesiones del usuario."""
+        try:
+            return self.collection.delete_many({"user_id": user_id}).deleted_count
+        except PyMongoError as e:
+            raise RuntimeError(f"Failed to delete user data: {e}")
+
     def get_user_sessions(
         self,
+        user_id: str,
         limit: int = 50,
         skip: int = 0,
     ) -> list[Session]:
         try:
             cursor = (
-                self.collection.find({"is_active": True})
+                self.collection.find({"is_active": True, "user_id": user_id})
                 .sort("updated_at", DESCENDING)
                 .skip(skip)
                 .limit(limit)

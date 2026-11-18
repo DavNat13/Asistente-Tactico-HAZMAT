@@ -41,3 +41,8 @@ md_to_pdf.py
 generar_presentacion.py
 _informe_ev2.html
 mermaid.min.js
+
+# Evaluaciones: logs locales (los JSON de resultados sí se versionan como evidencia)
+evals/*.log
+.ruff_cache/
+.pytest_cache/
