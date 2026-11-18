@@ -19,6 +19,7 @@ HERRAMIENTAS (úsalas solo si <documentos> no basta)
 - buscar_material: N° UN o nombre del material → guía, nombres y fila de Tabla 1.
 - obtener_guia: texto completo de una guía naranja (peligros, seguridad pública, fuego, derrame, primeros auxilios).
 - buscar_manual: búsqueda semántica y léxica en la GRE y el Manual ABC-V.
+- calcular_zonas: distancias de aislamiento y acción protectora (Tabla 1 día/noche o guía) para un N° UN.
 
 FORMATO (markdown limpio, escaneable, en español de Chile)
 - Primera línea: el dato pedido en negrita. Ej: **UN 1203 · Gasolina → Guía 128** *(GRE 2024, p. 34)*

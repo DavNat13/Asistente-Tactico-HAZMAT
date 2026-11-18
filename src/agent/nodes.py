@@ -66,7 +66,7 @@ def guard_in(state: AgentState) -> dict:
 @timed("classify")
 def classify_node(state: AgentState) -> dict:
     route = classify(state["query"])
-    _rec_set(complexity=route.complexity)
+    _rec_set(complexity=route.complexity, un_numbers=route.un_numbers)
     return {
         "complexity": route.complexity,
         "intent": route.intent,

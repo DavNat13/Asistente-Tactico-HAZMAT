@@ -70,4 +70,36 @@ def buscar_manual(
     ), docs
 
 
-TOOLS = [buscar_material, obtener_guia, buscar_manual]
+@tool(response_format="content_and_artifact")
+def calcular_zonas(
+    numero_un: str, derrame: Literal["pequeño", "grande"] = "pequeño"
+) -> tuple[str, list]:
+    """Calcula la distancia de aislamiento inicial y de acción protectora a favor del viento para un
+    N° UN, según la Tabla 1 (día/noche según la hora actual) o la guía naranja. Úsala cuando pregunten
+    cuánto aislar o evacuar."""
+    from src.agent.zones import zones_for
+
+    z = _timed(
+        "calcular_zonas", lambda: [zones_for(numero_un, derrame)] if numero_un else []
+    )
+    z = z[0] if z and z[0] else None
+    if not z:
+        return f"No encontré el N° UN {numero_un} en la GRE 2024.", []
+    text = (
+        f"GRE 2024 · Zonas calculadas ({z.method}) · Página {z.page}\n"
+        f"UN {z.un} {z.material} · Guía {z.guide} · derrame {z.spill} · {z.period}\n"
+        f"Aislamiento inicial: {z.isolate_m or 'ver nota'} m · "
+        f"Acción protectora a favor del viento: {z.protect_km or 'no aplica / ver nota'} km · "
+        f"Si hay incendio de tanque: aislar {z.fire_isolate_m or '—'} m. {z.note}"
+    )
+    doc = {
+        "_id": f"zonas-{z.un}-{z.spill}",
+        "text": text,
+        "score": 1.0,
+        "match": "exacto",
+        "metadata": {"source": "GRE 2024", "page_label": z.page, "section": z.method},
+    }
+    return text, [doc]
+
+
+TOOLS = [buscar_material, obtener_guia, buscar_manual, calcular_zonas]
