@@ -32,12 +32,12 @@ header[data-testid="stHeader"] { background: transparent; }
   background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff;
   box-shadow: 0 4px 12px -2px rgb(200 16 46 / .45);
 }
-.hz-mark svg { width: 19px; height: 19px; }
+.hz-mark .hz-ico { width: 19px; height: 19px; }
 
 /* ── Bienvenida ─────────────────────────────────────────────────────────── */
 .hz-hero { text-align: center; padding: 9vh 0 2rem; animation: hz-fade-up .6s var(--ease) both; }
 .hz-hero .hz-mark { width: 56px; height: 56px; border-radius: 18px; margin: 0 auto 1.25rem; animation: hz-pulse 2.8s ease-in-out infinite; }
-.hz-hero .hz-mark svg { width: 28px; height: 28px; }
+.hz-hero .hz-mark .hz-ico { width: 28px; height: 28px; }
 .hz-hero h1 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); font-weight: 650; letter-spacing: -.035em; margin: 0 0 .5rem; padding: 0; }
 .hz-hero h1 span {
   background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent)); background-size: 200% auto;
@@ -82,7 +82,7 @@ header[data-testid="stHeader"] { background: transparent; }
   white-space: nowrap; transition: border-color .2s, color .2s;
 }
 .hz-chip:hover { border-color: var(--hairline-strong); color: inherit; }
-.hz-chip svg { width: 12px; height: 12px; }
+.hz-chip .hz-ico { width: 12px; height: 12px; }
 .hz-chip b { font-weight: 600; }
 .hz-level-low { color: #15803d; } .hz-level-medium { color: #b45309; } .hz-level-high { color: var(--accent); }
 .hz-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }

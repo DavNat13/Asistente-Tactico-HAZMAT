@@ -6,7 +6,7 @@ import streamlit as st
 
 from src.config.settings import settings
 from src.ui.auth_forms import login_form, register_form
-from src.ui.icons import icon
+from src.ui.icons import MUTED, icon
 from src.ui.theme import mark
 
 FEATURES = (
@@ -28,10 +28,11 @@ FEATURES = (
 )
 
 PRIVACY = (
-    f"{icon('lock')}Tus consultas se procesan para responderte. RUT, teléfonos, correos y patentes se "
+    f"{icon('lock', MUTED, 13)}Tus consultas se procesan para responderte. RUT, teléfonos, correos y patentes se "
     "ocultan automáticamente antes de llegar al modelo de IA. El historial se conserva "
     f"{settings.SESSION_TTL_DAYS} días y puedes eliminarlo cuando quieras (Ley 19.628 y Ley 21.719). "
-    "Herramienta de apoyo: no reemplaza al mando del incidente."
+    "Las direcciones del mapa se buscan en OpenStreetMap y las fotos de placas se analizan sin "
+    "guardarse. Herramienta de apoyo: no reemplaza al mando del incidente."
 )
 
 
@@ -55,11 +56,17 @@ def render_auth() -> None:
     left, right = st.columns([1.05, 1], gap="large", vertical_alignment="center")
     with left:
         _brand_panel()
-    with right, st.container(key="auth_panel"):
+    with right, st.container(key="auth_panel", border=False):
         mode = st.segmented_control(
             "Acceso",
             ["Iniciar sesión", "Crear cuenta"],
+            format_func=lambda o: (
+                f":material/login: {o}"
+                if o == "Iniciar sesión"
+                else f":material/person_add: {o}"
+            ),
             default="Iniciar sesión",
+            required=True,
             key="auth_mode",
             label_visibility="collapsed",
         )

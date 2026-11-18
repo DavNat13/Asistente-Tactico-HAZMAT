@@ -29,28 +29,45 @@
   flex: none; width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center;
   background: rgb(255 255 255 / .14); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .2);
 }
-.hz-feature i svg { width: 18px; height: 18px; }
+.hz-feature i .hz-ico { width: 18px; height: 18px; }
 .hz-feature b { display: block; font-size: .92rem; margin-bottom: .1rem; }
 .hz-feature span { font-size: .84rem; color: rgb(255 255 255 / .75); line-height: 1.45; }
 .hz-auth small { position: relative; z-index: 1; color: rgb(255 255 255 / .6); font-size: .75rem; }
 
-/* Panel del formulario */
-.st-key-auth_panel { padding: .5rem 0 0 1rem; animation: hz-fade-up .6s .1s var(--ease) both; }
-.hz-auth-title h3 { font-size: 1.55rem; font-weight: 650; letter-spacing: -.03em; margin: 0 0 .25rem; padding: 0; }
-.hz-auth-title p { color: var(--muted); margin: 0 0 1.25rem; font-size: .92rem; }
-.st-key-auth_panel [data-testid="stForm"] { border: none; padding: 0; }
-.st-key-auth_panel [data-testid="stTextInputRootElement"] { border-radius: 12px; }
-.st-key-auth_panel button[kind="primaryFormSubmit"] {
-  height: 46px; border-radius: 12px; font-weight: 600; border: none;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 8px 20px -6px rgb(200 16 46 / .55); transition: transform .2s var(--ease), box-shadow .2s;
+/* Tarjeta del formulario */
+.st-key-auth_panel {
+  padding: 2rem 2rem 1.5rem !important; border-radius: 22px; border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-lg); animation: hz-fade-up .6s .1s var(--ease) both;
 }
-.st-key-auth_panel button[kind="primaryFormSubmit"]:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -8px rgb(200 16 46 / .6); }
-.hz-legal { color: var(--muted); font-size: .74rem; line-height: 1.55; margin-top: 1rem; }
-.hz-legal svg { width: 12px; height: 12px; vertical-align: -1px; margin-right: .25rem; }
+.hz-auth-title { display: flex; gap: .85rem; align-items: center; margin: .25rem 0 1.4rem; }
+.hz-auth-title .hz-badge {
+  width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none;
+  background: var(--accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.hz-auth-title h3 { font-size: 1.4rem; font-weight: 650; letter-spacing: -.03em; margin: 0; padding: 0; line-height: 1.2; }
+.hz-auth-title p { color: var(--muted); margin: .15rem 0 0; font-size: .88rem; }
+.st-key-auth_panel [data-testid="stForm"] { border: none; padding: 0; }
+
+/* Selector Iniciar sesión / Crear cuenta a todo el ancho */
+.st-key-auth_mode [data-testid="stButtonGroup"], .st-key-auth_mode [data-testid="stButtonGroup"] > div { width: 100%; }
+.st-key-auth_mode button { flex: 1 1 0; height: 42px; font-weight: 550; }
+
+/* Botón principal */
+.st-key-auth_panel button[kind="primaryFormSubmit"] {
+  height: 48px; border-radius: 12px; font-weight: 600; border: none; margin-top: .35rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 10px 24px -8px rgb(200 16 46 / .6); transition: transform .2s var(--ease), box-shadow .2s, filter .2s;
+}
+.st-key-auth_panel button[kind="primaryFormSubmit"]:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 14px 30px -10px rgb(200 16 46 / .65); }
+.st-key-auth_panel button[kind="primaryFormSubmit"]:active { transform: translateY(0); }
+.hz-req { display: flex; flex-wrap: wrap; gap: .35rem .9rem; font-size: .75rem; color: var(--muted); margin: -.2rem 0 .35rem; }
+.hz-req span { display: inline-flex; align-items: center; gap: .3rem; }
+.hz-req .hz-ico { width: 13px; height: 13px; }
+.hz-legal { color: var(--muted); font-size: .74rem; line-height: 1.55; margin: 1.1rem 0 0; padding-top: 1rem; border-top: 1px solid var(--hairline); }
+.hz-legal .hz-ico { width: 13px; height: 13px; vertical-align: -2px; margin-right: .3rem; }
 
 @media (max-width: 760px) {
   .hz-auth { min-height: auto; padding: 1.8rem; }
   .hz-auth h2 { font-size: 1.5rem; margin-top: 1.4rem; }
-  .st-key-auth_panel { padding: 0; }
+  .st-key-auth_panel { padding: 1.4rem !important; }
 }

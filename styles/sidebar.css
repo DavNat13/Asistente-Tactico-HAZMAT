@@ -6,7 +6,7 @@
 
 .hz-side-brand { display: flex; align-items: center; gap: .6rem; padding: .25rem .25rem 1rem; }
 .hz-side-brand .hz-mark { width: 30px; height: 30px; border-radius: 9px; }
-.hz-side-brand .hz-mark svg { width: 16px; height: 16px; }
+.hz-side-brand .hz-mark .hz-ico { width: 16px; height: 16px; }
 .hz-side-brand b { font-size: .95rem; letter-spacing: -.01em; display: block; line-height: 1.1; }
 .hz-side-brand span { font-size: .72rem; color: var(--muted); }
 
