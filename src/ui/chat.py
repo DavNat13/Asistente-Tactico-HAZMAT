@@ -16,8 +16,8 @@ log = logging.getLogger("hazmat.ui")
 
 
 def render_history() -> None:
-    for msg in st.session_state.get("history", []):
-        render_message(msg)
+    for i, msg in enumerate(st.session_state.get("history", [])):
+        render_message(msg, key=f"{st.session_state.get('thread_id')}_{i}")
 
 
 def _persist(role: str, content: str, sources: list[dict] | None = None) -> None:
@@ -103,6 +103,7 @@ def ask(query: str) -> None:
             "sources": sources,
             "complexity": final.get("complexity"),
             "run_id": final.get("run_id"),
+            "question": clean,
         }
     )
     _persist("assistant", answer, sources)

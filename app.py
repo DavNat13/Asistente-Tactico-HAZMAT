@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.config.settings import settings
 from src.ui import state
 from src.ui.auth_view import render_auth
-from src.ui.chat_page import chat_page
 from src.ui.theme import load_css
 from src.utils.constants import APP_ICON, APP_NAME
 
@@ -45,16 +44,6 @@ if settings.AUTH_ENABLED and not state.user():
 if not settings.AUTH_ENABLED and not state.user():
     st.session_state.user = {"username": "local", "name": "Modo local", "role": "admin"}
 
-pages = [st.Page(chat_page, title="Asistente", icon=":material/chat:", default=True)]
-if state.is_admin():
-    from src.ui.observability_page import observability_page
+from src.ui.pages import available
 
-    pages.append(
-        st.Page(
-            observability_page,
-            title="Observabilidad",
-            icon=":material/monitoring:",
-            url_path="observabilidad",
-        )
-    )
-st.navigation(pages, position="top" if len(pages) > 1 else "hidden").run()
+st.navigation(available(), position="top").run()

@@ -40,6 +40,7 @@ class Thread(BaseModel):
     updated_at: datetime = Field(default_factory=_utcnow)
     is_active: bool = True
     messages: list[Message] = Field(default_factory=list)
+    incident: dict | None = None  # checklist y bitácora del incidente asociado
 
     def add_message(self, message: Message) -> None:
         self.messages.append(message)

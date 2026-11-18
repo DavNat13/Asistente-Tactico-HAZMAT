@@ -85,3 +85,22 @@ class ThreadRepository:
             return result.modified_count > 0
         except PyMongoError as e:
             raise RuntimeError(f"Failed to delete thread: {e}")
+
+    def set_incident(
+        self, session_id: str, thread_id: str, incident: dict | None
+    ) -> bool:
+        try:
+            session_id = InputSanitizer.sanitize_uuid(session_id)
+            thread_id = InputSanitizer.sanitize_uuid(thread_id)
+            result = self.collection.update_one(
+                {"session_id": session_id, "threads.thread_id": thread_id},
+                {
+                    "$set": {
+                        "threads.$.incident": incident,
+                        "updated_at": datetime.now(UTC),
+                    }
+                },
+            )
+            return result.modified_count > 0
+        except PyMongoError as e:
+            raise RuntimeError(f"Failed to save incident: {e}")

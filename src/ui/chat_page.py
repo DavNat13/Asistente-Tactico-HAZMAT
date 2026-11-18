@@ -7,9 +7,12 @@ from datetime import UTC, datetime
 
 import streamlit as st
 
+from src.config.features import features
 from src.config.settings import settings
 from src.ui import state
 from src.ui.chat import ask, render_history
+from src.ui.incident_panel import render_incident_panel
+from src.ui.photo import photo_query
 from src.ui.sidebar import render_sidebar
 from src.ui.theme import mark
 from src.utils.constants import SUGGESTIONS
@@ -50,16 +53,26 @@ def chat_page() -> None:
     if flash := st.session_state.pop("flash", None):
         st.toast(flash, icon=":material/check_circle:")
 
+    render_incident_panel()
     suggestion = _welcome() if not st.session_state.get("history") else None
     render_history()
 
     prompt = st.chat_input(
-        "Pregunta al Asistente HAZMAT…", max_chars=settings.MAX_QUERY_CHARS
+        "Pregunta al Asistente HAZMAT o adjunta una foto de la placa…",
+        max_chars=settings.MAX_QUERY_CHARS,
+        accept_file=True,
+        file_type=["jpg", "jpeg", "png"],
+        max_upload_size=features.MAX_IMAGE_MB,
     )
     with st.bottom:  # aviso bajo la caja de texto
         st.html(
             '<p class="hz-disclaimer">Herramienta de apoyo. Verifica en la GRE impresa y '
             "sigue al mando del incidente.</p>"
         )
-    if query := (prompt or suggestion):
+    query = suggestion
+    if prompt:
+        query = prompt.text
+        if prompt.files:
+            query = photo_query(prompt.files[0], prompt.text)
+    if query:
         ask(query)

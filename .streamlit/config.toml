@@ -3,7 +3,7 @@
 [server]
 enableXsrfProtection = true     # protección CSRF en formularios
 enableCORS = true
-maxUploadSize = 1               # la app no recibe archivos
+maxUploadSize = 5               # fotos de placas (validadas y re-codificadas)
 headless = true
 
 [browser]

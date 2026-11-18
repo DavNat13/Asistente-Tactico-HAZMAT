@@ -66,6 +66,11 @@ class SessionManager:
     def rename_thread(self, session_id: str, thread_id: str, title: str) -> bool:
         return self.repo.update_thread_title(session_id, thread_id, title)
 
+    def set_incident(
+        self, session_id: str, thread_id: str, incident: dict | None
+    ) -> bool:
+        return self.repo.set_incident(session_id, thread_id, incident)
+
     def delete_thread(self, session_id: str, thread_id: str) -> bool:
         return self.repo.delete_thread(session_id, thread_id)
 
