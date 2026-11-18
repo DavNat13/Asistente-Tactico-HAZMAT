@@ -103,8 +103,9 @@ def split_documents(documents: list[Document], text_splitter=None) -> list[Docum
 
 
 def chunk_id(meta: dict) -> str:
+    """ID determinista del chunk (deduplicación en upserts). No es un uso criptográfico."""
     raw = f"{meta.get('file')}|{meta.get('page')}|{meta.get('chunk_index')}"
-    return hashlib.sha1(raw.encode()).hexdigest()
+    return hashlib.sha1(raw.encode(), usedforsecurity=False).hexdigest()
 
 
 def prepare_documents(
