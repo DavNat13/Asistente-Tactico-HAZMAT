@@ -79,3 +79,20 @@ def eval_runs(limit: int = 10) -> pd.DataFrame:
         .limit(limit)
     )
     return pd.DataFrame([r["summary"] for r in rows if "summary" in r])
+
+
+def blocked_by_reason(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty or "block_reason" not in df:
+        return pd.DataFrame(columns=["reason", "n"])
+    names = {
+        "injection": "Manipulación del asistente",
+        "harmful": "Intención de daño",
+        "secrets": "Pedido de credenciales",
+        "out_of_domain": "Fuera de dominio",
+        "invalid": "Consulta inválida",
+        "rate_limit": "Límite de consultas",
+    }
+    b = df.dropna(subset=["block_reason"])
+    out = b.groupby("block_reason").size().rename("n").reset_index()
+    out["reason"] = out["block_reason"].map(lambda r: names.get(r, r))
+    return out[["reason", "n"]].sort_values("n", ascending=False)
