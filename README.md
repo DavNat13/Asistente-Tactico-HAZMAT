@@ -102,6 +102,25 @@ La latencia p95 subió porque el modelo principal (`gemini-3.6-flash`) estaba sa
 antes de pasar al respaldo; el circuit breaker evita repetir esa espera durante 120 s. Detalle por caso en
 `evals/results/*_rescored.json`.
 
+## Tareas automatizadas (v5.2)
+
+| Tarea | Dónde | Qué hace |
+|---|---|---|
+| **Mapa de zonas** | Página "Mapa de zonas" o botón bajo la respuesta | Dibuja el aislamiento y la zona de acción protectora (Tabla 1 día/noche o guía) sobre la dirección real del incidente |
+| **Identificar por foto** | Adjuntar imagen en el chat | Lee el N° UN de la placa naranja con visión y responde como una consulta normal |
+| **Checklist por fases** | "Iniciar checklist" en planes de nivel alto | Fases del procedimiento, cronómetro y bitácora con hora por paso |
+| **Ficha de incidente** | "Ficha de incidente" bajo la respuesta | PDF con distancias, plan, checklist, bitácora y fuentes; descarga o envío por correo |
+| **Correos** | Gmail SMTP (`.env`) | Bienvenida, cuenta bloqueada, ficha, alertas y reporte semanal |
+| **Evaluación nocturna** | `.github/workflows/nightly-eval.yml` | 31 casos + casos aprobados desde 👎; correo si la calidad baja |
+| **Alertas de salud** | `.github/workflows/monitoring.yml` (cada 30 min) | Latencia p95, errores y bloqueos sobre el uso real |
+| **Mejora continua** | Dashboard → "Mejora continua" | Las respuestas con 👎 se convierten en casos de evaluación |
+
+```bash
+python -m src.automation.jobs health-check | weekly-report | nightly-eval
+```
+
+Secrets de GitHub requeridos: `GEMINI_API_KEYS`, `MONGODB_URI`, `SMTP_USER`, `SMTP_PASSWORD`, `ADMIN_EMAILS`.
+
 ## Observabilidad
 
 Cada consulta registra en `agent_runs` (seudonimizado, TTL 180 días): latencia total, TTFT y por nodo,
