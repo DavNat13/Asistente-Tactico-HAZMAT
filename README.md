@@ -67,8 +67,8 @@ pip install -r requirements-heavy.txt -r requirements.txt
 cp .env.example .env                                   # completar credenciales
 
 python -m src.ingesta.ingest --data --clear --create-index   # ingesta (una vez)
-python -m src.security.create_user --username admin --role admin
-streamlit run app.py
+python -m src.security.create_user --username admin --role admin   # cuenta administradora
+streamlit run app.py   # los demás usuarios se registran desde "Crear cuenta" (rol operador)
 ```
 
 Con Docker: `docker compose up --build` (la imagen incluye el modelo de embeddings).

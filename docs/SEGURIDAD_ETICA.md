@@ -22,6 +22,8 @@ reemplazar al mando del incidente** y **no facilitar el uso malicioso** de la in
 | LLM09 Desinformación | Distancias o guías inventadas | RAG con búsqueda exacta UN→guía, verificación de citas (grounding) y advertencia si no coinciden | `src/agent/context.py`, `nodes.py` |
 | LLM10 Consumo no acotado | Abuso / DoS de cuota | Rate limit por usuario (12/min), límite de 2.000 caracteres, timeouts | `src/security/rate_limit.py` |
 | Web — Control de acceso (IDOR) | `?session_id=` permitía leer historiales ajenos | Login obligatorio; la sesión se resuelve desde el usuario en el servidor, nunca desde la URL | `src/ui/state.py` |
+| Web — Registro | Secuestro de cuenta al "registrar" un usuario existente, altas masivas | Inserción con clave única (nunca sobrescribe), validación de usuario/contraseña, aceptación del aviso de privacidad, límite de altas por hora y auditoría | `src/security/registration.py` |
+| LLM05 Código en el chat | Mensajes con `<script>`, `<img onerror>` o `&lt;script&gt;` | El texto se limpia antes de mostrarse, guardarse y enviarse al modelo; una consulta que solo contiene código se descarta | `src/security/text.py` |
 | Web — Autenticación | Fuerza bruta, enumeración de usuarios | scrypt + sal, comparación en tiempo constante, bloqueo tras 5 intentos, mensaje genérico | `src/security/auth.py` |
 | Web — CSRF / errores verbosos | Formularios, trazas expuestas | `enableXsrfProtection`, `showErrorDetails = "none"` | `.streamlit/config.toml` |
 | Cadena de suministro | Dependencias vulnerables, secretos en git | Versiones fijadas, `pip-audit`, Bandit (bloquea severidad alta), Gitleaks en CI | `.github/workflows/ci.yml` |
