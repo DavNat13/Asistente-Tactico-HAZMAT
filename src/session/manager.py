@@ -63,6 +63,12 @@ class SessionManager:
     def get_thread(self, session_id: str, thread_id: str) -> Thread | None:
         return self.repo.get_thread(session_id, thread_id)
 
+    def rename_thread(self, session_id: str, thread_id: str, title: str) -> bool:
+        return self.repo.update_thread_title(session_id, thread_id, title)
+
+    def delete_thread(self, session_id: str, thread_id: str) -> bool:
+        return self.repo.delete_thread(session_id, thread_id)
+
     def get_active_threads(self, session_id: str) -> list[Thread]:
         session = self.repo.get_session(session_id)
         return session.get_active_threads() if session else []

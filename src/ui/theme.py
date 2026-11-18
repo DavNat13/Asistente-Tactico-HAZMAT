@@ -7,25 +7,33 @@ from pathlib import Path
 
 import streamlit as st
 
-from src.utils.constants import APP_NAME, APP_SHORT, APP_SUBTITLE
+from src.ui.icons import icon
+from src.utils.constants import APP_NAME, APP_SUBTITLE
 
-_CSS = Path(__file__).resolve().parents[2] / "styles" / "app.css"
+_STYLES = Path(__file__).resolve().parents[2] / "styles"
+_FILES = ("app.css", "sidebar.css", "auth.css")
 
 
 @st.cache_resource
 def _css() -> str:
-    return _CSS.read_text(encoding="utf-8") if _CSS.exists() else ""
+    return "\n".join(
+        (_STYLES / f).read_text(encoding="utf-8")
+        for f in _FILES
+        if (_STYLES / f).exists()
+    )
 
 
 def load_css() -> None:
-    # CSS propio (archivo local, no contenido del usuario): seguro con unsafe_allow_html
+    """CSS propio del proyecto (archivo local, no contenido del usuario)."""
     st.html(f"<style>{_css()}</style>")
 
 
-def brand(subtitle: str = APP_SUBTITLE) -> None:
+def mark() -> str:
+    return f'<div class="hz-mark">{icon("flame")}</div>'
+
+
+def sidebar_brand() -> None:
     st.html(
-        '<div class="hz-brand">'
-        f'<div class="hz-mark">{html.escape(APP_SHORT)}</div>'
-        f'<div><div class="hz-title">{html.escape(APP_NAME)}</div>'
-        f'<div class="hz-sub">{html.escape(subtitle)}</div></div></div>'
+        f'<div class="hz-side-brand">{mark()}<div><b>{html.escape(APP_NAME)}</b>'
+        f"<span>{html.escape(APP_SUBTITLE)}</span></div></div>"
     )

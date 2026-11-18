@@ -106,6 +106,9 @@ class SessionRepository:
     def update_thread_title(self, session_id: str, thread_id: str, title: str) -> bool:
         return self.threads.update_thread_title(session_id, thread_id, title)
 
+    def delete_thread(self, session_id: str, thread_id: str) -> bool:
+        return self.threads.delete_thread(session_id, thread_id)
+
     def add_message(self, session_id: str, thread_id: str, message: Message) -> bool:
         return self.messages.add_message(session_id, thread_id, message)
 

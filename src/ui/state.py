@@ -94,6 +94,30 @@ def open_thread(thread_id: str) -> None:
     st.session_state.history = _to_history(mgr.get_history(sid, thread_id))
 
 
+def rename_thread(thread_id: str, title: str) -> None:
+    mgr, sid = manager(), st.session_state.get("session_id")
+    title = (title or "").strip()[:80]
+    if mgr and sid and title:
+        try:
+            mgr.rename_thread(sid, thread_id, title)
+        except Exception:  # noqa: BLE001
+            st.toast("No se pudo renombrar.", icon=":material/error:")
+
+
+def delete_thread(thread_id: str) -> None:
+    mgr, sid = manager(), st.session_state.get("session_id")
+    if not (mgr and sid):
+        return
+    try:
+        mgr.delete_thread(sid, thread_id)
+    except Exception:  # noqa: BLE001
+        st.toast("No se pudo eliminar.", icon=":material/error:")
+        return
+    if st.session_state.get("thread_id") == thread_id:
+        new_thread()
+    st.toast("Conversación eliminada.", icon=":material/delete:")
+
+
 def logout() -> None:
     for key in list(st.session_state.keys()):
         del st.session_state[key]

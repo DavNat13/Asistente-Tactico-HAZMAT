@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config.settings import settings
 from src.ui import state
-from src.ui.auth_view import render_login
+from src.ui.auth_view import render_auth
 from src.ui.chat_page import chat_page
 from src.ui.theme import load_css
 from src.utils.constants import APP_ICON, APP_NAME
@@ -24,7 +24,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 
-st.set_page_config(page_title=APP_NAME, page_icon=APP_ICON, layout="centered")
+st.set_page_config(page_title=APP_NAME, page_icon=APP_ICON, layout="wide")
 load_css()
 
 
@@ -40,7 +40,7 @@ def _warmup() -> bool:
 _warmup()
 
 if settings.AUTH_ENABLED and not state.user():
-    render_login()
+    render_auth()
     st.stop()
 if not settings.AUTH_ENABLED and not state.user():
     st.session_state.user = {"username": "local", "name": "Modo local", "role": "admin"}

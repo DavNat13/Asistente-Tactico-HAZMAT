@@ -1,13 +1,29 @@
 APP_NAME = "Asistente HAZMAT"
-APP_SHORT = "HZ"
-APP_SUBTITLE = "Bomberos de Chile · GRE 2024 y Manual ABC-V"
+APP_SUBTITLE = "Bomberos de Chile · GRE 2024"
 APP_ICON = ":material/local_fire_department:"
 
-EXAMPLE_QUERIES = [
-    "¿Qué guía corresponde al UN 1203?",
-    "Distancia de aislamiento para cloro UN 1017",
-    "Fuga de amoniaco en planta frigorífica, ¿cómo respondo?",
-    "¿Qué EPP necesito para un derrame de ácido sulfúrico?",
+# (ícono Material, texto visible, consulta enviada)
+SUGGESTIONS = [
+    (
+        ":material/search:",
+        "¿Qué guía corresponde al UN 1203?",
+        "¿Qué guía corresponde al UN 1203?",
+    ),
+    (
+        ":material/radar:",
+        "Distancias de aislamiento para cloro (UN 1017)",
+        "Distancia de aislamiento y evacuación para cloro UN 1017",
+    ),
+    (
+        ":material/emergency:",
+        "Fuga de amoniaco en planta frigorífica: plan de respuesta",
+        "Fuga de amoniaco anhidro en una planta frigorífica con nube visible, ¿cómo respondo?",
+    ),
+    (
+        ":material/health_and_safety:",
+        "EPP para un derrame de ácido sulfúrico",
+        "¿Qué EPP necesito para un derrame de ácido sulfúrico?",
+    ),
 ]
 
 LEVEL_LABELS = {
@@ -15,3 +31,5 @@ LEVEL_LABELS = {
     "medium": "Nivel medio",
     "high": "Nivel alto",
 }
+
+ROLE_LABELS = {"admin": "Administrador", "operador": "Operador"}
