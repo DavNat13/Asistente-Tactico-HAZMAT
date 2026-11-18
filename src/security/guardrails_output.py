@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import re
 
+from src.security.text import strip_markup
+
 _HTML_TAG = re.compile(r"<\s*/?\s*[a-zA-Z][^>]*>")
 _JS_URL = re.compile(r"javascript\s*:", re.IGNORECASE)
 _LEAKS = [
@@ -26,7 +28,7 @@ def sanitize_output(text: str) -> tuple[str, list[str]]:
     issues = []
     if _HTML_TAG.search(text):
         issues.append("html")
-        text = _HTML_TAG.sub("", text)
+        text = strip_markup(text)
     if _JS_URL.search(text):
         issues.append("js_url")
         text = _JS_URL.sub("", text)

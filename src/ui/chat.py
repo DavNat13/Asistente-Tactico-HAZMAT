@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.agent.service import stream_query
 from src.security.pii import redact
+from src.security.text import strip_markup
 from src.ui import state
 from src.ui.message import AVATARS, meta_html, render_message, sources_from_docs
 
@@ -48,7 +49,15 @@ def _persist(role: str, content: str, sources: list[dict] | None = None) -> None
 
 def ask(query: str) -> None:
     user = state.user() or {}
-    clean, _ = redact(query)  # el historial nunca guarda datos personales
+    clean, _ = redact(
+        strip_markup(query)
+    )  # nunca código ni datos personales en pantalla o BD
+    if not clean:
+        st.toast(
+            "La consulta solo contenía código y fue descartada.",
+            icon=":material/block:",
+        )
+        return
     prior = [
         {"role": m["role"], "content": m["content"]} for m in st.session_state.history
     ]

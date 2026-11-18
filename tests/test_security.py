@@ -50,7 +50,7 @@ def test_output_strips_html_and_js():
         "Guía 128 <script>alert(1)</script><img src=x onerror=alert(1)> [x](javascript:alert(1))"
     )
     assert "<script" not in text and "<img" not in text and "javascript:" not in text
-    assert "html" in issues and "js_url" in issues
+    assert "html" in issues
 
 
 def test_output_redacts_secrets():

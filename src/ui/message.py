@@ -12,6 +12,7 @@ import html
 import streamlit as st
 
 from src.observability.store import record_feedback
+from src.security.text import strip_markup
 from src.utils.constants import LEVEL_LABELS
 
 AVATARS = {"user": ":material/person:", "assistant": ":material/local_fire_department:"}
@@ -62,7 +63,9 @@ def _feedback(run_id: str) -> None:
 def render_message(msg: dict) -> None:
     role = msg.get("role", "assistant")
     with st.chat_message(role, avatar=AVATARS.get(role)):
-        st.markdown(msg.get("content", ""))
+        st.markdown(
+            strip_markup(msg.get("content", ""))
+        )  # historiales antiguos incluidos
         if role == "assistant":
             meta = meta_html(msg.get("complexity"), msg.get("sources", []), None)
             if meta:

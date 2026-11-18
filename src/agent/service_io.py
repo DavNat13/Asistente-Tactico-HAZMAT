@@ -7,6 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from src.config.settings import settings
 from src.observability.telemetry import RunRecorder
 from src.security.pii import redact
+from src.security.text import strip_markup
 
 STATUS_LABELS = {
     "guard_in": "Validando la consulta…",
@@ -40,7 +41,7 @@ def _history_messages(history: list[dict] | None) -> list:
 
 
 def _inputs(query: str, history: list[dict] | None) -> tuple[dict, int]:
-    clean, n_pii = redact(query)
+    clean, n_pii = redact(strip_markup(query))  # sin código HTML/JS ni datos personales
     return {
         "query": clean,
         "messages": [*_history_messages(history), HumanMessage(content=clean)],
