@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+from src.config.features import features
 from src.config.settings import settings
 from src.observability.store import security_event
 from src.security.accounts import (  # noqa: F401 — API pública reexportada
@@ -34,7 +35,7 @@ from src.security.privacy import needs_acceptance
 
 def pending_step(user: dict) -> str | None:
     """Paso pendiente antes de entrar. Sin `email_verified` = cuenta previa a la migración."""
-    if user.get("email_verified") is False:
+    if features.EMAIL_VERIFICATION_REQUIRED and user.get("email_verified") is False:
         return "verify" if user.get("email") else "email"
     if needs_acceptance(user):
         return "privacy"

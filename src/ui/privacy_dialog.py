@@ -16,6 +16,7 @@ from src.security.privacy import (
     load_notice,
     split_sections,
 )
+from src.utils.constants import APP_VERSION
 
 READ_KEY = "privacy_read"
 
@@ -68,7 +69,7 @@ def legal_line(key: str = "privacy_footer") -> None:
         key="auth_legal", horizontal=True, vertical_alignment="center", gap="small"
     ):
         st.caption(
-            ":material/shield: Datos protegidos · Ley 21.719",
+            f":material/shield: Datos protegidos · Ley 21.719 · v{APP_VERSION}",
             width="content",
         )
         if st.button("Aviso de privacidad", type="tertiary", key=key):

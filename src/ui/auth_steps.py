@@ -7,6 +7,7 @@ import streamlit as st
 from src.security import otp, privacy, verification
 from src.security.auth import account_status
 from src.ui.auth_common import go, mask_email, notify, numeric_code_input, route, title
+from src.ui.auth_errors import report
 from src.ui.privacy_dialog import acceptance, privacy_dialog
 
 
@@ -23,6 +24,9 @@ def _resend(username: str) -> None:
         except ValueError as e:
             st.warning(str(e), icon=":material/timer:")
             return
+        except Exception as exc:  # noqa: BLE001
+            st.error(report(exc, "reenviar código"), icon=":material/error:")
+            return
         if ok:
             st.toast("Te enviamos un código nuevo.", icon=":material/mark_email_read:")
         else:
@@ -33,7 +37,11 @@ def verify_step(data: dict) -> None:
     title("mail", "Revisa tu correo", "Ingresa el código para activar tu cuenta.")
     st.markdown(
         f"Enviamos un código de 6 dígitos a **{mask_email(data.get('email'))}**. "
-        "Vence en 15 minutos y sirve una sola vez."
+        + (
+            f"Vence a las **{data['expires']}** y sirve una sola vez."
+            if data.get("expires")
+            else "Vence en 15 minutos y sirve una sola vez."
+        )
     )
     with st.form("otp", border=False):
         code = st.text_input(
@@ -53,7 +61,11 @@ def verify_step(data: dict) -> None:
         )
     numeric_code_input()
     if submitted:
-        account = verification.confirm(data["username"], code)
+        try:
+            account = verification.confirm(data["username"], code)
+        except Exception as exc:  # noqa: BLE001
+            st.error(report(exc, "verificar código"), icon=":material/error:")
+            return
         if not account:
             st.error(
                 "Código incorrecto o expirado. Tras 5 intentos fallidos debes pedir uno nuevo.",
@@ -96,6 +108,9 @@ def email_step(data: dict) -> None:
         sent = verification.set_email(data["username"], email)
     except ValueError as e:
         st.error(str(e), icon=":material/error:")
+        return
+    except Exception as exc:  # noqa: BLE001
+        st.error(report(exc, "agregar correo"), icon=":material/error:")
         return
     if not sent:
         st.error("No pudimos enviar el código de verificación. Intenta más tarde")

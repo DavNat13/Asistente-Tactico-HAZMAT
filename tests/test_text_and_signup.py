@@ -92,7 +92,7 @@ def test_register_rejects_bad_or_duplicate_email(users):
         "ana", "Ana", "ana@b.cl", "Clave-12345", "Clave-12345", True
     )
     # Cuenta aún pendiente: solo "Revisa tu correo" (el caso verificado está en test_registration_verify)
-    with pytest.raises(registration.PendingVerification, match="Revisa tu correo"):
+    with pytest.raises(registration.PendingVerification, match="registro pendiente"):
         registration.register_user(
             "ana2", "Ana", "ANA@b.cl", "Clave-12345", "Clave-12345", True
         )

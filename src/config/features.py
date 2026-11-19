@@ -24,6 +24,10 @@ def _float(name: str, default: float) -> float:
         return default
 
 
+def _bool(name: str, default: bool) -> bool:
+    return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "si")
+
+
 def _list(name: str) -> list[str]:
     return [x.strip() for x in os.getenv(name, "").split(",") if x.strip()]
 
@@ -42,6 +46,8 @@ class Features:
     ADMIN_EMAILS: list[str] = field(default_factory=lambda: _list("ADMIN_EMAILS"))
     MAIL_MAX_PER_HOUR: int = _int("MAIL_MAX_PER_HOUR", 5)
     APP_URL: str = os.getenv("APP_URL", "http://localhost:8501")
+    # false solo en desarrollo: las cuentas nuevas se activan sin código de correo
+    EMAIL_VERIFICATION_REQUIRED: bool = _bool("EMAIL_VERIFICATION_REQUIRED", True)
     # Mapa (OpenStreetMap / Nominatim)
     GEOCODER_URL: str = os.getenv(
         "GEOCODER_URL", "https://nominatim.openstreetmap.org/search"
@@ -59,7 +65,20 @@ class Features:
 
     @property
     def mail_enabled(self) -> bool:
-        return bool(self.SMTP_USER and self.SMTP_PASSWORD)
+        return not self.mail_problem
+
+    @property
+    def mail_problem(self) -> str | None:
+        """Motivo por el que el correo no puede funcionar, o None si la configuración es válida."""
+        if not (self.SMTP_USER and self.SMTP_PASSWORD):
+            return "faltan SMTP_USER o SMTP_PASSWORD en .env"
+        if "@" not in self.SMTP_USER:
+            return (
+                "SMTP_USER debe ser la dirección de correo completa (no la contraseña)"
+            )
+        if self.SMTP_USER == self.SMTP_PASSWORD:
+            return "SMTP_USER y SMTP_PASSWORD son iguales: SMTP_USER debe ser el correo"
+        return None
 
 
 features = Features()

@@ -131,6 +131,19 @@ Secrets de GitHub requeridos: `GEMINI_API_KEYS`, `MONGODB_URI`, `SMTP_USER`, `SM
 | **Cuentas existentes** | `python -m src.security.migrate_verification --dry-run` / `--apply` / `--verify-user USUARIO` |
 
 Variable nueva obligatoria en producción: `OTP_SECRET` (ver `.env.example`).
+`EMAIL_VERIFICATION_REQUIRED=false` desactiva la verificación (solo desarrollo).
+
+### Si no puedes entrar o no llega el código
+
+1. **Un solo servidor y la versión correcta:** el pie de la pantalla de acceso muestra la versión
+   (`v5.3.2`). Tras actualizar el código, detén todos los `streamlit run` y deja uno solo: un servidor
+   antiguo recarga los módulos por partes y puede fallar.
+2. **Correo:** `python -m src.notify.smtp_check` (sin enviar) y `--send-to tu@correo`. `SMTP_USER` debe
+   ser la dirección completa y `SMTP_PASSWORD` la contraseña de aplicación.
+3. **Entrada garantizada:** `python -m src.security.create_user --username admin --role admin --email tu@correo`
+   crea la cuenta con el correo ya verificado, aunque el SMTP no funcione.
+4. **Errores con referencia:** "No se pudo crear la cuenta (ref. ab12cd34)" → busca `ab12cd34` en la
+   consola del servidor (traceback) o en `security_events` (`signup_failed` / `auth_ui_error`).
 
 ## Observabilidad
 

@@ -64,10 +64,17 @@ python -m evals.run_evals --only S01,S02,S03,S04,S05,S06,S07   # ataques: refusa
 
 ## 6. Decisiones sobre verificación, recuperación y privacidad (v5.3)
 
-- **Correo de una cuenta pendiente en el registro:** si el correo pertenece a una cuenta verificada se
-  mantiene "Ese correo ya está registrado" (comportamiento previo). Si pertenece a una cuenta pendiente
-  se responde solo **"Revisa tu correo"**, sin indicar a qué cuenta corresponde ni reenviar el código.
-  El titular legítimo puede iniciar sesión con su contraseña y reenviar el código desde ahí.
+- **Correo de una cuenta pendiente en el registro (v5.3.2):** si el correo pertenece a una cuenta
+  verificada se mantiene "Ese correo ya está registrado". Si pertenece a una cuenta pendiente se indica
+  explícitamente que hay un registro pendiente y que se entra con usuario y contraseña para reenviar el
+  código (con botón "Ir a Entrar"). El mensaje anterior ("Revisa tu correo") se confundía con un envío
+  exitoso. No revela más que el mensaje de correo ya registrado, que ya existía.
+- **Sin fallos silenciosos (v5.3.2):** todo error inesperado del registro o de la pantalla de acceso deja
+  traceback en el log del servidor, un evento (`signup_failed`, `auth_ui_error`) y una referencia corta
+  visible para el usuario; la cuenta a medio crear se deshace sin ocultar el error original.
+- **`EMAIL_VERIFICATION_REQUIRED`:** `true` por defecto. Si es `true` y el correo no está bien
+  configurado (`features.mail_problem`), el registro se bloquea antes de crear nada. `false` solo en
+  desarrollo. Las cuentas creadas por `create_user` quedan verificadas: vía de entrada garantizada.
 - **Errores de login y recuperación:** nunca indican si el correo existe. El mensaje "Debes verificar tu
   correo" solo aparece después de una contraseña correcta, por lo que no sirve para enumerar.
 - **Dominios de correo:** no se restringen (decisión tomada).

@@ -49,7 +49,7 @@ def test_no_login_until_verified(env):
 
 def test_pending_email_only_says_check_inbox(env):
     _register()
-    with pytest.raises(registration.PendingVerification, match="^Revisa tu correo$"):
+    with pytest.raises(registration.PendingVerification, match="registro pendiente"):
         _register(username="otra")
     verification.confirm("camila", _code(env))
     with pytest.raises(ValueError, match="Ese correo ya está registrado"):

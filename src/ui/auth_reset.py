@@ -13,6 +13,7 @@ from src.ui.auth_common import (
     password_checks,
     title,
 )
+from src.ui.auth_errors import report
 
 
 def _request() -> None:
@@ -76,6 +77,9 @@ def _confirm(email: str) -> None:
             reset_password(email, code or "", new or "", confirm or "", ip=client_ip())
         except ValueError as e:
             st.error(str(e), icon=":material/error:")
+            return
+        except Exception as exc:  # noqa: BLE001
+            st.error(report(exc, "cambiar contraseña"), icon=":material/error:")
             return
         notify("Contraseña actualizada. Ya puedes iniciar sesión.")
         go(None)

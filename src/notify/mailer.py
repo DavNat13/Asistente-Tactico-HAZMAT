@@ -68,7 +68,11 @@ def send(
     if not to:
         return False
     if not features.mail_enabled:
-        log.info("Correo '%s' omitido: SMTP no configurado", kind)
+        log.warning(
+            "Correo '%s' omitido: %s",
+            kind,
+            getattr(features, "mail_problem", None) or "SMTP no configurado",
+        )
         _log(kind, to, False, "smtp_no_configurado", sender)
         return False
     msg = build_message(to, subject, html, text, attachments)
@@ -78,7 +82,13 @@ def send(
             features.SMTP_HOST, features.SMTP_PORT, context=context, timeout=20
         ) as smtp:
             smtp.login(features.SMTP_USER, features.SMTP_PASSWORD)
-            smtp.send_message(msg)
+            refused = smtp.send_message(msg)  # destinatarios rechazados por el servidor
+        if refused:
+            log.warning(
+                "Correo '%s': %d destinatario(s) rechazado(s)", kind, len(refused)
+            )
+            _log(kind, to, False, "destinatario_rechazado", sender)
+            return False
         _log(kind, to, True, sender=sender)
         return True
     except (smtplib.SMTPException, OSError) as e:

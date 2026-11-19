@@ -5,16 +5,33 @@ El backend repite las mismas validaciones (src/security/validators.py).
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 import streamlit as st
 
-from src.security.registration import PendingVerification, register_user
+from src.config.features import features
+from src.security import otp
+from src.security.registration import (
+    MAIL_REQUIRED,
+    PendingVerification,
+    register_user,
+)
+from src.security.signup_failure import SignupError
 from src.security.validators import (
     email_error,
     name_error,
     signup_errors,
     username_error,
 )
-from src.ui.auth_common import client_ip, field_hint, go, password_checks, title
+from src.ui.auth_common import (
+    client_ip,
+    field_hint,
+    go,
+    password_checks,
+    start_session,
+    title,
+)
+from src.ui.auth_errors import local_now, report
 from src.ui.privacy_dialog import acceptance
 
 LIVE = "400ms"  # valida tras una pausa al escribir
@@ -23,9 +40,17 @@ LIVE = "400ms"  # valida tras una pausa al escribir
 @st.fragment
 def register_form() -> None:
     """Sin st.form: los checks de contraseña se actualizan mientras se escribe (`live`)."""
-    title(
-        "shield", "Crea tu cuenta", "Te enviaremos un código para verificar tu correo."
+    required = features.EMAIL_VERIFICATION_REQUIRED
+    subtitle = (
+        "Te enviaremos un código para verificar tu correo."
+        if required
+        else "Tu cuenta quedará activa al instante."
     )
+    title("shield", "Crea tu cuenta", subtitle)
+    top = st.container()  # todas las alertas del registro aparecen aquí, arriba
+    blocked = required and not features.mail_enabled
+    if blocked:
+        top.warning(MAIL_REQUIRED, icon=":material/mail_lock:")
     name = st.text_input(
         "Nombre completo",
         placeholder="ej. Camila Rojas",
@@ -76,7 +101,7 @@ def register_form() -> None:
     password_checks(password or "", confirm or "")
     accepted = acceptance("reg_accept")
     errors = signup_errors(name, username, email, password, confirm)
-    ready = not errors and accepted
+    ready = not errors and accepted and not blocked
     clicked = st.button(
         "Crear cuenta",
         type="primary",
@@ -97,15 +122,29 @@ def register_form() -> None:
             username, name, email, password, confirm, accepted, ip=client_ip()
         )
     except PendingVerification as e:
-        st.info(str(e), icon=":material/mark_email_unread:")
+        top.info(str(e), icon=":material/mark_email_unread:")
+        top.button("Ir a Entrar", icon=":material/login:", on_click=_to_login)
         return
-    except ValueError as e:
-        st.error(str(e), icon=":material/error:")
+    except (
+        ValueError,
+        SignupError,
+    ) as e:  # SignupError ya quedó registrado con su ref.
+        top.error(str(e), icon=":material/error:")
         return
-    except Exception:  # noqa: BLE001
-        st.error(
-            "No se pudo crear la cuenta. Intenta en unos minutos.",
-            icon=":material/cloud_off:",
-        )
+    except Exception as exc:  # noqa: BLE001 — se registra con traceback y referencia
+        top.error(report(exc, "registro"), icon=":material/error:")
         return
-    go("verify", username=account["username"], email=account["email"], signup=True)
+    if account.get("requires") is None:  # verificación desactivada: entra directo
+        start_session(account, f"¡Cuenta creada! Bienvenido/a, {account['name']}.")
+    expires = local_now() + timedelta(minutes=otp.TTL_MINUTES["signup"])
+    go(
+        "verify",
+        username=account["username"],
+        email=account["email"],
+        signup=True,
+        expires=expires.strftime("%H:%M"),
+    )
+
+
+def _to_login() -> None:
+    st.session_state["auth_mode"] = "Entrar"

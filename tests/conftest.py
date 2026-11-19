@@ -14,7 +14,7 @@ import pytest
 
 from tests.fakedb import FakeDB
 
-_DB_MODULES = ("accounts", "registration", "otp", "throttle")
+_DB_MODULES = ("accounts", "registration", "otp", "throttle", "signup_failure")
 _EVENT_MODULES = (
     "otp",
     "throttle",
@@ -24,6 +24,7 @@ _EVENT_MODULES = (
     "privacy",
     "auth",
     "migrate_verification",
+    "signup_failure",
 )
 
 
@@ -61,7 +62,14 @@ def env(monkeypatch):
         "notify_password_changed",
         lambda u: mails.append(("changed", u["email"], None)),
     )
-    from src.security import accounts, recovery, throttle
+    from src.security import accounts, auth, recovery, registration, throttle
+
+    # Verificación obligatoria y SMTP "configurado" (independiente del .env de la máquina)
+    state.features = SimpleNamespace(
+        EMAIL_VERIFICATION_REQUIRED=True, mail_enabled=True
+    )
+    monkeypatch.setattr(registration, "features", state.features)
+    monkeypatch.setattr(auth, "features", state.features)
 
     monkeypatch.setattr(accounts, "_index_ready", True)
     monkeypatch.setattr(recovery, "MIN_RESPONSE_S", 0)
