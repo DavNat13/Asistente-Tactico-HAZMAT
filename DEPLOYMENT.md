@@ -10,6 +10,37 @@
 
 ---
 
+## Opción gratuita: Hugging Face Spaces
+
+Despliegue continuo sin costo ni tarjeta: Docker, 2 vCPU, 16 GB de RAM y HTTPS incluido. Cada vez que el
+CI pasa en `main`, el flujo `.github/workflows/deploy-huggingface.yml` publica una copia limpia en el Space.
+
+1. **Cuenta y Space.** Crea una cuenta en [huggingface.co](https://huggingface.co) y luego
+   **New Space**: nombre (por ejemplo `asistente-hazmat`), SDK **Docker** → plantilla **Blank**,
+   hardware **CPU basic (free)** y visibilidad **Public**. Un Space privado exige iniciar sesión en
+   Hugging Face para usar la app.
+2. **Variables del Space.** En el Space, entra a **Settings → Variables and secrets** y agrega como
+   *Secrets* `GEMINI_API_KEYS`, `MONGODB_URI`, `OTP_SECRET`, `TELEMETRY_SALT`, `SMTP_USER`,
+   `SMTP_PASSWORD`, `MAIL_FROM`, `ADMIN_EMAILS`, `ESRI_API_KEY` y, si lo usas, `LANGCHAIN_API_KEY`.
+   Agrega como *Variables* `APP_URL=https://usuario-asistente-hazmat.hf.space` y
+   `EMAIL_VERIFICATION_REQUIRED=true`. Pega **solo el valor**, sin comillas.
+3. **Token.** En **Settings → Access Tokens** de tu cuenta de Hugging Face, crea un token de tipo
+   **Write** (o *fine-grained* con escritura solo sobre ese Space).
+4. **GitHub.** En el repositorio, entra a **Settings → Secrets and variables → Actions** y crea el secret
+   `HF_TOKEN` con ese token y la variable `HF_SPACE=usuario/asistente-hazmat`.
+5. **Publicar.** Ejecuta **Actions → Despliegue en Hugging Face → Run workflow**, o espera al próximo
+   CI en verde en `main`. El Space construye la imagen (~10 minutos la primera vez).
+6. **Mapas.** Agrega `https://usuario-asistente-hazmat.hf.space` en los *Referrers* de la clave Esri.
+7. **Administrador.** Desde tu equipo, con el mismo `.env` (misma base de datos):
+   `python -m src.security.create_user --username admin --role admin --email tu@correo.cl`.
+
+> [!NOTE]
+> Usa la dirección directa `https://usuario-asistente-hazmat.hf.space`. Dentro del marco de la página
+> del Space el navegador puede bloquear la ubicación GPS y la subida de fotos. En el plan gratuito, el
+> Space se suspende tras unas 48 horas sin visitas y despierta en alrededor de un minuto al entrar.
+
+El resto de esta guía describe un despliegue en servidor propio con Docker Compose.
+
 ## Requisitos
 
 | Componente | Requisito |
