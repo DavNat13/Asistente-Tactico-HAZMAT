@@ -11,7 +11,16 @@ from src.ui.icons import icon
 from src.utils.constants import APP_NAME, APP_SUBTITLE
 
 _STYLES = Path(__file__).resolve().parents[2] / "styles"
-_FILES = ("app.css", "forms.css", "sidebar.css", "auth.css")
+_FILES = (
+    "tokens.css",
+    "app.css",
+    "nav.css",
+    "forms.css",
+    "sidebar.css",
+    "auth.css",
+    "dashboard.css",
+    "map.css",
+)
 
 
 @st.cache_resource

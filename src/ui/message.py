@@ -8,6 +8,7 @@ Los únicos fragmentos HTML (chips) se construyen aquí con `html.escape`.
 from __future__ import annotations
 
 import html
+import uuid
 
 import streamlit as st
 
@@ -77,7 +78,13 @@ def _feedback(msg: dict) -> None:
 
 def render_message(msg: dict, key: str = "") -> None:
     role = msg.get("role", "assistant")
-    with st.chat_message(role, avatar=AVATARS.get(role)):
+    tag = (
+        "u" if role == "user" else "a"
+    )  # clave por rol: el CSS distingue usuario/asistente
+    with (
+        st.container(key=f"msg_{tag}_{key or uuid.uuid4().hex[:8]}"),
+        st.chat_message(role, avatar=AVATARS.get(role)),
+    ):
         st.markdown(
             strip_markup(msg.get("content", ""))
         )  # historiales antiguos incluidos

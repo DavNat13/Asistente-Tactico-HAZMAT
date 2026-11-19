@@ -17,9 +17,8 @@
 }
 
 /* ── Estructura ─────────────────────────────────────────────────────────── */
-[data-testid="stMainBlockContainer"] { max-width: 860px; padding-top: 1.5rem; padding-bottom: 8rem; }
+[data-testid="stMainBlockContainer"] { max-width: 880px; padding-bottom: 8rem; }
 [data-testid="stMainBlockContainer"]:has(.hz-dash) { max-width: 1240px; }
-header[data-testid="stHeader"] { background: transparent; }
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stDecoration"] { display: none; }
 
 @keyframes hz-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -59,16 +58,16 @@ header[data-testid="stHeader"] { background: transparent; }
 
 /* ── Mensajes ───────────────────────────────────────────────────────────── */
 [data-testid="stChatMessage"] { background: transparent; padding: .6rem 0; gap: .85rem; animation: hz-fade-up .35s var(--ease) both; }
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { flex-direction: row-reverse; }
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
+[class*="st-key-msg_u_"] [data-testid="stChatMessage"] { flex-direction: row-reverse; }
+[class*="st-key-msg_u_"] [data-testid="stChatMessageContent"] {
   flex: 0 1 auto; max-width: 78%; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
   border-radius: 18px 18px 4px 18px; padding: .55rem 1rem;
 }
-[data-testid="stChatMessageAvatarAssistant"] {
+[class*="st-key-msg_a_"] [data-testid="stChatMessageAvatarCustom"] {
   background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; border-radius: 10px;
   box-shadow: 0 3px 10px -2px rgb(200 16 46 / .4);
 }
-[data-testid="stChatMessageAvatarUser"] { border-radius: 10px; }
+[class*="st-key-msg_u_"] [data-testid="stChatMessageAvatarCustom"] { border-radius: 10px; }
 [data-testid="stChatMessageContent"] p, [data-testid="stChatMessageContent"] li { line-height: 1.65; }
 [data-testid="stChatMessageContent"] hr { margin: .9rem 0 .5rem; border-color: var(--hairline); }
 [data-testid="stChatMessageContent"] em:only-child { color: var(--muted); }
@@ -103,5 +102,33 @@ header[data-testid="stHeader"] { background: transparent; }
   box-shadow: var(--shadow-sm); transition: transform .2s var(--ease), box-shadow .2s;
 }
 [data-testid="stMetric"]:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* ── Centro de mando: chat ─────────────────────────────────────────────── */
+/* Respuesta del asistente como tarjeta */
+[class*="st-key-msg_a_"] [data-testid="stChatMessageContent"] {
+  border: 1px solid var(--hairline); background: var(--surface); border-radius: 6px var(--r-lg) var(--r-lg) var(--r-lg);
+  padding: .95rem 1.15rem .85rem; box-shadow: var(--e-1); transition: box-shadow .25s var(--ease), border-color .25s;
+}
+[class*="st-key-msg_a_"] [data-testid="stChatMessageContent"]:hover { box-shadow: var(--e-2); border-color: var(--hairline-strong); }
+[data-testid="stChatMessageContent"] h1, [data-testid="stChatMessageContent"] h2, [data-testid="stChatMessageContent"] h3 { letter-spacing: -.02em; }
+[data-testid="stChatMessageContent"] table { border-radius: var(--r-sm); overflow: hidden; }
+
+/* Acciones bajo la respuesta (Ver en el mapa, Ficha, Checklist) como píldoras */
+[class*="st-key-actions_"] button {
+  border: 1px solid var(--hairline-strong) !important; border-radius: var(--r-pill) !important; padding: .3rem .85rem !important;
+  background: var(--surface) !important; transition: transform .2s var(--spring), border-color .2s, background .2s;
+}
+[class*="st-key-actions_"] button:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important; background: var(--accent-soft) !important; }
+[class*="st-key-actions_"] [data-testid="stIconMaterial"] { color: var(--accent); }
+
+/* Bienvenida: halo suave detrás de la marca */
+.hz-hero { position: relative; }
+.hz-hero::before {
+  content: ""; position: absolute; left: 50%; top: 4vh; width: 340px; height: 340px; transform: translateX(-50%); z-index: -1;
+  background: radial-gradient(closest-side, rgb(200 16 46 / .14), transparent); filter: blur(10px); pointer-events: none;
+}
+
+/* Barra de entrada anclada con el fondo del tema (los mensajes no se ven a través) */
+[data-testid="stBottom"] > div { background: inherit; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

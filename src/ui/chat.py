@@ -65,7 +65,10 @@ def ask(query: str) -> None:
     _persist("user", clean)
     render_message({"role": "user", "content": clean})
 
-    with st.chat_message("assistant", avatar=AVATARS["assistant"]):
+    with (
+        st.container(key="msg_a_live"),
+        st.chat_message("assistant", avatar=AVATARS["assistant"]),
+    ):
         status = st.status("Analizando consulta…", expanded=False)
         placeholder = st.empty()
         text, final = "", {}
