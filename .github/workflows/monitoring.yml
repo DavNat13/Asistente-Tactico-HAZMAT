@@ -1,4 +1,5 @@
 # Monitoreo: revisión de salud cada 30 min y reporte semanal los lunes.
+# Cada 30 min también se eliminan cuentas nuevas no verificadas vencidas.
 # Ambas tareas leen la telemetría real (agent_runs, canal ui) y avisan por correo a ADMIN_EMAILS.
 name: "Monitoreo y reportes"
 
@@ -11,7 +12,7 @@ on:
       task:
         description: "Tarea a ejecutar"
         type: choice
-        options: [health-check, weekly-report]
+        options: [health-check, weekly-report, purge-unverified]
         default: health-check
 
 permissions:
@@ -39,6 +40,13 @@ jobs:
           else
             echo "task=health-check" >> "$GITHUB_OUTPUT"
           fi
+      - name: "Eliminar cuentas sin verificar vencidas (respaldo del TTL)"
+        if: github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *'
+        run: python -m src.automation.jobs purge-unverified
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
       - name: "Ejecutar ${{ steps.pick.outputs.task }}"
         run: python -m src.automation.jobs ${{ steps.pick.outputs.task }}
         env:

@@ -49,14 +49,12 @@ class Settings:
         )
         self.VECTOR_INDEX_NAME: str = os.getenv("VECTOR_INDEX_NAME", "vector_index")
         self.MONGODB_TIMEOUT_MS: int = _env_int("MONGODB_TIMEOUT_MS", 8000)
-
         # --- Trazabilidad (LangSmith) ---
         self.LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
         self.LANGCHAIN_TRACING_V2: str = os.getenv("LANGCHAIN_TRACING_V2", "true")
         self.LANGCHAIN_PROJECT: str = os.getenv(
             "LANGCHAIN_PROJECT", "Bomberos-HAZMAT-RAG"
         )
-
         # --- Modelos ---
         self.EMBEDDING_MODEL: str = os.getenv(
             "EMBEDDING_MODEL",
@@ -116,6 +114,8 @@ class Settings:
         self.LOGIN_LOCK_MINUTES: int = _env_int("LOGIN_LOCK_MINUTES", 15)
         # Sal para seudonimizar usuarios en la telemetría
         self.TELEMETRY_SALT: str = os.getenv("TELEMETRY_SALT", "hazmat-telemetry")
+        # Clave HMAC de los códigos de verificación (vacía → clave aleatoria por proceso)
+        self.OTP_SECRET: str = os.getenv("OTP_SECRET", "")
 
         # --- Sesiones / retención de datos ---
         self.SESSION_COLLECTION_NAME: str = os.getenv(
