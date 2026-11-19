@@ -10,10 +10,53 @@
 
 ---
 
+## Opción gratuita: Streamlit Community Cloud
+
+Despliegue continuo sin costo ni tarjeta, con HTTPS. Streamlit Cloud instala un único `requirements.txt`,
+así que el flujo `.github/workflows/deploy-streamlit.yml` genera la rama **`streamlit-cloud`** (= `main` +
+dependencias unificadas, con PyTorch CPU por URL directa) cada vez que el CI pasa en `main`.
+
+1. **Rama de despliegue.** En GitHub, **Actions → Despliegue en Streamlit Cloud → Run workflow** (solo la
+   primera vez; después se actualiza sola). Debe aparecer la rama `streamlit-cloud`.
+2. **Crear la app.** Entra a [share.streamlit.io](https://share.streamlit.io) con tu cuenta de GitHub →
+   **Create app → Deploy a public app from GitHub**:
+   - Repository: `DavNat13/Asistente-Tactico-HAZMAT` · Branch: **`streamlit-cloud`** · Main file: `app.py`
+   - App URL: un subdominio, por ejemplo `asistente-hazmat` → `https://asistente-hazmat.streamlit.app`
+3. **Advanced settings.** Python **3.12**. En **Secrets** pega la configuración en formato TOML (aquí las
+   comillas **sí** van, porque es TOML; cada clave se expone como variable de entorno):
+
+   ```toml
+   GEMINI_API_KEYS = "clave1,clave2"
+   MONGODB_URI = "mongodb+srv://..."
+   MONGODB_DB_NAME = "hazmat_gre"
+   MONGODB_COLLECTION_NAME = "gre_chunks_v5"
+   OTP_SECRET = "..."
+   TELEMETRY_SALT = "..."
+   SMTP_USER = "tu.cuenta@dominio.cl"
+   SMTP_PASSWORD = "xxxx xxxx xxxx xxxx"
+   MAIL_FROM = "tu.cuenta@dominio.cl"
+   ADMIN_EMAILS = "admin@dominio.cl"
+   APP_URL = "https://asistente-hazmat.streamlit.app"
+   EMAIL_VERIFICATION_REQUIRED = "true"
+   ESRI_API_KEY = "..."
+   LANGCHAIN_TRACING_V2 = "false"
+   ```
+4. **Deploy.** La primera instalación tarda varios minutos. El modelo de embeddings se descarga al primer uso.
+5. **Mapas.** Agrega la URL `https://asistente-hazmat.streamlit.app` en los *Referrers* de la clave Esri.
+
+> [!WARNING]
+> Streamlit Cloud documenta hasta ~2,7 GB de RAM por app; esta app usa ~0,8 GB en reposo y hasta ~1,4 GB
+> en picos. Si aparece "This app has gone over its resource limits", reinicia la app desde **Manage app**.
+> La app se duerme tras varias horas sin visitas y despierta al entrar.
+
 ## Opción gratuita: Hugging Face Spaces
 
-Despliegue continuo sin costo ni tarjeta: Docker, 2 vCPU, 16 GB de RAM y HTTPS incluido. Cada vez que el
-CI pasa en `main`, el flujo `.github/workflows/deploy-huggingface.yml` publica una copia limpia en el Space.
+> [!CAUTION]
+> Las cuentas nuevas de Hugging Face tienen hoy **cuota gratuita 0** para `cpu-basic` (error
+> `Quota exceeded for flavor cpu-basic ... limit=0`); en ese caso hace falta Hugging Face PRO. El flujo
+> `.github/workflows/deploy-huggingface.yml` quedó **solo manual** para cuentas con cuota.
+
+Docker, 2 vCPU, 16 GB de RAM y HTTPS incluido. El flujo publica una copia limpia en el Space.
 
 1. **Cuenta y Space.** Crea una cuenta en [huggingface.co](https://huggingface.co) y luego
    **New Space**: nombre (por ejemplo `asistente-hazmat`), SDK **Docker** → plantilla **Blank**,
@@ -28,8 +71,7 @@ CI pasa en `main`, el flujo `.github/workflows/deploy-huggingface.yml` publica u
    **Write** (o *fine-grained* con escritura solo sobre ese Space).
 4. **GitHub.** En el repositorio, entra a **Settings → Secrets and variables → Actions** y crea el secret
    `HF_TOKEN` con ese token y la variable `HF_SPACE=usuario/asistente-hazmat`.
-5. **Publicar.** Ejecuta **Actions → Despliegue en Hugging Face → Run workflow**, o espera al próximo
-   CI en verde en `main`. El Space construye la imagen (~10 minutos la primera vez).
+5. **Publicar.** Ejecuta **Actions → Despliegue en Hugging Face → Run workflow**. El Space construye la imagen (~10 minutos la primera vez).
 6. **Mapas.** Agrega `https://usuario-asistente-hazmat.hf.space` en los *Referrers* de la clave Esri.
 7. **Administrador.** Desde tu equipo, con el mismo `.env` (misma base de datos):
    `python -m src.security.create_user --username admin --role admin --email tu@correo.cl`.

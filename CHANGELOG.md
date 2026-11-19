@@ -14,6 +14,15 @@
 Las versiones previas a 5.0 se agrupan por línea mayor. El detalle de cada versión está en los commits,
 que siguen el formato `tipo(scope): descripción vX.Y.Z`.
 
+## [5.4.3] · 2026-11-19
+
+### Agregado
+- Despliegue continuo gratuito en Streamlit Community Cloud: la rama `streamlit-cloud` se regenera con un
+  `requirements.txt` unificado (PyTorch CPU por URL directa) cada vez que el CI pasa en `main`.
+
+### Cambiado
+- El despliegue a Hugging Face Spaces queda solo manual: las cuentas nuevas tienen cuota gratuita 0.
+
 ## [5.4.2] · 2026-11-19
 
 ### Agregado

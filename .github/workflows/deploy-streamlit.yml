@@ -1,0 +1,56 @@
+# Despliegue continuo en Streamlit Community Cloud (gratis, sin tarjeta, HTTPS).
+# Streamlit Cloud instala un único requirements.txt con uv y no admite el índice aparte de PyTorch
+# que usa requirements-heavy.txt. Este flujo genera la rama `streamlit-cloud` = main + un
+# requirements.txt unificado, con torch CPU por URL directa (Linux, Python 3.12). Streamlit Cloud
+# sigue esa rama y se vuelve a desplegar solo con cada actualización. Corre cuando el CI pasa en main.
+name: "Despliegue en Streamlit Cloud"
+
+on:
+  workflow_run:
+    workflows: ["CI — Integración Continua"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write  # publica la rama streamlit-cloud
+
+concurrency:
+  group: deploy-streamlit
+  cancel-in-progress: true
+
+env:
+  BRANCH: streamlit-cloud
+  TORCH_WHEEL: https://download.pytorch.org/whl/cpu/torch-2.14.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl
+
+jobs:
+  publicar:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: "Unificar dependencias"
+        run: |
+          grep -q '^torch==2.14.0$' requirements-heavy.txt || {
+            echo "::error::requirements-heavy.txt cambió la versión de torch: actualiza TORCH_WHEEL en este flujo."; exit 1; }
+          {
+            echo "# Generado por .github/workflows/deploy-streamlit.yml: no editar en esta rama."
+            echo "torch @ ${TORCH_WHEEL}"
+            grep -vE '^\s*(#|--|torch==|$)' requirements-heavy.txt
+            grep -vE '^\s*(#|--|$)' requirements.txt
+          } > requirements.unified.txt
+          mv requirements.unified.txt requirements.txt
+          cat requirements.txt
+      - name: "Publicar la rama ${{ env.BRANCH }}"
+        run: |
+          sha=$(git rev-parse --short HEAD)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q -B "$BRANCH"
+          git add requirements.txt
+          git commit -q -m "Despliegue Streamlit Cloud desde ${sha}"
+          git push --force -q origin "$BRANCH"
+          echo "### Rama \`$BRANCH\` actualizada desde ${sha}" >> "$GITHUB_STEP_SUMMARY"
