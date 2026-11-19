@@ -1,11 +1,12 @@
 # Monitoreo: revisión de salud cada 30 min y reporte semanal los lunes.
 # Cada 30 min también se eliminan cuentas nuevas no verificadas vencidas.
-# Ambas tareas leen la telemetría real (agent_runs, canal ui) y avisan por correo a ADMIN_EMAILS.
+# Las tareas leen la telemetría real (agent_runs, canal ui) y avisan por correo a ADMIN_EMAILS.
+# Si faltan los secrets del repositorio, el flujo se omite con un aviso (no falla cada 30 min).
 name: "Monitoreo y reportes"
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # health-check
+    - cron: "*/30 * * * *"   # health-check + limpieza de cuentas no verificadas
     - cron: "0 12 * * 1"     # reporte semanal (lunes 12:00 UTC ≈ 09:00 en Chile)
   workflow_dispatch:
     inputs:
@@ -18,20 +19,53 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: monitoring
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: ${{ github.workspace }}
+  GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  TELEMETRY_SALT: ${{ secrets.TELEMETRY_SALT }}
+  SMTP_USER: ${{ secrets.SMTP_USER }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  MAIL_FROM: ${{ secrets.MAIL_FROM }}
+  ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+  APP_URL: ${{ vars.APP_URL }}
+
 jobs:
   tarea:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: "Verificar secrets"
+        id: secrets
+        run: |
+          missing=""
+          for v in GEMINI_API_KEYS MONGODB_URI TELEMETRY_SALT; do [ -n "${!v}" ] || missing="$missing $v"; done
+          if [ -n "$missing" ]; then
+            echo "::warning title=Monitoreo omitido::Faltan secrets:$missing. Agrégalos en Settings > Secrets and variables > Actions."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for v in SMTP_USER SMTP_PASSWORD ADMIN_EMAILS; do
+            [ -n "${!v}" ] || echo "::warning title=Sin correo::Falta $v: las alertas se calculan pero no se envían."
+          done
+          echo "ok=true" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ok == 'true'
       - uses: actions/setup-python@v5
+        if: steps.secrets.outputs.ok == 'true'
         with:
           python-version: "3.12"
           cache: pip
       - name: "Instalar dependencias mínimas"
-        run: pip install python-dotenv==1.2.3 pymongo==4.18.3 psutil==6.0.0
+        if: steps.secrets.outputs.ok == 'true'
+        run: pip install python-dotenv==1.2.3 pymongo==4.18.3 psutil==6.0.0 pydantic==2.13.5
       - name: "Elegir tarea"
         id: pick
+        if: steps.secrets.outputs.ok == 'true'
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "task=${{ inputs.task }}" >> "$GITHUB_OUTPUT"
@@ -41,18 +75,8 @@ jobs:
             echo "task=health-check" >> "$GITHUB_OUTPUT"
           fi
       - name: "Eliminar cuentas sin verificar vencidas (respaldo del TTL)"
-        if: github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *'
+        if: steps.secrets.outputs.ok == 'true' && github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *'
         run: python -m src.automation.jobs purge-unverified
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
       - name: "Ejecutar ${{ steps.pick.outputs.task }}"
+        if: steps.secrets.outputs.ok == 'true'
         run: python -m src.automation.jobs ${{ steps.pick.outputs.task }}
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}

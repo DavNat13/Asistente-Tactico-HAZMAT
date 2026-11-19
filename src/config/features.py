@@ -45,7 +45,7 @@ class Features:
     MAIL_FROM: str = os.getenv("MAIL_FROM", "") or os.getenv("SMTP_USER", "")
     ADMIN_EMAILS: list[str] = field(default_factory=lambda: _list("ADMIN_EMAILS"))
     MAIL_MAX_PER_HOUR: int = _int("MAIL_MAX_PER_HOUR", 5)
-    APP_URL: str = os.getenv("APP_URL", "http://localhost:8501")
+    APP_URL: str = os.getenv("APP_URL") or "http://localhost:8501"  # vacío → localhost
     # false solo en desarrollo: las cuentas nuevas se activan sin código de correo
     EMAIL_VERIFICATION_REQUIRED: bool = _bool("EMAIL_VERIFICATION_REQUIRED", True)
     # Mapa (OpenStreetMap / Nominatim)
