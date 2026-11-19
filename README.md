@@ -136,7 +136,7 @@ Variable nueva obligatoria en producción: `OTP_SECRET` (ver `.env.example`).
 ### Si no puedes entrar o no llega el código
 
 1. **Un solo servidor y la versión correcta:** el pie de la pantalla de acceso muestra la versión
-   (`v5.3.2`). Tras actualizar el código, detén todos los `streamlit run` y deja uno solo: un servidor
+   (`v5.4.0`). Tras actualizar el código, detén todos los `streamlit run` y deja uno solo: un servidor
    antiguo recarga los módulos por partes y puede fallar.
 2. **Correo:** `python -m src.notify.smtp_check` (sin enviar) y `--send-to tu@correo`. `SMTP_USER` debe
    ser la dirección completa y `SMTP_PASSWORD` la contraseña de aplicación.
