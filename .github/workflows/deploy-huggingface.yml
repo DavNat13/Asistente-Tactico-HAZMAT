@@ -1,5 +1,6 @@
-# Despliegue continuo en Hugging Face Spaces (gratis: Docker, 2 vCPU, 16 GB de RAM, HTTPS).
-# Se ejecuta solo cuando el CI termina con éxito en main, o a mano. Publica una copia limpia del
+# Despliegue en Hugging Face Spaces (Docker, 16 GB de RAM, HTTPS). SOLO MANUAL: desde fines de 2026 las
+# cuentas nuevas de Hugging Face tienen cuota gratuita 0 para cpu-basic (requiere PRO). Se mantiene para
+# quien tenga cuota; el despliegue continuo gratuito es Streamlit Cloud (deploy-streamlit.yml). Publica una copia limpia del
 # repositorio: sin historial, sin binarios (Hugging Face los rechaza; los PDF ya están indexados en
 # Atlas y la app no los usa) y con el README que el Space necesita (deploy/huggingface/README.md).
 # Requiere el secret HF_TOKEN (token con permiso de escritura) y la variable HF_SPACE
@@ -7,10 +8,6 @@
 name: "Despliegue en Hugging Face"
 
 on:
-  workflow_run:
-    workflows: ["CI — Integración Continua"]
-    types: [completed]
-    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -26,7 +23,6 @@ env:
 
 jobs:
   desplegar:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -42,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.cfg.outputs.ok == 'true'
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - name: "Preparar copia para el Space"
         if: steps.cfg.outputs.ok == 'true'
         run: |

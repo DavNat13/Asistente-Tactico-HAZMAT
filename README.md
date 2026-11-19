@@ -5,7 +5,7 @@
 <br>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/DavNat13/Asistente-Tactico-HAZMAT/ci.yml?branch=main&style=for-the-badge&label=CI&labelColor=1c1917)](https://github.com/DavNat13/Asistente-Tactico-HAZMAT/actions/workflows/ci.yml)
-[![Versión](https://img.shields.io/badge/versión-5.4.2-C8102E?style=for-the-badge&labelColor=1c1917)](CHANGELOG.md)
+[![Versión](https://img.shields.io/badge/versión-5.4.3-C8102E?style=for-the-badge&labelColor=1c1917)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1c1917)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.67-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white&labelColor=1c1917)](https://streamlit.io/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1.2-0B8A6F?style=for-the-badge&labelColor=1c1917)](https://langchain-ai.github.io/langgraph/)
@@ -239,10 +239,10 @@ docs/                  Seguridad y ética, observabilidad, aviso de privacidad y
 
 | Ámbito | Estado |
 |---|---|
-| Funcionalidad, pruebas y CI | Completo (v5.4.2) |
+| Funcionalidad, pruebas y CI | Completo (v5.4.3) |
 | Imagen Docker | Construida y verificada (healthy, ~0,8 GB de RAM en reposo, límite 2 GB) |
 | Aviso de privacidad | **Borrador**: marcadores `[[...]]` pendientes de completar por el responsable y revisión legal |
-| Despliegue público | Gratuito en Hugging Face Spaces con despliegue continuo (ver `DEPLOYMENT.md`) |
+| Despliegue público | Gratuito en Streamlit Community Cloud con despliegue continuo (ver `DEPLOYMENT.md`) |
 
 Uso previsto: evaluación académica y piloto controlado con personal de emergencias.
 
