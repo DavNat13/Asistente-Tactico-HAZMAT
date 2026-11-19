@@ -110,16 +110,27 @@ antes de pasar al respaldo; el circuit breaker evita repetir esa espera durante 
 | **Identificar por foto** | Adjuntar imagen en el chat | Lee el N° UN de la placa naranja con visión y responde como una consulta normal |
 | **Checklist por fases** | "Iniciar checklist" en planes de nivel alto | Fases del procedimiento, cronómetro y bitácora con hora por paso |
 | **Ficha de incidente** | "Ficha de incidente" bajo la respuesta | PDF con distancias, plan, checklist, bitácora y fuentes; descarga o envío por correo |
-| **Correos** | Gmail SMTP (`.env`) | Bienvenida, cuenta bloqueada, ficha, alertas y reporte semanal |
+| **Correos** | Gmail SMTP (`.env`) | Código de verificación, bienvenida, cuenta bloqueada, cambio de contraseña, ficha, alertas y reporte semanal |
 | **Evaluación nocturna** | `.github/workflows/nightly-eval.yml` | 31 casos + casos aprobados desde 👎; correo si la calidad baja |
 | **Alertas de salud** | `.github/workflows/monitoring.yml` (cada 30 min) | Latencia p95, errores y bloqueos sobre el uso real |
 | **Mejora continua** | Dashboard → "Mejora continua" | Las respuestas con 👎 se convierten en casos de evaluación |
 
 ```bash
-python -m src.automation.jobs health-check | weekly-report | nightly-eval
+python -m src.automation.jobs health-check | weekly-report | nightly-eval | purge-unverified
 ```
 
 Secrets de GitHub requeridos: `GEMINI_API_KEYS`, `MONGODB_URI`, `SMTP_USER`, `SMTP_PASSWORD`, `ADMIN_EMAILS`.
+
+## Cuentas, verificación de correo y privacidad (v5.3)
+
+| Función | Qué hace |
+|---|---|
+| **Verificación de correo** | Al registrarse se envía un código de 6 dígitos (HMAC-SHA256 con `OTP_SECRET`, 15 min, 5 intentos, reenvío cada 60 s y máx. 5/hora). Si el correo no sale, la cuenta no se crea. Sin verificar no se puede entrar; las cuentas pendientes se borran a los 30 min |
+| **Recuperar contraseña** | "¿Olvidaste tu contraseña?": respuesta idéntica exista o no el correo, código de 10 min, desbloqueo de la cuenta y aviso por correo del cambio |
+| **Aviso de privacidad** | Texto completo en [`docs/AVISO_PRIVACIDAD.md`](docs/AVISO_PRIVACIDAD.md) (borrador, revisión legal pendiente), modal con índice y descarga, versión aceptada guardada y reaceptación si cambia |
+| **Cuentas existentes** | `python -m src.security.migrate_verification --dry-run` / `--apply` / `--verify-user USUARIO` |
+
+Variable nueva obligatoria en producción: `OTP_SECRET` (ver `.env.example`).
 
 ## Observabilidad
 
