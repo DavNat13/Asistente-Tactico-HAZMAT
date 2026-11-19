@@ -1,0 +1,65 @@
+# Despliegue continuo en Hugging Face Spaces (gratis: Docker, 2 vCPU, 16 GB de RAM, HTTPS).
+# Se ejecuta solo cuando el CI termina con éxito en main, o a mano. Publica una copia limpia del
+# repositorio: sin historial, sin binarios (Hugging Face los rechaza; los PDF ya están indexados en
+# Atlas y la app no los usa) y con el README que el Space necesita (deploy/huggingface/README.md).
+# Requiere el secret HF_TOKEN (token con permiso de escritura) y la variable HF_SPACE
+# ("usuario/nombre-del-space"). Si faltan, se omite con un aviso.
+name: "Despliegue en Hugging Face"
+
+on:
+  workflow_run:
+    workflows: ["CI — Integración Continua"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-huggingface
+  cancel-in-progress: true
+
+env:
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+  HF_SPACE: ${{ vars.HF_SPACE }}
+
+jobs:
+  desplegar:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "Verificar configuración"
+        id: cfg
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
+            echo "::warning title=Despliegue omitido::Falta el secret HF_TOKEN o la variable HF_SPACE (usuario/nombre-del-space)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ok == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: "Preparar copia para el Space"
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          echo "SHA_CORTO=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          rm -rf .git
+          find data -type f ! -name .gitkeep -delete
+          cp deploy/huggingface/README.md README.md
+          # Ningún binario debe llegar al Space (grep -I los trata como "sin coincidencia")
+          bins=$(find . -type f -size +0 -exec grep -IL . {} + || true)
+          if [ -n "$bins" ]; then echo "::error::Archivos binarios en la copia:"; echo "$bins"; exit 1; fi
+      - name: "Publicar en ${{ env.HF_SPACE }}"
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Despliegue desde GitHub ${SHA_CORTO}"
+          git push --force -q "https://hf:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main
+          echo "### Publicado en https://huggingface.co/spaces/${HF_SPACE}" >> "$GITHUB_STEP_SUMMARY"

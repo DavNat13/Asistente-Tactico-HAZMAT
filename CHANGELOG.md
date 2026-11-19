@@ -14,6 +14,12 @@
 Las versiones previas a 5.0 se agrupan por línea mayor. El detalle de cada versión está en los commits,
 que siguen el formato `tipo(scope): descripción vX.Y.Z`.
 
+## [5.4.2] · 2026-11-19
+
+### Agregado
+- Despliegue continuo gratuito en Hugging Face Spaces: cuando el CI pasa en `main`, se publica una copia
+  limpia (sin binarios ni historial) con el README propio del Space. Guía en `DEPLOYMENT.md`.
+
 ## [5.4.1] · 2026-11-19
 
 ### Corregido
