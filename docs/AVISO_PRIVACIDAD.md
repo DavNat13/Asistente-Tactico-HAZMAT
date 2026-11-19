@@ -3,7 +3,7 @@
 > **Borrador: revisión legal pendiente.** Este texto no ha sido aprobado por un abogado. Los
 > marcadores `[[...]]` indican datos que el responsable debe completar o verificar antes de publicar.
 
-**Versión:** 2026-12-01-v1 · **Vigente desde:** 1 de diciembre de 2026 · **Última revisión técnica:** 19 de noviembre de 2026
+**Versión:** 2026-12-01-v2 · **Vigente desde:** 1 de diciembre de 2026 · **Última revisión técnica:** 19 de noviembre de 2026
 
 Este aviso explica qué datos personales trata el Asistente HAZMAT, para qué, con qué base legal,
 con quién se comparten, cuánto tiempo se conservan, cómo se protegen y cómo puedes ejercer tus
@@ -59,6 +59,7 @@ detallan en la sección 7.
 | Consultas y respuestas del chat | Texto de tus preguntas y las respuestas del asistente, después de la redacción automática (sección 6) | Tú y el sistema | Colección de sesiones (historial) |
 | Feedback | Calificación 👍 o 👎 de una respuesta | Tú | Telemetría (`agent_runs`); si es 👎, la pregunta y la respuesta redactadas pasan a `eval_candidates` |
 | Fotos de placas | Imagen de una placa, rombo o panel que subes para identificar el número ONU | Tú | **No se guardan.** Se validan, se re-codifican a JPEG en memoria y se envían al modelo de visión |
+| Ubicación del dispositivo | Coordenadas y precisión del GPS, solo si pulsas «Usar mi ubicación» o «Seguir en vivo» y el navegador te da permiso | Tu dispositivo | **No se guarda** en la base de datos: vive en la sesión abierta del navegador y se pierde al cerrarla. Puedes detener el seguimiento en cualquier momento |
 | Direcciones del mapa | Texto de la dirección que buscas para dibujar zonas de aislamiento | Tú | Se envía a OpenStreetMap/Nominatim y se guarda temporalmente en la memoria del proceso (caché de hasta 256 búsquedas). `[[VERIFICAR si la dirección queda en el historial o en la ficha del incidente]]` |
 | Datos técnicos | Fecha, duración de cada etapa, errores tipificados, herramientas usadas, consumo de tokens, largo de la consulta (no su texto), modelo usado | El sistema | Colección `agent_runs`, con el usuario seudonimizado |
 | Registros de seguridad | Intentos de inicio de sesión fallidos, bloqueos, límites alcanzados, códigos fallidos, reenvíos, cambios de contraseña y aceptación del aviso | El sistema | Colección `security_events`, con el usuario seudonimizado. Nunca se guarda el código ni la contraseña |
@@ -157,6 +158,8 @@ comunes. Las direcciones que buscas en el mapa se envían tal cual al servicio d
 | Google (API de Gemini) | Modelo de lenguaje que redacta las respuestas, clasificador de seguridad y análisis de fotos de placas | Consulta redactada, historial reciente redactado, fragmentos de los manuales y, si la subes, la foto re-codificada | `[[VERIFICAR región de procesamiento]]` | `[[VERIFICAR cláusulas contractuales o garantías del proveedor]]` |
 | MongoDB Atlas | Base de datos (cuentas, historial, telemetría, registros de seguridad, códigos) | Todos los datos guardados descritos en la sección 2 | `[[región]]` | `[[VERIFICAR]]` |
 | Google (Gmail SMTP) | Envío de correos | Tu correo, tu nombre y el contenido del mensaje (por ejemplo, el código) | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
+| Esri (ArcGIS Location Platform) | Imágenes satelitales y mapas base | La zona del mapa que se está viendo (coordenadas de las teselas) y la dirección IP del navegador; nunca tu nombre ni tu cuenta | `[[VERIFICAR región de los servidores de Esri]]` | `[[VERIFICAR]]` |
+| Google (Map Tiles API, opcional) | Capas de mapa, satélite, relieve y tráfico, solo si el responsable configura la clave | La zona del mapa que se está viendo y la dirección IP del navegador | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
 | OpenStreetMap / Nominatim | Convertir una dirección en coordenadas para el mapa | Solo el texto de la dirección buscada, con un identificador genérico de la aplicación (sin datos tuyos) | `[[VERIFICAR país de los servidores de la Fundación OpenStreetMap]]` | `[[VERIFICAR]]` |
 | LangSmith (LangChain) | Trazas técnicas para depurar y evaluar el agente | Consulta y respuesta ya redactadas, documentos recuperados, pasos del agente; metadatos de ejecución (identificador de ejecución y canal), no tu nombre de usuario | `[[VERIFICAR región]]` | `[[VERIFICAR]]` |
 | Hosting de la aplicación (Streamlit / Docker) | Ejecutar la aplicación web | Tráfico de la sesión, incluida tu dirección IP | `[[dónde: proveedor y país]]` | `[[VERIFICAR]]` |
@@ -296,6 +299,7 @@ equivalentes).
 | Google (Gemini y Gmail) | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
 | MongoDB Atlas | `[[región]]` | `[[VERIFICAR]]` |
 | LangSmith | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
+| Esri (mapas y satélite) | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
 | OpenStreetMap / Nominatim | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
 | Hosting y GitHub Actions | `[[VERIFICAR]]` | `[[VERIFICAR]]` |
 

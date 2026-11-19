@@ -53,6 +53,9 @@ class Features:
         "GEOCODER_URL", "https://nominatim.openstreetmap.org/search"
     )
     GEOCODER_COUNTRY: str = os.getenv("GEOCODER_COUNTRY", "cl")
+    # Capas del mapa: Esri (gratis con cuenta) y Google Map Tiles API (opcional, con facturación)
+    ESRI_API_KEY: str = os.getenv("ESRI_API_KEY", "").strip()
+    GOOGLE_MAPS_API_KEY: str = os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
     # Visión
     VISION_MODEL: str = os.getenv("VISION_MODEL", "gemini-3.5-flash-lite")
     MAX_IMAGE_MB: int = _int("MAX_IMAGE_MB", 5)

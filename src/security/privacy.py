@@ -14,7 +14,7 @@ from pathlib import Path
 
 from src.observability.store import security_event
 
-PRIVACY_VERSION = "2026-12-01-v1"
+PRIVACY_VERSION = "2026-12-01-v2"  # v2: ubicación del dispositivo y mapas Esri/Google
 PRIVACY_DATE = "1 de diciembre de 2026"
 NOTICE_PATH = Path(__file__).resolve().parents[2] / "docs" / "AVISO_PRIVACIDAD.md"
 MARKER = re.compile(r"\[\[[^\]]+\]\]")
