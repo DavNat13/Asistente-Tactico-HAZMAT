@@ -4,12 +4,16 @@
 - Bloqueo temporal tras LOGIN_MAX_ATTEMPTS intentos fallidos (aviso por correo al titular).
 - Mensaje genérico ante cualquier rechazo (no revela si la cuenta existe) y tiempo similar
   en ambos casos (mitiga enumeración por timing). Cada evento queda en `security_events`.
+- Con la contraseña correcta, la cuenta puede requerir un paso previo (`requires`): `email`
+  (cuenta antigua sin correo), `verify` (correo sin verificar) o `privacy` (reaceptar el aviso).
+  La UI solo inicia sesión cuando `requires` es None.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+from src.config.features import features
 from src.config.settings import settings
 from src.observability.store import security_event
 from src.security.accounts import (  # noqa: F401 — API pública reexportada
@@ -18,6 +22,7 @@ from src.security.accounts import (  # noqa: F401 — API pública reexportada
     _users,
     create_user,
     find_by_login,
+    public,
 )
 from src.security.passwords import (  # noqa: F401 — API pública reexportada
     MIN_PASSWORD,
@@ -25,15 +30,21 @@ from src.security.passwords import (  # noqa: F401 — API pública reexportada
     validate_password,
     verify_password,
 )
+from src.security.privacy import needs_acceptance
 
 
-def _public(user: dict) -> dict:
-    return {
-        "username": user["_id"],
-        "name": user.get("name", user["_id"]),
-        "role": user.get("role", "operador"),
-        "email": user.get("email"),
-    }
+def pending_step(user: dict) -> str | None:
+    """Paso pendiente antes de entrar. Sin `email_verified` = cuenta previa a la migración."""
+    if features.EMAIL_VERIFICATION_REQUIRED and user.get("email_verified") is False:
+        return "verify" if user.get("email") else "email"
+    if needs_acceptance(user):
+        return "privacy"
+    return None
+
+
+def account_status(username: str) -> dict | None:
+    user = _users().find_one({"_id": username, "active": True})
+    return {**public(user), "requires": pending_step(user)} if user else None
 
 
 def _lock(user: dict, attempts: int, now: datetime) -> dict:
@@ -54,7 +65,7 @@ def _lock(user: dict, attempts: int, now: datetime) -> dict:
 
 
 def authenticate(login: str, password: str) -> dict | None:
-    """Devuelve {"username", "name", "role", "email"} o None."""
+    """Devuelve {"username", "name", "role", "email", "requires"} o None."""
     user = find_by_login(login)
     now = datetime.now(UTC)
     if not user:
@@ -87,4 +98,4 @@ def authenticate(login: str, password: str) -> dict | None:
         {"_id": user["_id"]},
         {"$set": {"failed_attempts": 0, "locked_until": None, "last_login": now}},
     )
-    return _public(user)
+    return {**public(user), "requires": pending_step(user)}

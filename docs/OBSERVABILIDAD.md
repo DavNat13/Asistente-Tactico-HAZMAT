@@ -3,6 +3,34 @@
 Base técnica para el informe y la presentación de la EV3 (IE1–IE7). Las conclusiones y reflexiones
 personales del informe deben redactarlas los integrantes (la pauta prohíbe usar IA para eso).
 
+## 0. Qué es, para qué sirve y cómo se lee el panel (v5.4)
+
+**Qué es.** La observabilidad mide en vivo cómo se comporta el asistente con usuarios reales:
+rapidez, fallas, costo, veracidad de las citas y abuso. Los datos están seudonimizados (hash con sal)
+y se borran a los 180 días.
+
+**Para qué sirve.** En una emergencia una respuesta lenta o inventada es un riesgo. El panel permite
+**detectar** (modelo saturado, cuota agotada, base caída), **verificar** (citas comprobadas, feedback,
+evaluación nocturna) y **mejorar** (cada 👎 puede convertirse en un caso de prueba).
+
+**Cómo funciona.** Consulta → el agente registra la telemetría (`RunRecorder`) → MongoDB
+(`agent_runs`, `security_events`) → el panel la lee cada 30 s → cada 30 min `health-check` compara con
+los umbrales y avisa por correo; cada noche corre la evaluación.
+
+**Cómo se lee.** La banda superior es un semáforo con la **misma lógica que las alertas por correo**
+(`src/observability/health_status.py`, que reutiliza `automation/health.health_alerts`):
+
+| Indicador | Verde | Ámbar | Rojo |
+|---|---|---|---|
+| Latencia p95 | ≤ `ALERT_P95_S` (20 s) | > umbral | > 1,5 × umbral |
+| Tasa de error | 0 % | > 0 % | > `ALERT_ERROR_RATE` (5 %) |
+| Citas verificadas | ≥ 95 % | ≥ 80 % | < 80 % |
+| Feedback positivo | ≥ 80 % | ≥ 60 % | < 60 % |
+| Consultas bloqueadas | ≤ `ALERT_BLOCKED_RATE` (30 %) | sobre el umbral | — |
+
+Cada tarjeta tiene un botón **?** que explica qué muestra y qué hacer si está en rojo. Pestañas: Uso
+real, Seguridad, Evaluación offline, Mejora continua y Registro.
+
 ## 1. Métricas implementadas
 
 | Dimensión (pauta) | Métrica | Dónde se mide |

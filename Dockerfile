@@ -22,6 +22,8 @@ RUN python -c "from sentence_transformers import SentenceTransformer as S; S('${
 
 COPY .streamlit/ .streamlit/
 COPY styles/ styles/
+# Aviso de privacidad: lo lee el modal de registro y reaceptación (src/security/privacy.py)
+COPY docs/AVISO_PRIVACIDAD.md docs/
 COPY src/ src/
 COPY app.py .
 

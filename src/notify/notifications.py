@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 
 from src.config.features import features
 from src.notify.mailer import EMAIL_LOG, send
-from src.notify.templates import app_link, layout, paragraph, table
+from src.notify.templates import app_link, code_box, layout, paragraph, table
 from src.observability.store import get_db, pseudonymize, run_async
 
 
@@ -40,6 +40,54 @@ def notify_account_locked(user: dict) -> None:
             layout("Cuenta bloqueada temporalmente", body),
             "Tu cuenta del Asistente HAZMAT fue bloqueada temporalmente por intentos fallidos.",
             kind="account_locked",
+        )
+    )
+
+
+_CODE_COPY = {
+    "signup": ("Verifica tu correo", "Usa este código para activar tu cuenta.", 15),
+    "reset": (
+        "Restablece tu contraseña",
+        "Usa este código para crear una nueva contraseña.",
+        10,
+    ),
+}
+
+
+def send_code(user: dict, code: str, purpose: str) -> bool:
+    """Envío SÍNCRONO del código: el resultado decide si el registro se completa."""
+    title, intro, minutes = _CODE_COPY[purpose]
+    body = (
+        paragraph(f"Hola {user.get('name') or user['_id']}. {intro}")
+        + code_box(code)
+        + paragraph(f"Vence en {minutes} minutos y sirve una sola vez.")
+        + paragraph(
+            "Si no fuiste tú, ignora este mensaje. Nunca te pediremos este código."
+        )
+    )
+    text = (
+        f"{intro}\nCódigo: {code}\nVence en {minutes} minutos. "
+        "Si no fuiste tú, ignora este correo."
+    )
+    subject = f"{title} · Asistente HAZMAT"
+    return send(
+        [user["email"]], subject, layout(title, body), text, kind=f"otp_{purpose}"
+    )
+
+
+def notify_password_changed(user: dict) -> None:
+    body = paragraph(
+        "La contraseña de tu cuenta del Asistente HAZMAT fue cambiada."
+    ) + paragraph(
+        "Si no fuiste tú, contacta de inmediato al administrador del sistema."
+    )
+    run_async(
+        lambda: send(
+            [user["email"]],
+            "Aviso de seguridad: tu contraseña fue cambiada",
+            layout("Tu contraseña fue cambiada", body),
+            "Tu contraseña fue cambiada. Si no fuiste tú, contacta al administrador.",
+            kind="password_changed",
         )
     )
 

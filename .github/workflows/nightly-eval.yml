@@ -1,5 +1,6 @@
 # Evaluación nocturna: corre el set de evaluación (31 casos + casos aprobados desde el feedback),
 # guarda el resultado en MongoDB (eval_runs) y avisa por correo si la calidad baja.
+# Si faltan los secrets del repositorio, se omite con un aviso (sin instalar ~8 min de dependencias).
 name: "Evaluación nocturna"
 
 on:
@@ -14,13 +15,39 @@ concurrency:
   group: nightly-eval
   cancel-in-progress: false
 
+env:
+  PYTHONPATH: ${{ github.workspace }}
+  GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  MONGODB_COLLECTION_NAME: gre_chunks_v5
+  TELEMETRY_SALT: ${{ secrets.TELEMETRY_SALT }}
+  SMTP_USER: ${{ secrets.SMTP_USER }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  MAIL_FROM: ${{ secrets.MAIL_FROM }}
+  ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+  APP_URL: ${{ vars.APP_URL }}
+  LANGCHAIN_TRACING_V2: "false"
+
 jobs:
   evaluar:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      - name: "Verificar secrets"
+        id: secrets
+        run: |
+          missing=""
+          for v in GEMINI_API_KEYS MONGODB_URI TELEMETRY_SALT; do [ -n "${!v}" ] || missing="$missing $v"; done
+          if [ -n "$missing" ]; then
+            echo "::warning title=Evaluación omitida::Faltan secrets:$missing. Agrégalos en Settings > Secrets and variables > Actions."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ok == 'true'
       - uses: actions/setup-python@v5
+        if: steps.secrets.outputs.ok == 'true'
         with:
           python-version: "3.12"
           cache: pip
@@ -28,20 +55,13 @@ jobs:
             requirements.txt
             requirements-heavy.txt
       - name: "Instalar dependencias"
+        if: steps.secrets.outputs.ok == 'true'
         run: pip install -r requirements-heavy.txt -r requirements.txt
       - name: "Evaluar y detectar regresiones"
+        if: steps.secrets.outputs.ok == 'true'
         run: python -m src.automation.jobs nightly-eval
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          MONGODB_COLLECTION_NAME: gre_chunks_v5
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
-          LANGCHAIN_TRACING_V2: "false"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.secrets.outputs.ok == 'true'
         with:
           name: eval-results
           path: evals/results/

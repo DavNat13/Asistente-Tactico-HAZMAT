@@ -1,0 +1,11 @@
+/* Mapa de zonas: panel de control + lienzo del mapa en tarjetas. */
+
+.hz-label { font-size: .875rem; font-weight: 600; margin: .35rem 0 .45rem; }
+.st-key-hzcard_map_canvas { padding: .5rem !important; }
+.st-key-hzcard_map_canvas iframe { border-radius: calc(var(--r-lg) - 6px); box-shadow: var(--e-1); }
+.st-key-hzcard_map_controls [data-testid="stForm"] { border: none; padding: 0; }
+.st-key-hzcard_map_controls [data-testid="stSegmentedControl"] button { flex: 1 1 0; }
+[class*="st-key-map_geo"] { margin: .1rem 0 .4rem; }
+
+/* Las tarjetas de distancia bajo el mapa se ven como un tablero de terreno */
+[data-testid="stMainBlockContainer"]:has(.hz-map-page) .hz-tiles { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }

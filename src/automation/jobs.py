@@ -3,6 +3,7 @@
     python -m src.automation.jobs health-check     # cada 30 min: latencia, errores, bloqueos
     python -m src.automation.jobs weekly-report    # lunes: resumen semanal al admin
     python -m src.automation.jobs nightly-eval     # diario: set de evaluación + regresiones
+    python -m src.automation.jobs purge-unverified # cada 30 min: cuentas sin verificar vencidas
 
 Los avisos se envían por correo a ADMIN_EMAILS; cada tipo de alerta se envía como máximo una vez
 cada ALERT_COOLDOWN_H horas (colección `alerts`). Código de salida 1 si hay problemas (visible en CI).
@@ -115,10 +116,18 @@ def nightly_eval() -> int:
     return 1 if issues else 0
 
 
+def purge_unverified() -> int:
+    from src.security.verification import purge_unverified as purge
+
+    print(f"purge-unverified: {purge()} cuenta(s) eliminadas")
+    return 0
+
+
 TASKS = {
     "health-check": health_check,
     "weekly-report": weekly_report,
     "nightly-eval": nightly_eval,
+    "purge-unverified": purge_unverified,
 }
 
 if __name__ == "__main__":

@@ -1,0 +1,38 @@
+/* Centro de mando HAZMAT — tokens de diseño.
+   Los neutros se derivan de currentColor: el mismo token funciona en tema claro y oscuro. */
+
+:root {
+  /* Estado (texto e íconos legibles en ambos temas: se mezclan con el color del texto) */
+  --ok: color-mix(in srgb, #16a34a 78%, currentColor);
+  --warn: color-mix(in srgb, #d97706 80%, currentColor);
+  --crit: color-mix(in srgb, #dc2626 82%, currentColor);
+  --info: color-mix(in srgb, #2563eb 78%, currentColor);
+  --ok-soft: color-mix(in srgb, #16a34a 12%, transparent);
+  --warn-soft: color-mix(in srgb, #d97706 13%, transparent);
+  --crit-soft: color-mix(in srgb, #dc2626 12%, transparent);
+  --info-soft: color-mix(in srgb, #2563eb 11%, transparent);
+
+  /* Superficies y bordes */
+  --surface: color-mix(in srgb, currentColor 3%, transparent);
+  --surface-2: color-mix(in srgb, currentColor 5.5%, transparent);
+  --text-2: color-mix(in srgb, currentColor 72%, transparent); /* texto secundario ≥ AA */
+
+  /* Forma, elevación y movimiento */
+  --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+  --e-1: 0 1px 2px rgb(0 0 0 / .07), 0 1px 1px rgb(0 0 0 / .04);
+  --e-2: 0 8px 24px -10px rgb(0 0 0 / .28), 0 2px 6px rgb(0 0 0 / .06);
+  --e-3: 0 24px 60px -18px rgb(0 0 0 / .45);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+  --spring: cubic-bezier(.22, 1.2, .36, 1);
+  --nav-h: 60px;
+}
+
+@keyframes hz-rise { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes hz-breathe { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(.82); } }
+@keyframes hz-sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* Números alineados en métricas y tablas */
+.hz-num, [data-testid="stMetricValue"], .hz-tile b { font-variant-numeric: tabular-nums; }
+
+/* Foco visible coherente en toda la app */
+button:focus-visible, a:focus-visible, input:focus-visible, [role="tab"]:focus-visible { outline: none; box-shadow: var(--ring); }

@@ -23,19 +23,24 @@ NODE_NAMES = {
 }
 
 
-def _base(chart: alt.Chart, height: int = 220) -> alt.Chart:
+def _base(chart: alt.Chart, height=220) -> alt.Chart:
     return (
-        chart.properties(height=height)
+        chart.properties(
+            height=height, padding={"left": 4, "right": 44, "top": 6, "bottom": 4}
+        )
         .configure_axis(
             grid=True,
-            gridOpacity=0.35,
+            gridOpacity=0.25,
+            gridDash=[3, 4],
             domain=False,
             tickColor="transparent",
             labelFontSize=11,
             titleFontSize=11,
             titleFontWeight="normal",
+            labelLimit=180,
         )
         .configure_view(strokeWidth=0)
+        .configure_legend(labelFontSize=11, symbolType="circle")
     )
 
 
@@ -91,26 +96,31 @@ def hbar(
     names: dict | None = None,
     color: str = SERIES[0],
     fmt: str = ".0f",
-) -> alt.Chart:
+) -> alt.LayerChart:
+    """Barras horizontales: alto fijo por fila (alt.Step) → las etiquetas nunca se superponen."""
     d = df.copy()
     if names:
         d[cat] = d[cat].map(lambda v: names.get(v, v))
-    chart = (
+    d = d.sort_values(val, ascending=False)
+    order = list(dict.fromkeys(d[cat].tolist()))  # mismo orden explícito en ambas capas
+    y = alt.Y(f"{cat}:N", sort=order, title=None, axis=alt.Axis(labelPadding=8))
+    axis = alt.Axis(tickMinStep=1, format=",d") if fmt == ".0f" else alt.Axis()
+    x = alt.X(f"{val}:Q", title=title, scale=alt.Scale(nice=True, zero=True), axis=axis)
+    tip = [
+        alt.Tooltip(f"{cat}:N", title=""),
+        alt.Tooltip(f"{val}:Q", format=fmt, title=title),
+    ]
+    bars = (
         alt.Chart(d)
-        .mark_bar(cornerRadiusEnd=4, height=14, color=color)
-        .encode(
-            y=alt.Y(f"{cat}:N", sort="-x", title=None),
-            x=alt.X(f"{val}:Q", title=title),
-            tooltip=[
-                alt.Tooltip(f"{cat}:N", title=""),
-                alt.Tooltip(f"{val}:Q", format=fmt, title=title),
-            ],
-        )
+        .mark_bar(cornerRadiusEnd=5, size=16, color=color)
+        .encode(y=y, x=x, tooltip=tip)
     )
-    labels = chart.mark_text(align="left", dx=4, fontSize=11, color="gray").encode(
-        text=alt.Text(f"{val}:Q", format=fmt)
+    labels = (
+        alt.Chart(d)
+        .mark_text(align="left", dx=6, fontSize=11, fontWeight=600, color="gray")
+        .encode(y=y, x=x, text=alt.Text(f"{val}:Q", format=fmt))
     )
-    return _base(chart + labels, height=max(90, 30 * len(d)))
+    return _base(alt.layer(bars, labels), height=alt.Step(34))
 
 
 def level_bars(df: pd.DataFrame) -> alt.Chart:

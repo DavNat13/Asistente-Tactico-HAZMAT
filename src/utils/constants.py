@@ -1,4 +1,5 @@
 APP_NAME = "Asistente HAZMAT"
+APP_VERSION = "5.4.1"  # visible en el pie de acceso: delata servidores desactualizados
 APP_SUBTITLE = "Bomberos de Chile · GRE 2024"
 APP_ICON = ":material/local_fire_department:"
 

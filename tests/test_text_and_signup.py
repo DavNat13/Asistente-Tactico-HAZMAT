@@ -1,10 +1,8 @@
-"""Limpieza de código en mensajes y registro de cuentas (BD simulada en memoria)."""
+"""Limpieza de código en mensajes y registro de cuentas (BD simulada en memoria, ver conftest)."""
 
 import pytest
-from pymongo.errors import DuplicateKeyError
 
-from src.notify import notifications
-from src.security import accounts, registration
+from src.security import registration
 from src.security.text import strip_markup
 
 
@@ -25,36 +23,9 @@ def test_strip_markup(raw, expected):
     assert strip_markup(raw) == expected
 
 
-class FakeUsers:
-    def __init__(self):
-        self.docs = {}
-
-    def insert_one(self, doc):
-        if doc["_id"] in self.docs:
-            raise DuplicateKeyError("dup _id")
-        if any(d.get("email") == doc.get("email") for d in self.docs.values()):
-            raise DuplicateKeyError("dup email_unique")
-        self.docs[doc["_id"]] = doc
-
-    def create_index(self, *a, **k):
-        return "ok"
-
-    def replace_one(self, flt, doc, upsert=False):
-        self.docs[flt["_id"]] = doc
-
-    def count_documents(self, flt):
-        return len(self.docs)
-
-
 @pytest.fixture
-def users(monkeypatch):
-    col = FakeUsers()
-    db = {accounts.USERS: col}
-    monkeypatch.setattr(accounts, "get_db", lambda: db)
-    monkeypatch.setattr(registration, "get_db", lambda: db)
-    monkeypatch.setattr(registration, "security_event", lambda *a, **k: None)
-    monkeypatch.setattr(notifications, "notify_welcome", lambda acc: None)
-    return col
+def users(env):
+    return env.db["users"]
 
 
 def test_register_creates_operator(users):
@@ -71,6 +42,7 @@ def test_register_creates_operator(users):
         "name": "Camila Rojas",
         "role": "operador",
         "email": "camila@bomberos.cl",
+        "requires": "verify",
     }
     assert users.docs["camila.r"]["password_hash"].startswith("scrypt$")
 
@@ -101,7 +73,7 @@ def test_register_never_overwrites_existing_account(users):
         (("pedro", "", "p@b.cl", "Clave-12345", "Clave-12345", True), "nombre"),
         (
             ("pe", "Pedro", "p@b.cl", "Clave-12345", "Clave-12345", True),
-            "Usuario inválido",
+            "al menos 3 caracteres",
         ),
         (("pedro", "Pedro", "p@b.cl", "corta", "corta", True), "al menos"),
     ],
@@ -112,14 +84,15 @@ def test_register_validation(users, args, msg):
 
 
 def test_register_rejects_bad_or_duplicate_email(users):
-    with pytest.raises(ValueError, match="correo electrónico válido"):
+    with pytest.raises(ValueError, match="correo válido"):
         registration.register_user(
             "ana", "Ana", "no-es-correo", "Clave-12345", "Clave-12345", True
         )
     registration.register_user(
         "ana", "Ana", "ana@b.cl", "Clave-12345", "Clave-12345", True
     )
-    with pytest.raises(ValueError, match="Ese correo ya está registrado"):
+    # Cuenta aún pendiente: solo "Revisa tu correo" (el caso verificado está en test_registration_verify)
+    with pytest.raises(registration.PendingVerification, match="registro pendiente"):
         registration.register_user(
             "ana2", "Ana", "ANA@b.cl", "Clave-12345", "Clave-12345", True
         )

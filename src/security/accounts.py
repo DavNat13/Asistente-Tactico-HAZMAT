@@ -1,32 +1,32 @@
 """Cuentas de usuario (colección `users`): alta sin sobrescritura, correo único y búsqueda por login.
 
 Roles: `operador` (chat) y `admin` (chat + dashboard de observabilidad).
+Las cuentas nuevas quedan con `email_verified: False` y `pending_expires_at`: un índice TTL las
+elimina si no se verifican a tiempo (el campo se quita al verificar).
 """
 
 from __future__ import annotations
 
 import logging
-import re
 from datetime import UTC, datetime
 
 from pymongo.errors import DuplicateKeyError
 
 from src.observability.store import get_db
 from src.security.passwords import hash_password, validate_password
+from src.security.validators import email_error
 from src.session.sanitizer import InputSanitizer
 
 log = logging.getLogger("hazmat.accounts")
 USERS = "users"
 ROLES = ("operador", "admin")
-_EMAIL = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 _index_ready = False
 
 
 def normalize_email(email: str) -> str:
-    email = (email or "").strip().lower()
-    if not _EMAIL.match(email) or len(email) > 120:
+    if email_error(email):
         raise ValueError("Ingresa un correo electrónico válido")
-    return email
+    return email.strip().lower()
 
 
 def _users():
@@ -39,6 +39,9 @@ def _users():
                 unique=True,
                 name="email_unique",
                 partialFilterExpression={"email": {"$type": "string"}},
+            )
+            col.create_index(
+                "pending_expires_at", expireAfterSeconds=0, name="ttl_pending"
             )
             _index_ready = True
         except Exception as e:  # noqa: BLE001 — BD de pruebas sin soporte de índices
@@ -53,6 +56,7 @@ def create_user(
     name: str = "",
     overwrite: bool = False,
     email: str | None = None,
+    extra: dict | None = None,
 ) -> dict:
     username = InputSanitizer.sanitize_username(username)
     if role not in ROLES:
@@ -70,6 +74,7 @@ def create_user(
     }
     if email:
         doc["email"] = normalize_email(email)
+    doc.update(extra or {})
     if overwrite:  # solo el CLI de administración puede reemplazar una cuenta existente
         _users().replace_one({"_id": username}, doc, upsert=True)
     else:
@@ -83,6 +88,16 @@ def create_user(
         "name": doc["name"],
         "role": role,
         "email": doc.get("email"),
+    }
+
+
+def public(user: dict) -> dict:
+    """Datos de la cuenta que viajan a la sesión de la UI (nunca el hash ni contadores)."""
+    return {
+        "username": user["_id"],
+        "name": user.get("name", user["_id"]),
+        "role": user.get("role", "operador"),
+        "email": user.get("email"),
     }
 
 

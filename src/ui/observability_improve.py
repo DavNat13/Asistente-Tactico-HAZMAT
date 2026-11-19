@@ -6,11 +6,12 @@ import streamlit as st
 
 from src.observability import feedback
 from src.ui import state
+from src.ui.ui_kit import empty_state, stat_tile, tiles
 
 
 def _candidate(c: dict) -> None:
     cid = c["_id"]
-    with st.container(border=True, key=f"cand_{cid}"):
+    with st.container(key=f"hzcard_cand_{cid}"):
         st.markdown(f"**Pregunta:** {c['question']}")
         with st.expander("Respuesta que recibió 👎"):
             st.markdown(c.get("answer", ""))
@@ -54,22 +55,33 @@ def _candidate(c: dict) -> None:
 
 
 def tab_improve() -> None:
-    st.caption(
-        "Cada respuesta marcada con 👎 llega aquí. Define qué datos debía contener y apruébala: se "
-        "sumará a la evaluación nocturna (`--include-db-cases`) para que el error no se repita."
-    )
     try:
         pending = feedback.list_candidates()
         approved = feedback.approved_cases()
     except Exception:  # noqa: BLE001
-        st.error("No se pudo leer la base de datos.", icon=":material/cloud_off:")
+        empty_state("No se pudo leer la base de datos.", "alert")
         return
-    c1, c2 = st.columns(2)
-    c1.metric("Pendientes de revisión", len(pending))
-    c2.metric("Casos aprobados desde feedback", len(approved))
+    tiles(
+        [
+            stat_tile(
+                "Pendientes de revisión",
+                f"{len(pending)}",
+                "warn" if pending else "ok",
+                "respuestas con 👎",
+                "thumbs",
+                "Respuestas que un usuario marcó como no útiles y esperan revisión.",
+            ),
+            stat_tile(
+                "Casos aprobados",
+                f"{len(approved)}",
+                "info",
+                "se suman a la evaluación nocturna",
+                "check",
+                "Casos que ya forman parte de las pruebas automáticas de cada noche.",
+            ),
+        ]
+    )
     if not pending:
-        st.success(
-            "No hay respuestas pendientes de revisión.", icon=":material/check_circle:"
-        )
+        empty_state("No hay respuestas pendientes de revisión.", "check")
     for c in pending:
         _candidate(c)

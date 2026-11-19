@@ -1,0 +1,35 @@
+/* Barra superior fija: fondo sólido (hereda el del tema), borde y sombra → el contenido nunca pasa
+   por debajo. Navegación en "píldoras" con la página activa resaltada. */
+
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] div:has(> header[data-testid="stHeader"]) { background-color: inherit; }
+header[data-testid="stHeader"] {
+  background-color: inherit !important; height: var(--nav-h);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 10px 30px -22px rgb(0 0 0 / .55);
+}
+[data-testid="stMainBlockContainer"] { padding-top: calc(var(--nav-h) + 1.75rem) !important; }
+
+[data-testid="stTopNav"] { gap: .25rem; }
+[data-testid="stTopNavLink"] {
+  border-radius: var(--r-pill); padding: .4rem .9rem; margin: 0 .1rem; border: 1px solid transparent;
+  transition: background .2s var(--ease), border-color .2s, transform .2s var(--spring);
+}
+[data-testid="stTopNavLink"]:hover { background: var(--surface-2); transform: translateY(-1px); }
+[data-testid="stTopNavLink"] p { font-weight: 550; font-size: .9rem; }
+[data-testid="stTopNavLink"][aria-current="page"] {
+  background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 6px 18px -10px rgb(200 16 46 / .7);
+}
+[data-testid="stTopNavLink"][aria-current="page"] p,
+[data-testid="stTopNavLink"][aria-current="page"] [data-testid="stIconMaterial"] { color: var(--accent) !important; }
+
+/* Pantalla de acceso: sin barra */
+[data-testid="stAppViewContainer"]:has(.hz-auth) header[data-testid="stHeader"] {
+  background: transparent !important; border: none; box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  [data-testid="stTopNavLink"] { padding: .35rem .6rem; }
+  [data-testid="stTopNavLink"] p { font-size: .82rem; }
+}

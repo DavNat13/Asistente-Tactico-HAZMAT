@@ -1,12 +1,16 @@
-"""Pantalla de acceso: panel de marca + formularios de inicio de sesión y registro."""
+"""Pantalla de acceso: panel de marca + tarjeta con pestañas (Entrar / Registrarme) o el paso pendiente."""
 
 from __future__ import annotations
 
 import streamlit as st
 
-from src.config.settings import settings
-from src.ui.auth_forms import login_form, register_form
-from src.ui.icons import MUTED, icon
+from src.ui.auth_common import flow, show_notice
+from src.ui.auth_forms import login_form
+from src.ui.auth_register import register_form
+from src.ui.auth_reset import reset_step
+from src.ui.auth_steps import email_step, privacy_step, verify_step
+from src.ui.icons import icon
+from src.ui.privacy_dialog import legal_line
 from src.ui.theme import mark
 
 FEATURES = (
@@ -26,14 +30,12 @@ FEATURES = (
         "Tus conversaciones son solo tuyas. Los datos personales se ocultan.",
     ),
 )
-
-PRIVACY = (
-    f"{icon('lock', MUTED, 13)}Tus consultas se procesan para responderte. RUT, teléfonos, correos y patentes se "
-    "ocultan automáticamente antes de llegar al modelo de IA. El historial se conserva "
-    f"{settings.SESSION_TTL_DAYS} días y puedes eliminarlo cuando quieras (Ley 19.628 y Ley 21.719). "
-    "Las direcciones del mapa se buscan en OpenStreetMap y las fotos de placas se analizan sin "
-    "guardarse. Herramienta de apoyo: no reemplaza al mando del incidente."
-)
+STEPS = {
+    "verify": verify_step,
+    "email": email_step,
+    "privacy": privacy_step,
+    "reset": reset_step,
+}
 
 
 def _brand_panel() -> None:
@@ -52,26 +54,35 @@ def _brand_panel() -> None:
     )
 
 
+def _tabs() -> None:
+    mode = st.segmented_control(
+        "Acceso",
+        ["Entrar", "Registrarme"],
+        format_func=lambda o: (
+            f":material/login: {o}" if o == "Entrar" else f":material/person_add: {o}"
+        ),
+        default="Entrar",
+        required=True,
+        key="auth_mode",
+        label_visibility="collapsed",
+        width="stretch",
+    )
+    if mode == "Registrarme":
+        register_form()
+    else:
+        login_form()
+
+
 def render_auth() -> None:
-    left, right = st.columns([1.05, 1], gap="large", vertical_alignment="center")
+    left, right = st.columns(2, gap="large", vertical_alignment="center")
     with left:
         _brand_panel()
     with right, st.container(key="auth_panel", border=False):
-        mode = st.segmented_control(
-            "Acceso",
-            ["Iniciar sesión", "Crear cuenta"],
-            format_func=lambda o: (
-                f":material/login: {o}"
-                if o == "Iniciar sesión"
-                else f":material/person_add: {o}"
-            ),
-            default="Iniciar sesión",
-            required=True,
-            key="auth_mode",
-            label_visibility="collapsed",
-        )
-        if mode == "Crear cuenta":
-            register_form()
+        show_notice()
+        current = flow()
+        step = STEPS.get(current["step"]) if current else None
+        if step:
+            step(current)
         else:
-            login_form()
-        st.html(f'<p class="hz-legal">{PRIVACY}</p>')
+            _tabs()
+        legal_line()

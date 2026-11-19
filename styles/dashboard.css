@@ -1,0 +1,83 @@
+/* Componentes del Centro de mando: encabezados, tarjetas, indicadores, banda de estado y pestañas. */
+
+[data-testid="stMainBlockContainer"]:has(.hz-dash) { max-width: 1240px; }
+
+/* Encabezado de página */
+.hz-page-head { display: flex; gap: 1rem; align-items: center; margin: .25rem 0 1.25rem; animation: hz-rise .5s var(--ease) both; }
+.hz-page-badge {
+  width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; flex: none;
+  background: linear-gradient(140deg, #7a0c1c, var(--accent) 55%, var(--accent-2));
+  box-shadow: 0 10px 26px -10px rgb(200 16 46 / .75), inset 0 1px 0 rgb(255 255 255 / .25);
+}
+.hz-page-head h1 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); font-weight: 680; letter-spacing: -.035em; margin: 0; padding: 0; line-height: 1.15; }
+.hz-page-head p { margin: .2rem 0 0; color: var(--text-2); font-size: .92rem; }
+.hz-kicker { font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+
+/* Tarjetas (st.container con key "hzcard_*") */
+[class*="st-key-hzcard_"] {
+  border: 1px solid var(--hairline); border-radius: var(--r-lg); background: var(--surface);
+  padding: 1.1rem 1.2rem 1rem; box-shadow: var(--e-1); animation: hz-rise .55s var(--ease) both;
+  transition: box-shadow .25s var(--ease), border-color .25s, transform .25s var(--spring);
+}
+[class*="st-key-hzcard_"]:hover { box-shadow: var(--e-2); border-color: var(--hairline-strong); }
+.hz-card-head h3 { font-size: 1.02rem; font-weight: 650; letter-spacing: -.015em; margin: 0; padding: 0; }
+.hz-card-head p { margin: .15rem 0 0; color: var(--text-2); font-size: .82rem; line-height: 1.45; }
+[class*="st-key-hzcard_"] [data-testid="stPopover"] button { border-radius: var(--r-pill); min-height: 32px; padding: 0 .5rem; }
+
+/* Indicadores con semáforo */
+.hz-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .8rem; margin: .2rem 0 1rem; }
+.hz-tile {
+  position: relative; overflow: hidden; border: 1px solid var(--hairline); border-radius: var(--r-md);
+  padding: .9rem 1rem .85rem; background: var(--surface); box-shadow: var(--e-1);
+  animation: hz-rise .5s var(--ease) both; transition: transform .25s var(--spring), box-shadow .25s;
+}
+.hz-tile:nth-child(2) { animation-delay: .04s; } .hz-tile:nth-child(3) { animation-delay: .08s; }
+.hz-tile:nth-child(4) { animation-delay: .12s; } .hz-tile:nth-child(n+5) { animation-delay: .16s; }
+.hz-tile:hover { transform: translateY(-2px); box-shadow: var(--e-2); }
+.hz-tile::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--tone, transparent); }
+.hz-tile-top { display: flex; align-items: center; gap: .45rem; font-size: .78rem; color: var(--text-2); font-weight: 550; }
+.hz-tile-top i { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--tone-soft, var(--surface-2)); }
+.hz-tile-top em { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--tone, var(--hairline-strong)); animation: hz-breathe 2.4s ease-in-out infinite; }
+.hz-tile b { display: block; font-size: 1.65rem; font-weight: 680; letter-spacing: -.03em; margin: .45rem 0 .1rem; line-height: 1.1; }
+.hz-tile small { display: block; font-size: .76rem; color: var(--text-2); min-height: 1.1em; }
+.hz-ok { --tone: var(--ok); --tone-soft: var(--ok-soft); } .hz-warn { --tone: var(--warn); --tone-soft: var(--warn-soft); }
+.hz-crit { --tone: var(--crit); --tone-soft: var(--crit-soft); } .hz-info { --tone: var(--info); --tone-soft: var(--info-soft); }
+.hz-neutral em, .hz-info em { animation: none; }
+
+/* Banda de estado */
+.hz-banner {
+  display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.2rem; border-radius: var(--r-lg);
+  border: 1px solid color-mix(in srgb, var(--tone, var(--hairline)) 45%, transparent); background: var(--tone-soft, var(--surface));
+  margin: 0 0 1rem; animation: hz-rise .5s var(--ease) both;
+}
+.hz-banner-ico { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; background: var(--surface-2); }
+.hz-banner span { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tone); }
+.hz-banner b { display: block; font-size: 1.05rem; font-weight: 650; margin: .1rem 0 .25rem; }
+.hz-banner ul { margin: 0; padding-left: 1.1rem; color: var(--text-2); font-size: .86rem; line-height: 1.55; }
+
+/* Píldoras y estado vacío */
+.hz-pill { display: inline-flex; align-items: center; gap: .35rem; font-size: .74rem; font-weight: 600; padding: .25rem .65rem; border-radius: var(--r-pill); color: var(--tone, var(--text-2)); background: var(--tone-soft, var(--surface-2)); }
+.hz-empty { display: grid; place-items: center; gap: .4rem; padding: 1.6rem 1rem; text-align: center; color: var(--text-2); }
+.hz-empty p { margin: 0; font-size: .88rem; max-width: 36ch; }
+
+/* Pestañas como segmentos (Streamlit 1.67: role="tablist" + data-testid="stTab") */
+[data-testid="stMainBlockContainer"]:has(.hz-dash) [role="tablist"]:has([data-testid="stTab"]) {
+  gap: .25rem; padding: .3rem; border-radius: var(--r-md); background: var(--surface);
+  border: 1px solid var(--hairline); width: fit-content; max-width: 100%; overflow-x: auto;
+}
+[data-testid="stMainBlockContainer"]:has(.hz-dash) [data-testid="stTab"] {
+  border-radius: var(--r-sm); padding: .45rem .9rem; height: auto; transition: background .2s var(--ease);
+}
+[data-testid="stMainBlockContainer"]:has(.hz-dash) [data-testid="stTab"]:hover { background: var(--surface-2); }
+[data-testid="stMainBlockContainer"]:has(.hz-dash) [data-testid="stTab"][aria-selected="true"] {
+  background: var(--accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+[data-testid="stMainBlockContainer"]:has(.hz-dash) [role="tablist"]:has([data-testid="stTab"]) > :not([data-testid="stTab"]) { display: none; }
+
+.hz-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 640px) { .hz-tile b { font-size: 1.35rem; } .hz-page-badge { width: 40px; height: 40px; } }
+
+/* Barra de filtros: los grupos de botones bajan de línea en pantallas angostas */
+.st-key-obs_toolbar { row-gap: .6rem; }
+.st-key-obs_toolbar [data-testid="stButtonGroup"] > div { flex-wrap: wrap; row-gap: .35rem; }

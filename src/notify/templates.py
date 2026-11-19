@@ -39,6 +39,15 @@ def paragraph(text: str) -> str:
     return f'<p style="margin:0 0 12px">{html.escape(text)}</p>'
 
 
+def code_box(code: str) -> str:
+    """Código de verificación destacado (solo dígitos: se valida antes de insertar)."""
+    digits = "".join(c for c in code if c.isdigit())[:6]
+    return (
+        '<p style="margin:16px 0;font-size:30px;font-weight:700;letter-spacing:8px;'
+        f'font-family:Consolas,Menlo,monospace;color:#1c1917">{digits}</p>'
+    )
+
+
 def table(rows: list[tuple[str, str]]) -> str:
     cells = "".join(
         f'<tr><td style="padding:8px 0;color:#78716c;width:55%">{html.escape(str(k))}</td>'

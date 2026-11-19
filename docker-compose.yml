@@ -12,7 +12,7 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
-    mem_limit: 1g
+    mem_limit: 2g  # uso real observado: ~1,4 GB (modelo de embeddings + agente)
     cpus: "2"
     networks:
       - hazmat-network
