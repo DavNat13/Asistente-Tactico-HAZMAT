@@ -145,6 +145,17 @@ Variable nueva obligatoria en producción: `OTP_SECRET` (ver `.env.example`).
 4. **Errores con referencia:** "No se pudo crear la cuenta (ref. ab12cd34)" → busca `ab12cd34` en la
    consola del servidor (traceback) o en `security_events` (`signup_failed` / `auth_ui_error`).
 
+## Diseño, mapa y panel (v5.4)
+
+- **Centro de mando:** sistema de diseño propio (`styles/tokens.css`, `src/ui/ui_kit.py`): barra superior
+  fija, tarjetas, indicadores con semáforo, animaciones y tema claro/oscuro.
+- **Mapa de zonas:** satélite, híbrido, calles, noche y topográfico de **Esri** (`ESRI_API_KEY`, cuenta
+  gratuita sin tarjeta en developers.arcgis.com) y, opcionalmente, **Google Map Tiles API**
+  (`GOOGLE_MAPS_API_KEY`, requiere facturación). Sin claves: OpenStreetMap. Incluye **ubicación en tiempo
+  real** ("Usar mi ubicación" / "Seguir en vivo"; requiere HTTPS o localhost), pantalla completa y medición.
+- **Observabilidad:** semáforo de salud, explicación del panel y de cada gráfico, y gráficos sin solapes.
+  Detalle en [`docs/OBSERVABILIDAD.md`](docs/OBSERVABILIDAD.md).
+
 ## Observabilidad
 
 Cada consulta registra en `agent_runs` (seudonimizado, TTL 180 días): latencia total, TTFT y por nodo,
