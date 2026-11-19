@@ -73,7 +73,7 @@ def test_register_never_overwrites_existing_account(users):
         (("pedro", "", "p@b.cl", "Clave-12345", "Clave-12345", True), "nombre"),
         (
             ("pe", "Pedro", "p@b.cl", "Clave-12345", "Clave-12345", True),
-            "Usuario inválido",
+            "al menos 3 caracteres",
         ),
         (("pedro", "Pedro", "p@b.cl", "corta", "corta", True), "al menos"),
     ],
@@ -84,7 +84,7 @@ def test_register_validation(users, args, msg):
 
 
 def test_register_rejects_bad_or_duplicate_email(users):
-    with pytest.raises(ValueError, match="correo electrónico válido"):
+    with pytest.raises(ValueError, match="correo válido"):
         registration.register_user(
             "ana", "Ana", "no-es-correo", "Clave-12345", "Clave-12345", True
         )

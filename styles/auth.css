@@ -38,6 +38,7 @@
 .st-key-auth_panel {
   --auth-muted: color-mix(in srgb, currentColor 74%, transparent); /* ≥ 4.5:1 (AA) en ambos temas */
   --auth-ok: color-mix(in srgb, #15803d 82%, currentColor);
+  --auth-bad: color-mix(in srgb, #dc2626 85%, currentColor);
   min-height: 640px; justify-content: flex-start;
   padding: 2rem 2rem 1.5rem !important; border-radius: 22px; border: 1px solid var(--hairline);
   box-shadow: var(--shadow-lg); animation: hz-fade-up .6s .1s var(--ease) both;
@@ -77,6 +78,10 @@
 .hz-req { display: flex; flex-direction: column; gap: .3rem; font-size: .82rem; color: var(--auth-muted); margin: -.1rem 0 .6rem; }
 .hz-req > span { display: inline-flex; align-items: center; gap: .4rem; transition: color .2s; }
 .hz-req > span.ok { color: var(--auth-ok); font-weight: 550; }
+.hz-req > span.bad, .hz-hint.err { color: var(--auth-bad); }
+.hz-hint { font-size: .8rem; margin: -.55rem 0 .35rem; line-height: 1.4; }
+.hz-hint.ok { color: var(--auth-ok); }
+.hz-hint.err::before { content: "✕ "; } .hz-hint.ok::before { content: "✓ "; }
 .hz-req .hz-ico { width: 14px; height: 14px; }
 .hz-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 

@@ -16,6 +16,7 @@ from datetime import UTC, datetime, timedelta
 from src.observability.store import get_db, security_event
 from src.security import otp, privacy, throttle
 from src.security.accounts import USERS, create_user, normalize_email, public
+from src.security.validators import email_error, name_error, username_error
 from src.security.verification import send_code
 
 MAX_SIGNUPS_PER_HOUR = 30
@@ -65,9 +66,10 @@ def register_user(
     """Crea la cuenta PENDIENTE y envía el código. Lanza ValueError con un mensaje claro."""
     if not accepted:
         raise ValueError("Debes aceptar el aviso de privacidad para crear tu cuenta")
-    name = (name or "").strip()
-    if len(name) < 2:
-        raise ValueError("Ingresa tu nombre")
+    for error in (name_error(name), username_error(username), email_error(email)):
+        if error:
+            raise ValueError(error)
+    name = " ".join(name.split())
     email = normalize_email(email)
     if password != confirm:
         raise ValueError("Las contraseñas no coinciden")

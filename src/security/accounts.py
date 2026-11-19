@@ -8,27 +8,25 @@ elimina si no se verifican a tiempo (el campo se quita al verificar).
 from __future__ import annotations
 
 import logging
-import re
 from datetime import UTC, datetime
 
 from pymongo.errors import DuplicateKeyError
 
 from src.observability.store import get_db
 from src.security.passwords import hash_password, validate_password
+from src.security.validators import email_error
 from src.session.sanitizer import InputSanitizer
 
 log = logging.getLogger("hazmat.accounts")
 USERS = "users"
 ROLES = ("operador", "admin")
-_EMAIL = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 _index_ready = False
 
 
 def normalize_email(email: str) -> str:
-    email = (email or "").strip().lower()
-    if not _EMAIL.match(email) or len(email) > 120:
+    if email_error(email):
         raise ValueError("Ingresa un correo electrónico válido")
-    return email
+    return email.strip().lower()
 
 
 def _users():

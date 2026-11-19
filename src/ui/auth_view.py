@@ -5,7 +5,8 @@ from __future__ import annotations
 import streamlit as st
 
 from src.ui.auth_common import flow, show_notice
-from src.ui.auth_forms import login_form, register_form
+from src.ui.auth_forms import login_form
+from src.ui.auth_register import register_form
 from src.ui.auth_reset import reset_step
 from src.ui.auth_steps import email_step, privacy_step, verify_step
 from src.ui.icons import icon

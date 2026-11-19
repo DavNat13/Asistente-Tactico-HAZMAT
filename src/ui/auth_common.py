@@ -7,13 +7,14 @@ import html
 import streamlit as st
 
 from src.security import verification
-from src.security.passwords import MIN_PASSWORD
+from src.security.validators import password_rules
 from src.ui.icons import ACCENT, icon
 
 FLOW = "auth_flow"
 NOTICE = "auth_notice"
 OK_COLOR = "#16a34a"
 PENDING_COLOR = "#78716c"
+BAD_COLOR = "#dc2626"
 # Teclado numérico en móviles para los campos de código (constante del proyecto, sin datos del usuario)
 _NUMERIC_JS = (
     "<script>(()=>{let n=0;const t=setInterval(()=>{document.querySelectorAll("
@@ -83,26 +84,28 @@ def numeric_code_input() -> None:
 
 
 def password_checks(password: str, confirm: str | None = None) -> bool:
-    """Lista de requisitos que se pone en verde a medida que se cumplen."""
-    rules = [
-        (len(password) >= MIN_PASSWORD, f"Mínimo {MIN_PASSWORD} caracteres"),
-        (
-            bool(password) and not (password.isalpha() or password.isdigit()),
-            "Letras y números o símbolos",
-        ),
-    ]
-    if confirm is not None:
-        rules.append(
-            (bool(password) and password == confirm, "Las contraseñas coinciden")
+    """Requisitos que se ponen en verde al cumplirse y en rojo si fallan (tras escribir)."""
+    rules = password_rules(password, confirm)
+    items = ""
+    for ok, label in rules:
+        state = "ok" if ok else ("bad" if password else "")
+        color = OK_COLOR if ok else (BAD_COLOR if password else PENDING_COLOR)
+        sr = {"ok": " (cumplido)", "bad": " (pendiente)"}.get(state, "")
+        items += (
+            f'<span class="{state}" role="listitem">'
+            f"{icon('check' if ok else 'circle', color, 14)}{html.escape(label)}"
+            f'<span class="hz-sr">{sr}</span></span>'
         )
-    items = "".join(
-        f'<span class="{"ok" if ok else ""}" role="listitem">'
-        f"{icon('check' if ok else 'circle', OK_COLOR if ok else PENDING_COLOR, 14)}"
-        f'{html.escape(label)}<span class="hz-sr">{" (cumplido)" if ok else ""}</span></span>'
-        for ok, label in rules
-    )
     st.html(f'<div class="hz-req" role="list" aria-live="polite">{items}</div>')
     return all(ok for ok, _ in rules)
+
+
+def field_hint(error: str | None, value: str | None) -> None:
+    """Mensaje bajo el campo: nada si está vacío, error en rojo o confirmación en verde."""
+    if not (value or "").strip():
+        return
+    cls, text = ("err", error) if error else ("ok", "Se ve bien")
+    st.html(f'<p class="hz-hint {cls}" role="status">{html.escape(text)}</p>')
 
 
 def route(account: dict, welcome: str | None = None) -> None:

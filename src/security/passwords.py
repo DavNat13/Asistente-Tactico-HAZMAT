@@ -41,3 +41,5 @@ def validate_password(password: str) -> None:
         raise ValueError(f"La contraseña debe tener al menos {MIN_PASSWORD} caracteres")
     if password.isalpha() or password.isdigit():
         raise ValueError("La contraseña debe combinar letras y números o símbolos")
+    if password.strip() != password:
+        raise ValueError("La contraseña no puede empezar ni terminar con espacios")
