@@ -13,4 +13,5 @@ Dockerfile
 .dockerignore
 data/
 *.md
+!docs/AVISO_PRIVACIDAD.md
 .pytest_cache/

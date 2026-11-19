@@ -56,3 +56,15 @@ def test_pending_markers_are_warnings_not_failures():
         )
     assert privacy.pending_markers("sin marcadores") == []
     assert privacy.pending_markers("a [[X]] b [[Y: z]]") == ["[[X]]", "[[Y: z]]"]
+
+
+def test_docker_image_includes_the_notice():
+    """La imagen debe llevar el aviso: sin él, el modal de registro falla en producción."""
+    root = privacy.NOTICE_PATH.parents[1]
+    dockerfile = (root / "Dockerfile").read_text(encoding="utf-8")
+    ignore = (root / ".dockerignore").read_text(encoding="utf-8").splitlines()
+    assert "COPY docs/AVISO_PRIVACIDAD.md docs/" in dockerfile
+    assert "!docs/AVISO_PRIVACIDAD.md" in ignore
+    assert ignore.index("!docs/AVISO_PRIVACIDAD.md") > ignore.index(
+        "*.md"
+    )  # la excepción va después
