@@ -1,4 +1,5 @@
-"""Contenido de las pestañas del dashboard de observabilidad."""
+"""Pestañas "Uso real" y "Seguridad": cuadrícula de tarjetas, un gráfico por tarjeta, cada una con su
+explicación ("¿Qué significa?")."""
 
 from __future__ import annotations
 
@@ -9,94 +10,134 @@ from src.observability import metrics as m
 from src.observability import metrics_breakdown as mb
 from src.ui import charts
 from src.ui.kpis import render_kpis
+from src.ui.observability_help import EVENT_NAMES
+from src.ui.ui_kit import card, empty_state, stat_tile, tiles
 
-EVAL_METRICS = [
-    "keyword_score",
-    "retrieval_hit",
-    "citation_ok",
-    "refusal_ok",
-    "safe_output",
-    "consistency",
-]
 EMPTY = "Aún no hay consultas en este periodo. Usa el chat y vuelve aquí: los datos aparecen en segundos."
 
 
-def _section(title: str, caption: str = "") -> None:
-    st.subheader(title, divider="gray")
-    if caption:
-        st.caption(caption)
+def _chart(chart) -> None:
+    st.altair_chart(chart, width="stretch")
 
 
 def tab_usage(runs: pd.DataFrame, freq: str) -> None:
     if runs.empty:
-        st.info(EMPTY, icon=":material/hourglass_empty:")
+        empty_state(EMPTY, "activity")
         return
     render_kpis(m.kpis(runs))
-    _section(
+    with card(
+        "latency",
         "Latencia en el tiempo",
         "Mediana (p50) y percentil 95 de las respuestas exitosas",
-    )
-    st.altair_chart(
-        charts.latency_line(mb.latency_over_time(runs, freq)), width="stretch"
-    )
-    left, right = st.columns(2, gap="large")
-    with left:
-        _section("Tiempo medio por etapa", "Dónde se va el tiempo dentro del agente")
-        st.altair_chart(
-            charts.hbar(mb.node_breakdown(runs), "node", "ms", "ms", charts.NODE_NAMES),
-            width="stretch",
+        "Si la línea **p95** sube, algunas respuestas tardan demasiado (modelo saturado o "
+        "timeouts). Si sube también la **p50**, la lentitud es general. Pasa el cursor para ver "
+        "cuántas consultas hubo en cada periodo.",
+    ):
+        _chart(charts.latency_line(mb.latency_over_time(runs, freq)))
+    left, right = st.columns(2, gap="medium")
+    with (
+        left,
+        card(
+            "nodes",
+            "Dónde se va el tiempo",
+            "Tiempo medio por etapa del agente (ms)",
+            "Cada consulta pasa por etapas: guardrail, recuperación de la GRE (RAG), modelo (LLM) y "
+            "verificación. La barra más larga es el **cuello de botella** a optimizar.",
+        ),
+    ):
+        _chart(
+            charts.hbar(mb.node_breakdown(runs), "node", "ms", "ms", charts.NODE_NAMES)
         )
-    with right:
-        _section(
+    with (
+        right,
+        card(
+            "levels",
             "Latencia por nivel",
-            "Bajo = sin LLM · Medio = RAG · Alto = plan de respuesta",
-        )
-        st.altair_chart(charts.level_bars(mb.by_level(runs)), width="stretch")
-    _section("Errores por tipo")
-    err = mb.errors(runs)
-    if err.empty:
-        st.success("Sin errores en el periodo.", icon=":material/check_circle:")
-    else:
-        st.altair_chart(
-            charts.hbar(err, "error_type", "n", "ejecuciones", color=charts.CRITICAL),
-            width="stretch",
-        )
+            "Bajo = sin modelo · Medio = RAG · Alto = plan de respuesta",
+            "El asistente clasifica cada consulta. Es normal que **Alto** tarde más: arma un plan "
+            "completo con varias herramientas. Un nivel **Bajo** lento indica un problema.",
+        ),
+    ):
+        _chart(charts.level_bars(mb.by_level(runs)))
+    with card(
+        "errors",
+        "Errores por tipo",
+        "Consultas que no obtuvieron respuesta",
+        "**timeout**: el modelo no respondió a tiempo · **quota**: se agotó la cuota de la API · "
+        "**database**: MongoDB no respondió · **llm_unavailable**: modelo saturado (se usa respaldo).",
+    ):
+        err = mb.errors(runs)
+        if err.empty:
+            empty_state("Sin errores en el periodo.", "check")
+        else:
+            _chart(
+                charts.hbar(err, "error_type", "n", "consultas", color=charts.CRITICAL)
+            )
 
 
 def tab_security(runs: pd.DataFrame, sec: pd.DataFrame) -> None:
     blocked = (
-        runs[runs.get("blocked", pd.Series(dtype=bool)).map(lambda v: v is True)]
-        if not runs.empty
-        else runs
+        int(runs["blocked"].map(lambda v: v is True).sum()) if "blocked" in runs else 0
     )
     pii = int(runs["pii_redacted"].fillna(0).sum()) if "pii_redacted" in runs else 0
-    c = st.columns(3)
-    c[0].metric("Consultas bloqueadas", len(blocked))
-    c[1].metric(
-        "Datos personales ocultados",
-        pii,
-        help="RUT, teléfonos, correos y patentes redactados",
+    audit = int(sec["n"].sum()) if not sec.empty else 0
+    tiles(
+        [
+            stat_tile(
+                "Consultas bloqueadas",
+                f"{blocked}",
+                "warn" if blocked else "ok",
+                "antes de llegar al modelo",
+                "ban",
+                "Manipulación, intención de daño, fuera de dominio o límite de uso.",
+            ),
+            stat_tile(
+                "Datos personales ocultados",
+                f"{pii}",
+                "info",
+                "RUT, teléfonos, correos y patentes",
+                "eyeoff",
+                "Datos reemplazados automáticamente antes de enviar el texto al modelo de IA.",
+            ),
+            stat_tile(
+                "Eventos de auditoría",
+                f"{audit}",
+                "info",
+                "cuentas y accesos",
+                "file",
+                "Registros de seguridad: inicios de sesión, registros, códigos y cambios de contraseña.",
+            ),
+        ]
     )
-    c[2].metric("Eventos de auditoría", int(sec["n"].sum()) if not sec.empty else 0)
-    left, right = st.columns(2, gap="large")
-    with left:
-        _section("Bloqueos por categoría")
+    left, right = st.columns(2, gap="medium")
+    with (
+        left,
+        card(
+            "blocks",
+            "Bloqueos por categoría",
+            "Qué se intentó y fue detenido",
+            "Los **guardrails** revisan cada consulta antes del modelo. Muchos bloqueos de "
+            "*manipulación* seguidos pueden indicar un ataque: revisa la pestaña Registro.",
+        ),
+    ):
         reasons = mb.blocked_by_reason(runs)
         if reasons.empty:
-            st.caption("Sin bloqueos en el periodo.")
+            empty_state("Sin bloqueos en el periodo.", "check")
         else:
-            st.altair_chart(
-                charts.hbar(
-                    reasons, "reason", "n", "consultas", color=charts.SERIES[1]
-                ),
-                width="stretch",
+            _chart(
+                charts.hbar(reasons, "reason", "n", "consultas", color=charts.SERIES[1])
             )
-    with right:
-        _section("Eventos de auditoría")
+    with (
+        right,
+        card(
+            "audit",
+            "Eventos de auditoría",
+            "Actividad de cuentas registrada en security_events",
+            "Muchos **inicios de sesión fallidos** pueden ser un intento de fuerza bruta (la cuenta "
+            "se bloquea tras 5). Los usuarios están seudonimizados.",
+        ),
+    ):
         if sec.empty:
-            st.caption("Sin eventos en el periodo.")
+            empty_state("Sin eventos en el periodo.", "check")
         else:
-            st.altair_chart(
-                charts.hbar(sec, "kind", "n", "eventos", color=charts.SERIES[0]),
-                width="stretch",
-            )
+            _chart(charts.hbar(sec, "kind", "n", "eventos", EVENT_NAMES))
